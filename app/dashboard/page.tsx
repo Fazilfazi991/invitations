@@ -1,0 +1,24 @@
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import { MobileHeader } from "@/components/layout/mobile-header";
+import { BottomNav } from "@/components/layout/bottom-nav";
+import { Button } from "@/components/ui/button";
+import { EventCard, FooterTrust, Section } from "@/components/shared";
+import { dashboardEvents } from "@/lib/mock-data";
+
+export default function DashboardPage() {
+  return (
+    <main className="phone-shell min-h-screen pb-20">
+      <MobileHeader action="avatar" />
+      <Section>
+        <h1 className="font-serif text-5xl font-bold">My Events</h1>
+        <p className="mt-2 text-muted">Create, manage and share your events.</p>
+        <Button asChild className="mt-5"><Link href="/categories"><Plus className="h-4 w-4" />Create New Event</Link></Button>
+        <div className="mt-6 inline-flex rounded-xl border border-border bg-white p-1 shadow-card"><span className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">Upcoming</span><span className="px-4 py-2 text-sm font-semibold text-muted">Past</span></div>
+        <div className="mt-5 space-y-4">{dashboardEvents.map((event) => <EventCard key={event.id} event={event} />)}</div>
+      </Section>
+      <FooterTrust />
+      <BottomNav />
+    </main>
+  );
+}
