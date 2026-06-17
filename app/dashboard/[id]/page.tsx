@@ -1,13 +1,30 @@
 "use client";
 
-import { Eye, MapPin, Play, QrCode, Send, Share2, Users, Clock, Pencil } from "lucide-react";
+import Link from "next/link";
+import {
+  Clock,
+  Copy,
+  Download,
+  Eye,
+  MapPin,
+  MessageCircle,
+  Pencil,
+  Play,
+  QrCode,
+  Send,
+  Share2,
+  Users,
+} from "lucide-react";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EventCompletionChecklist } from "@/components/dashboard/EventCompletionChecklist";
+import { ShareActions } from "@/components/share/ShareActions";
+import { WhatsAppMessageGenerator } from "@/components/share/WhatsAppMessageGenerator";
 import { DashboardMetricCard, FooterTrust, Section } from "@/components/shared";
-import { sampleEvent } from "@/lib/mock-data";
+import { eventUrl, sampleEvent } from "@/lib/mock-data";
 
 const actions = [
   { label: "Share Link", icon: Share2 },
@@ -17,6 +34,10 @@ const actions = [
 ];
 
 export default function DashboardDetailPage() {
+  async function copyEventLink() {
+    await navigator.clipboard.writeText(eventUrl);
+  }
+
   return (
     <main className="phone-shell min-h-screen pb-20">
       <MobileHeader action="avatar" />
@@ -25,9 +46,18 @@ export default function DashboardDetailPage() {
         <p className="mt-2 text-muted">Welcome back, Afsal Events</p>
         <Card className="mt-5 flex items-center gap-4 p-4">
           <img src={sampleEvent.coupleImage} alt="" className="h-24 w-28 rounded-xl object-cover" />
-          <div className="flex-1"><h2 className="font-serif text-2xl font-bold text-primary">{sampleEvent.title}</h2><p className="mt-2 text-muted">{sampleEvent.date} · {sampleEvent.time}</p><p className="text-muted">{sampleEvent.location}</p></div>
+          <div className="flex-1">
+            <h2 className="font-serif text-2xl font-bold text-primary">{sampleEvent.title}</h2>
+            <p className="mt-2 text-muted">{sampleEvent.date} - {sampleEvent.time}</p>
+            <p className="text-muted">{sampleEvent.location}</p>
+          </div>
           <Badge>Live</Badge>
         </Card>
+
+        <div className="mt-5">
+          <EventCompletionChecklist />
+        </div>
+
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3">
           <DashboardMetricCard label="Total Views" value="12,842" icon={Eye} trend="+18.6%" />
           <DashboardMetricCard label="RSVPs" value="862" icon={Users} trend="+12.4%" />
@@ -36,13 +66,66 @@ export default function DashboardDetailPage() {
           <DashboardMetricCard label="Watch Live" value="642" icon={Play} trend="+20.1%" />
           <DashboardMetricCard label="QR Scans" value="320" icon={QrCode} trend="+11.8%" />
         </div>
-        <Card className="mt-5 p-5"><h2 className="font-serif text-2xl font-bold">Views Over Time</h2><div className="mt-4 h-44 rounded-2xl bg-gradient-to-t from-primary-soft to-white p-4"><div className="h-full rounded-xl border-b-2 border-l-2 border-primary/30" /></div></Card>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <Card className="p-5"><h2 className="font-serif text-2xl font-bold">Guest Breakdown</h2><div className="mx-auto my-5 grid h-36 w-36 place-items-center rounded-full border-[22px] border-primary"><span className="text-center font-serif text-3xl">862<br /><small className="font-sans text-sm text-muted">Total</small></span></div></Card>
-          <Card className="p-5"><h2 className="font-serif text-2xl font-bold">Guest List Preview</h2>{["Fahad Ameen", "Noora Fathima", "Rashid K", "Suhana"].map((name, i) => <div key={name} className="flex items-center justify-between border-b border-border py-3 text-sm"><span>{name}</span><Badge className={i === 2 ? "bg-orange-50 text-orange-600" : ""}>{i === 3 ? "Not Responded" : i === 2 ? "Maybe" : "Going"}</Badge></div>)}</Card>
+
+        <Card className="mt-5 p-5">
+          <h2 className="font-serif text-2xl font-bold">Share tools</h2>
+          <p className="mt-1 text-sm text-muted">Copy the event link, open the share screen, or prepare guest messages.</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <Button onClick={copyEventLink} variant="outline"><Copy className="h-4 w-4" />Copy event link</Button>
+            <Button asChild variant="outline"><Link href="/event/afsal-fathima/share"><Share2 className="h-4 w-4" />Open share page</Link></Button>
+            <Button asChild variant="outline"><Link href="/event/afsal-fathima/share"><Download className="h-4 w-4" />Download QR</Link></Button>
+            <Button asChild variant="soft"><Link href="/event/afsal-fathima/share"><MessageCircle className="h-4 w-4" />WhatsApp message</Link></Button>
+          </div>
+          <div className="mt-4">
+            <ShareActions includeOpenSharePage />
+          </div>
+        </Card>
+
+        <div className="mt-5">
+          <WhatsAppMessageGenerator compact />
         </div>
-        <Card className="mt-5 grid grid-cols-2 gap-3 p-5 md:grid-cols-4">{actions.map(({ label, icon: Icon }) => <Button key={label} variant="outline"><Icon className="h-4 w-4" />{label}</Button>)}</Card>
-        <Card className="mt-5 p-5"><h2 className="font-serif text-2xl font-bold">Recent Activity</h2>{["New view on your event", "Fahad Ameen RSVP'd Going", "QR Code scanned"].map((item) => <p key={item} className="border-b border-border py-3 text-sm">{item}<span className="block text-muted">May 24, 2025 · 10:24 AM</span></p>)}</Card>
+
+        <Card className="mt-5 p-5">
+          <h2 className="font-serif text-2xl font-bold">Views Over Time</h2>
+          <div className="mt-4 h-44 rounded-2xl bg-gradient-to-t from-primary-soft to-white p-4">
+            <div className="h-full rounded-xl border-b-2 border-l-2 border-primary/30" />
+          </div>
+        </Card>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <Card className="p-5">
+            <h2 className="font-serif text-2xl font-bold">Guest Breakdown</h2>
+            <div className="mx-auto my-5 grid h-36 w-36 place-items-center rounded-full border-[22px] border-primary">
+              <span className="text-center font-serif text-3xl">862<br /><small className="font-sans text-sm text-muted">Total</small></span>
+            </div>
+          </Card>
+          <Card className="p-5">
+            <h2 className="font-serif text-2xl font-bold">Guest List Preview</h2>
+            {["Fahad Ameen", "Noora Fathima", "Rashid K", "Suhana"].map((name, i) => (
+              <div key={name} className="flex items-center justify-between border-b border-border py-3 text-sm">
+                <span>{name}</span>
+                <Badge className={i === 2 ? "bg-orange-50 text-orange-600" : ""}>
+                  {i === 3 ? "Not Responded" : i === 2 ? "Maybe" : "Going"}
+                </Badge>
+              </div>
+            ))}
+          </Card>
+        </div>
+
+        <Card className="mt-5 grid grid-cols-2 gap-3 p-5 md:grid-cols-4">
+          {actions.map(({ label, icon: Icon }) => (
+            <Button key={label} variant="outline"><Icon className="h-4 w-4" />{label}</Button>
+          ))}
+        </Card>
+
+        <Card className="mt-5 p-5">
+          <h2 className="font-serif text-2xl font-bold">Recent Activity</h2>
+          {["New view on your event", "Fahad Ameen RSVP'd Going", "QR Code scanned"].map((item) => (
+            <p key={item} className="border-b border-border py-3 text-sm">
+              {item}<span className="block text-muted">May 24, 2025 - 10:24 AM</span>
+            </p>
+          ))}
+        </Card>
       </Section>
       <FooterTrust />
       <BottomNav />

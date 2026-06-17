@@ -84,3 +84,78 @@ export const dashboardEvents = [
   { id: "arjun-birthday", title: "Arjun's Birthday", date: "May 25, 2025", status: "Published", coverImage: galleryImages[5] },
   { id: "new-home", title: "New Home Celebration", date: "June 1, 2025", status: "Published", coverImage: galleryImages[3] },
 ];
+
+export const eventUrl = "https://jashnly.com/event/afsal-fathima";
+
+export const eventChecklist = [
+  {
+    id: "basic-details",
+    title: "Basic details",
+    description: "Event name, date and time are added.",
+    completed: true,
+    actionLabel: "Edit",
+  },
+  {
+    id: "cover-image",
+    title: "Cover image",
+    description: "Add a beautiful image for your event page.",
+    completed: true,
+    actionLabel: "Change",
+  },
+  {
+    id: "invitation-card",
+    title: "Invitation card",
+    description: "Upload your card so guests can view it anytime.",
+    completed: false,
+    actionLabel: "Upload",
+  },
+  {
+    id: "schedule",
+    title: "Schedule",
+    description: "Help guests know what happens and when.",
+    completed: true,
+    actionLabel: "Edit",
+  },
+  {
+    id: "location",
+    title: "Location",
+    description: "Add venue and map direction.",
+    completed: true,
+    actionLabel: "Edit",
+  },
+  {
+    id: "rsvp",
+    title: "RSVP",
+    description: "Collect guest confirmations easily.",
+    completed: true,
+    actionLabel: "Manage",
+  },
+  {
+    id: "youtube-live",
+    title: "YouTube live",
+    description: "Add live stream link for guests who cannot attend.",
+    completed: false,
+    actionLabel: "Add link",
+  },
+  {
+    id: "family-contacts",
+    title: "Family contacts",
+    description: "Add people guests can call for help.",
+    completed: true,
+    actionLabel: "Edit",
+  },
+  {
+    id: "qr-code",
+    title: "QR code",
+    description: "Generate a QR code for cards and posters.",
+    completed: true,
+    actionLabel: "View",
+  },
+  {
+    id: "whatsapp-message",
+    title: "WhatsApp message",
+    description: "Prepare a beautiful message to share with guests.",
+    completed: false,
+    actionLabel: "Create",
+  },
+];
