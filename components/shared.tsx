@@ -10,8 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { galleryImages, sampleEvent } from "@/lib/mock-data";
 
-export function Section({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <motion.section initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className={cn("px-5 py-6", className)}>{children}</motion.section>;
+export function Section({ children, className, id }: { children: React.ReactNode; className?: string; id?: string }) {
+  return <motion.section id={id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className={cn("px-5 py-6", className)}>{children}</motion.section>;
 }
 
 export function CategoryCard({ label, icon: Icon, href = "/create/step-1" }: { label: string; icon: React.ElementType; href?: string }) {

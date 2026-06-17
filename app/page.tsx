@@ -1,45 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Heart, Play, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MobileHeader } from "@/components/layout/mobile-header";
+import { RotatingEventHero } from "@/components/landing/RotatingEventHero";
 import { VendorMarketplaceTeaser } from "@/components/landing/VendorMarketplaceTeaser";
-import { CategoryCard, FeaturePill, FooterTrust, GuestEventHero, Section } from "@/components/shared";
+import { CategoryCard, FeaturePill, FooterTrust, Section } from "@/components/shared";
 import { categories, featurePills } from "@/lib/mock-data";
 
 export default function HomePage() {
   return (
     <main className="phone-shell min-h-screen">
-      <MobileHeader />
-      <Section className="grid gap-8 pt-8 md:grid-cols-[1fr_420px] md:items-center">
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-semibold text-primary">
-            <Heart className="h-4 w-4" /> All your events. One beautiful link.
-          </span>
-          <h1 className="mt-6 font-serif text-5xl font-bold leading-tight md:text-6xl">
-            Create beautiful event pages in <span className="text-primary">minutes</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-muted">
-            Weddings, birthdays, religious ceremonies, housewarmings and every special moment, beautifully shared in one link.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Button asChild><Link href="/categories">Create Your Event</Link></Button>
-            <Button asChild variant="soft"><Link href="/event/afsal-fathima"><Play className="h-4 w-4" />View Demo</Link></Button>
-          </div>
-          <div className="mt-8 flex items-center gap-3 text-sm text-muted">
-            <div className="flex text-gold">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}</div>
-            Loved by 10K+ families
-          </div>
-        </div>
-        <GuestEventHero />
-      </Section>
+      <RotatingEventHero />
       <Section>
         <h2 className="font-serif text-3xl font-bold">For every kind of celebration</h2>
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">{categories.slice(0, 5).map((cat) => <CategoryCard key={cat.label} {...cat} href="/categories" />)}</div>
       </Section>
-      <Section>
+      <Section id="how-it-works">
         <h2 className="font-serif text-3xl font-bold">Everything you need, beautifully simple</h2>
         <div className="mt-5 flex flex-wrap gap-3">{featurePills.map((feature) => <FeaturePill key={feature.label} {...feature} />)}</div>
       </Section>
