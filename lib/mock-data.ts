@@ -17,6 +17,8 @@ export const sampleEvent = {
   id: "afsal-fathima",
   title: "Afsal & Fathima Wedding",
   slug: "afsal-fathima",
+  mode: "invite" as "invite" | "memory",
+  eventDate: "2025-05-24",
   date: "May 24, 2025",
   time: "6:00 PM",
   location: "Calicut Convention Centre, Kerala, India",
@@ -158,4 +160,67 @@ export const eventChecklist = [
     completed: false,
     actionLabel: "Create",
   },
+];
+
+export const blessings = [
+  {
+    id: "1",
+    name: "Shahina",
+    message: "Wishing you both a lifetime of happiness, love and togetherness.",
+    relation: "Bride's cousin",
+    createdAt: "2 hours ago",
+  },
+  {
+    id: "2",
+    name: "Rashid Uncle",
+    message: "May Allah bless your journey together and fill your life with barakah.",
+    relation: "Family",
+    createdAt: "5 hours ago",
+  },
+  {
+    id: "3",
+    name: "Nihal",
+    message: "So happy for you both! Can't wait to celebrate this beautiful day.",
+    relation: "Friend",
+    createdAt: "Yesterday",
+  },
+];
+
+export const memoryHighlights = [
+  {
+    id: "1",
+    title: "Nikah Ceremony",
+    description: "A beautiful moment surrounded by family and blessings.",
+    image: galleryImages[0],
+  },
+  {
+    id: "2",
+    title: "Reception Night",
+    description: "Smiles, lights and celebrations with loved ones.",
+    image: galleryImages[3],
+  },
+  {
+    id: "3",
+    title: "Family Moments",
+    description: "The sweetest candid memories from the day.",
+    image: galleryImages[2],
+  },
+];
+
+export const vendorCategories = [
+  { id: "photographer", name: "Photographer", description: "Capture every beautiful moment.", icon: "camera" },
+  { id: "makeup", name: "Makeup", description: "Find artists for your perfect look.", icon: "sparkles" },
+  { id: "decor", name: "Decor", description: "Create the celebration mood.", icon: "flower" },
+  { id: "catering", name: "Catering", description: "Plan food for every guest.", icon: "utensils" },
+  { id: "halls", name: "Halls", description: "Discover venues for your event.", icon: "building" },
+  { id: "live-streaming", name: "Live Streaming", description: "Let distant guests join live.", icon: "video" },
+];
+
+export const featuredVendors = [
+  { name: "LensCraft Weddings", category: "Photography", location: "Calicut", rating: "4.9", image: galleryImages[0] },
+  { name: "Noor Bridal Studio", category: "Makeup", location: "Kochi", rating: "4.8", image: galleryImages[1] },
+  { name: "Bloom Decor Co.", category: "Decor", location: "Malappuram", rating: "4.9", image: galleryImages[2] },
+  { name: "Feast House Catering", category: "Catering", location: "Thrissur", rating: "4.7", image: galleryImages[3] },
+  { name: "Grand Pearl Hall", category: "Venue", location: "Kozhikode", rating: "4.8", image: galleryImages[4] },
+  { name: "Streamly Live", category: "Live Streaming", location: "Kerala", rating: "4.9", image: galleryImages[5] },
 ];

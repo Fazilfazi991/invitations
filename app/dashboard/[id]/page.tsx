@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import {
   Clock,
   Copy,
@@ -21,10 +23,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EventCompletionChecklist } from "@/components/dashboard/EventCompletionChecklist";
+import { MemoryModeCard } from "@/components/dashboard/MemoryModeCard";
 import { ShareActions } from "@/components/share/ShareActions";
 import { WhatsAppMessageGenerator } from "@/components/share/WhatsAppMessageGenerator";
 import { DashboardMetricCard, FooterTrust, Section } from "@/components/shared";
 import { eventUrl, sampleEvent } from "@/lib/mock-data";
+import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 
 const actions = [
   { label: "Share Link", icon: Share2 },
@@ -34,8 +39,19 @@ const actions = [
 ];
 
 export default function DashboardDetailPage() {
+  const params = useParams<{ id: string }>();
+  const [localEvent, setLocalEvent] = useState<EventDraft | null>(null);
+  const eventTitle = localEvent?.title ?? sampleEvent.title;
+  const eventDate = localEvent ? formatEventDate(localEvent.date) : sampleEvent.date;
+  const eventTime = localEvent ? formatEventTime(localEvent.time) : sampleEvent.time;
+  const eventLocation = localEvent ? `${localEvent.venueName}, ${localEvent.city}` : sampleEvent.location;
+
+  useEffect(() => {
+    setLocalEvent(loadPublishedEvents().find((event) => event.slug === params.id) ?? null);
+  }, [params.id]);
+
   async function copyEventLink() {
-    await navigator.clipboard.writeText(eventUrl);
+    await navigator.clipboard.writeText(localEvent ? `https://jashnly.com/event/${localEvent.slug}` : eventUrl);
   }
 
   return (
@@ -47,9 +63,9 @@ export default function DashboardDetailPage() {
         <Card className="mt-5 flex items-center gap-4 p-4">
           <img src={sampleEvent.coupleImage} alt="" className="h-24 w-28 rounded-xl object-cover" />
           <div className="flex-1">
-            <h2 className="font-serif text-2xl font-bold text-primary">{sampleEvent.title}</h2>
-            <p className="mt-2 text-muted">{sampleEvent.date} - {sampleEvent.time}</p>
-            <p className="text-muted">{sampleEvent.location}</p>
+            <h2 className="font-serif text-2xl font-bold text-primary">{eventTitle}</h2>
+            <p className="mt-2 text-muted">{eventDate} - {eventTime}</p>
+            <p className="text-muted">{eventLocation}</p>
           </div>
           <Badge>Live</Badge>
         </Card>
@@ -83,6 +99,10 @@ export default function DashboardDetailPage() {
 
         <div className="mt-5">
           <WhatsAppMessageGenerator compact />
+        </div>
+
+        <div className="mt-5">
+          <MemoryModeCard />
         </div>
 
         <Card className="mt-5 p-5">

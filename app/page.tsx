@@ -5,6 +5,7 @@ import { ArrowRight, Heart, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MobileHeader } from "@/components/layout/mobile-header";
+import { VendorMarketplaceTeaser } from "@/components/landing/VendorMarketplaceTeaser";
 import { CategoryCard, FeaturePill, FooterTrust, GuestEventHero, Section } from "@/components/shared";
 import { categories, featurePills } from "@/lib/mock-data";
 
@@ -62,6 +63,9 @@ export default function HomePage() {
           <h2 className="mt-2 font-serif text-3xl font-bold">See your event come to life</h2>
           <p className="mt-2 text-muted">Beautiful on any device. Easy for everyone.</p>
         </Card>
+      </Section>
+      <Section>
+        <VendorMarketplaceTeaser />
       </Section>
       <Section>
         <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
