@@ -1,24 +1,22 @@
 "use client";
 
 import { Suspense } from "react";
-import { MobileHeader } from "@/components/layout/mobile-header";
-import { Section } from "@/components/shared";
 import { TemplateGallery } from "@/components/templates/TemplateGallery";
 
 export default function CategoriesPage() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-background pb-20">
-      <div className="mx-auto w-full max-w-6xl">
-        <MobileHeader action="settings" />
-        <Section className="pt-4">
-          <h1 className="font-serif text-5xl font-bold leading-tight">Choose your celebration template</h1>
-          <p className="mt-3 max-w-2xl text-lg leading-7 text-muted">Pick a beautiful starting style. You can edit details, images, schedule and sharing later.</p>
-          <div className="mt-6">
-            <Suspense fallback={<div className="rounded-[2rem] border border-border bg-white p-5 text-muted shadow-card">Loading templates...</div>}>
-              <TemplateGallery />
-            </Suspense>
-          </div>
-        </Section>
+    <main className="min-h-screen overflow-x-hidden bg-[#FFFDF9] px-4 py-10">
+      <div className="mx-auto max-w-[1320px]">
+        <header className="text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">DISCOVER BEAUTIFUL DESIGNS ♡</p>
+          <h1 className="mt-4 font-serif text-4xl font-bold leading-tight text-[#2B171C] sm:text-5xl md:text-6xl">Wedding Templates Gallery</h1>
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-muted sm:text-lg">Choose a template that matches your style and make your special day unforgettable.</p>
+        </header>
+        <div className="mt-10">
+          <Suspense fallback={<div className="rounded-[2rem] border border-border bg-white p-5 text-muted shadow-card">Loading templates...</div>}>
+            <TemplateGallery />
+          </Suspense>
+        </div>
       </div>
     </main>
   );

@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { Crown, Globe2, Headphones, Users, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TemplateCard } from "@/components/templates/TemplateCard";
-import { TemplateFilters, type TemplateFilterValue } from "@/components/templates/TemplateFilters";
+import { TemplateFilters, templateFilterOptions, type TemplateFilterValue } from "@/components/templates/TemplateFilters";
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import {
   SELECTED_TEMPLATE_KEY,
@@ -19,21 +19,17 @@ import { DRAFT_KEY, loadDraft, loadPublishedEvents, PUBLISHED_EVENTS_KEY, saveDr
 export function TemplateGallery() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialType = (searchParams.get("type") as TemplateFilterValue | null) ?? "all";
+  const queryType = searchParams.get("type") as TemplateFilterValue | null;
+  const initialType = templateFilterOptions.some((option) => option.value === queryType) ? queryType ?? "all" : "all";
   const [filter, setFilter] = useState<TemplateFilterValue>(initialType);
-  const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(typeof window === "undefined" ? null : window.localStorage.getItem(SELECTED_TEMPLATE_KEY));
   const [preview, setPreview] = useState<EventTemplate | null>(null);
   const eventSlug = searchParams.get("event");
   const mode = searchParams.get("mode");
 
   const visibleTemplates = useMemo(() => {
-    return templates.filter((template) => {
-      const matchesFilter = filter === "all" || template.category === filter;
-      const haystack = `${template.name} ${template.category} ${template.description}`.toLowerCase();
-      return matchesFilter && haystack.includes(search.toLowerCase());
-    });
-  }, [filter, search]);
+    return templates.filter((template) => filter === "all" || template.category === filter);
+  }, [filter]);
 
   function useTemplate(template: EventTemplate) {
     const eventType = templateCategoryToEventType(template.category);
@@ -56,29 +52,78 @@ export function TemplateGallery() {
   }
 
   return (
-    <div className="space-y-6">
-      <TemplateFilters selected={filter} search={search} onSelect={setFilter} onSearch={setSearch} />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="space-y-9">
+      <TemplateFilters selected={filter} onSelect={setFilter} />
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {visibleTemplates.map((template) => (
           <TemplateCard key={template.id} template={template} selected={selectedId === template.id} onPreview={setPreview} onUse={useTemplate} />
         ))}
       </div>
       {!visibleTemplates.length && <p className="rounded-2xl border border-border bg-white p-5 text-center text-muted shadow-card">No templates found. Try another celebration type.</p>}
+      <PremiumTemplateBanner />
       {preview && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/30 p-5 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[2rem] border border-border bg-white p-4 shadow-soft">
+          <div className="w-full max-w-md rounded-[2rem] border border-[#F3D8DE] bg-white p-4 shadow-soft">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h2 className="font-serif text-2xl font-bold">{preview.name}</h2>
-                <p className="text-sm text-muted">{preview.description}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{preview.category}</p>
+                <h2 className="font-serif text-2xl font-bold text-[#2B171C]">{preview.name}</h2>
+                <p className="mt-1 text-sm leading-6 text-muted">{preview.description}</p>
               </div>
               <Button type="button" variant="ghost" size="icon" onClick={() => setPreview(null)}><X className="h-5 w-5" /></Button>
             </div>
-            <TemplatePreview template={preview} className="h-80" />
-            <Button type="button" onClick={() => useTemplate(preview)} className="mt-4 w-full">Use this template</Button>
+            <TemplatePreview template={preview} className="h-80 rounded-[1.5rem]" />
+            <Button type="button" onClick={() => useTemplate(preview)} className="mt-4 w-full bg-[#D94F70] hover:bg-[#B93558]">Use this template</Button>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function PremiumTemplateBanner() {
+  const features = [
+    { label: "RSVP & Guest Management", icon: Users },
+    { label: "Live Streaming Integration", icon: Video },
+    { label: "Custom Domain", icon: Globe2 },
+    { label: "Priority Support", icon: Headphones },
+  ];
+
+  return (
+    <section className="rounded-[2rem] border border-[#F3D8DE] bg-white/80 p-5 shadow-[0_18px_55px_rgba(217,79,112,0.08)] sm:p-6 lg:p-7">
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_2fr_0.8fr] lg:items-center">
+        <div className="flex items-start gap-4">
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-[#F3D8DE] bg-[#FFF1F4] text-primary">
+            <Crown className="h-7 w-7" />
+          </span>
+          <div>
+            <h2 className="font-serif text-2xl font-bold leading-tight text-[#2B171C]">Premium templates with advanced features</h2>
+            <p className="mt-2 max-w-sm text-sm leading-6 text-muted">Get RSVP tracking, live streaming, custom domains and more.</p>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <div key={feature.label} className="flex items-center gap-3 text-sm font-medium text-[#4B5563]">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#F3D8DE] bg-[#FFF7F8] text-primary">
+                  <Icon className="h-5 w-5" />
+                </span>
+                {feature.label}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-col gap-3 lg:items-end">
+          <Button type="button" className="h-12 rounded-xl bg-[#D94F70] px-7 font-semibold hover:bg-[#B93558]">
+            <Crown className="h-4 w-4" />
+            Explore Premium
+          </Button>
+          <button type="button" className="text-sm font-medium text-muted transition hover:text-primary">
+            See all premium features →
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
