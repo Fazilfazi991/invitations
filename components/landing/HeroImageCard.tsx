@@ -14,6 +14,7 @@ export function HeroImageCard({ category, className }: { category: HeroCategory;
         width={280}
         height={360}
         sizes="280px"
+        unoptimized
         priority={category.id === "birthday"}
         className="h-full w-full object-contain"
       />
