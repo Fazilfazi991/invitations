@@ -60,7 +60,7 @@ export function HeroOrbitWheel({ events, selectedIndex, muted, onSelect, onPrevi
 
   return (
     <>
-      <div className="relative mx-auto hidden h-[560px] w-full max-w-[650px] overflow-hidden lg:block">
+      <div className="relative mx-auto hidden w-full overflow-hidden lg:block" style={{ maxWidth: 650, height: 560 }}>
         <div className="absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/25 bg-[radial-gradient(circle,rgba(255,241,244,0.45),rgba(255,253,249,0.04)_60%,transparent_72%)] shadow-[0_0_70px_rgba(217,79,112,0.10)]" />
         <div className="absolute left-1/2 top-1/2 h-[350px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10" />
         <div className="absolute left-1/2 top-1/2 h-[250px] w-[250px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-gold/20" />
@@ -114,7 +114,7 @@ export function HeroOrbitWheel({ events, selectedIndex, muted, onSelect, onPrevi
         <Controls muted={muted} onPrevious={onPrevious} onNext={onNext} onToggleMute={onToggleMute} />
       </div>
 
-      <div className="relative mx-auto h-[540px] w-full max-w-sm overflow-hidden lg:hidden">
+      <div className="relative mx-auto w-full max-w-sm overflow-hidden lg:hidden" style={{ height: 540 }}>
         <div className="absolute left-1/2 top-[48%] h-[310px] w-[310px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/25 bg-primary-soft/20" />
         <div className="absolute left-1/2 top-[48%]">
           {events.map((event, index) => {
