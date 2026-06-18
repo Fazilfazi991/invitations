@@ -14,7 +14,7 @@ export function TemplatePreview({ template, className, compact = false }: { temp
         <img
           src={template.previewImage}
           alt={`${template.name} template preview`}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain bg-[#FFF8F8] p-2"
           onError={() => setFailed(true)}
         />
       ) : (
