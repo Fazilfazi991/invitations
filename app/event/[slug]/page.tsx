@@ -12,9 +12,10 @@ import { Card } from "@/components/ui/card";
 import { BlessingsWall } from "@/components/event/BlessingsWall";
 import { EventCountdown } from "@/components/event/EventCountdown";
 import { MemoryModePreview } from "@/components/event/MemoryModePreview";
+import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import { familyContacts, galleryImages, locations, sampleEvent, schedule } from "@/lib/mock-data";
 import { FooterTrust, GuestEventHero, QRCodeCard, RSVPForm, Section, ShareCard, TimelineItem } from "@/components/shared";
-import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import { getDefaultDraft, loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getEventHeroLabel } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
@@ -46,6 +47,24 @@ export default function GuestEventPage() {
   const contacts = localEvent?.contacts.length ? localEvent.contacts.map((contact) => ({ name: contact.name, phone: contact.phone })) : familyContacts;
   const template = getTemplateById(localEvent?.templateId) ?? getDefaultTemplateForType(eventType);
   const accentStyle = { "--template-primary": template.style.primary, "--template-secondary": template.style.secondary } as CSSProperties;
+  const renderedEvent: EventDraft = localEvent ?? {
+    ...getDefaultDraft("wedding"),
+    slug: params.slug,
+    templateId: "floral-wedding-elegance",
+    title: sampleEvent.couple,
+    primaryName: "Afsal",
+    secondaryName: "Fathima",
+    groomName: "Afsal",
+    brideName: "Fathima",
+    venueName: "Grand Seasons",
+    address: "Kozhikode, Kerala",
+    city: "Kozhikode, Kerala",
+  };
+  const isWeddingLike = ["wedding", "engagement", "reception"].includes(renderedEvent.eventType);
+
+  if (!isMemoryMode && isWeddingLike) {
+    return <WeddingTemplateRenderer event={renderedEvent} />;
+  }
 
   return (
     <main className="phone-shell min-h-screen pb-20" style={{ background: `linear-gradient(180deg, ${template.style.background}, #fffdf9 55%)`, ...accentStyle }}>

@@ -29,34 +29,56 @@ export type EventTemplate = {
 
 export const SELECTED_TEMPLATE_KEY = "jashnly_selected_template";
 
-export const templates: EventTemplate[] = [
+export const weddingTemplates: EventTemplate[] = [
   {
-    id: "floral-wedding",
-    name: "Floral Wedding",
+    id: "floral-wedding-elegance",
+    name: "Floral Wedding Elegance",
     category: "wedding",
-    description: "Soft florals and rose details for a romantic wedding page.",
-    previewImage: "/event-cards/wedding.webp",
+    description: "A romantic floral wedding page with soft rose accents and graceful family sections.",
+    previewImage: "/templates/wedding/floral-wedding-elegance.webp",
     isPremium: false,
-    style: { primary: "#D94F70", secondary: "#D6A84F", background: "#FFF7F4", mood: "romantic" },
+    style: { primary: "#D94F70", secondary: "#D6A84F", background: "#FFFDF9", mood: "romantic" },
   },
   {
-    id: "royal-nikah",
-    name: "Royal Nikah",
+    id: "royal-nikah-elegance",
+    name: "Royal Nikah Elegance",
     category: "wedding",
-    description: "Elegant gold accents with a graceful traditional mood.",
-    previewImage: "/templates/royal-nikah.webp",
+    description: "A refined Nikah-inspired template with arches, lanterns, blush florals and soft gold details.",
+    previewImage: "/templates/wedding/royal-nikah-elegance.webp",
     isPremium: true,
-    style: { primary: "#9F6B2F", secondary: "#D6A84F", background: "#FFF8EE", mood: "traditional" },
+    style: { primary: "#C24D6A", secondary: "#D6A84F", background: "#FFF9F1", mood: "traditional" },
   },
   {
-    id: "minimal-wedding",
-    name: "Minimal Wedding",
+    id: "minimal-editorial-wedding",
+    name: "Minimal Editorial Wedding",
     category: "wedding",
-    description: "Clean ivory layout with simple rose typography.",
-    previewImage: "/templates/minimal-wedding.webp",
-    isPremium: false,
-    style: { primary: "#C94B67", secondary: "#E9B8C2", background: "#FFFDF9", mood: "minimal" },
+    description: "A clean photo-led wedding page with elegant editorial typography and lots of whitespace.",
+    previewImage: "/templates/wedding/minimal-editorial-wedding.webp",
+    isPremium: true,
+    style: { primary: "#C24D6A", secondary: "#1F2937", background: "#FFFDF9", mood: "minimal" },
   },
+  {
+    id: "soft-traditional-wedding",
+    name: "Soft Traditional Wedding",
+    category: "wedding",
+    description: "A sweet traditional wedding layout with pastel motifs, family contacts, blessings and WhatsApp sharing.",
+    previewImage: "/templates/wedding/soft-traditional-wedding.webp",
+    isPremium: false,
+    style: { primary: "#D94F70", secondary: "#E6B8A2", background: "#FFF7F6", mood: "traditional" },
+  },
+  {
+    id: "contemporary-luxe-wedding",
+    name: "Contemporary Luxe Wedding",
+    category: "wedding",
+    description: "A modern photo-forward wedding page with deep rose accents, RSVP insights and live stream blocks.",
+    previewImage: "/templates/wedding/contemporary-luxe-wedding.webp",
+    isPremium: true,
+    style: { primary: "#B93558", secondary: "#D6A84F", background: "#FFF8F8", mood: "luxury" },
+  },
+];
+
+export const templates: EventTemplate[] = [
+  ...weddingTemplates,
   {
     id: "cute-birthday",
     name: "Cute Birthday",

@@ -21,6 +21,8 @@ export type EventDraft = {
   title: string;
   primaryName: string;
   secondaryName?: string;
+  groomName?: string;
+  brideName?: string;
   hostName?: string;
   childName?: string;
   businessName?: string;
@@ -79,6 +81,8 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     title,
     primaryName: typedDefaults.primaryName ?? "",
     secondaryName: typedDefaults.secondaryName,
+    groomName: typedDefaults.primaryName,
+    brideName: typedDefaults.secondaryName,
     hostName: typedDefaults.hostName,
     childName: typedDefaults.childName,
     businessName: typedDefaults.businessName,
@@ -103,7 +107,7 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     contacts: [
       { id: "contact-1", name: "Afsal's Family", role: "Family", phone: "+91 999 555 1234" },
     ],
-    templateId: eventType === "birthday" ? "cute-birthday" : eventType === "housewarming" ? "warm-housewarming" : eventType === "naming" ? "naming-ceremony-soft" : eventType === "religious" ? "holy-communion-classic" : eventType === "business" ? "business-opening-modern" : "floral-wedding",
+    templateId: eventType === "birthday" ? "cute-birthday" : eventType === "housewarming" ? "warm-housewarming" : eventType === "naming" ? "naming-ceremony-soft" : eventType === "religious" ? "holy-communion-classic" : eventType === "business" ? "business-opening-modern" : "floral-wedding-elegance",
     theme: "blush",
     status: "draft",
     slug: generateSlug(title),
