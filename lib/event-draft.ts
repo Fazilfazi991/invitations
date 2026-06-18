@@ -41,6 +41,7 @@ export type EventDraft = {
   qrEnabled: boolean;
   schedule: ScheduleDraftItem[];
   contacts: ContactDraftItem[];
+  templateId?: string;
   theme: ThemeName;
   status: "draft" | "published";
   slug: string;
@@ -102,6 +103,7 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     contacts: [
       { id: "contact-1", name: "Afsal's Family", role: "Family", phone: "+91 999 555 1234" },
     ],
+    templateId: eventType === "birthday" ? "cute-birthday" : eventType === "housewarming" ? "warm-housewarming" : eventType === "naming" ? "naming-ceremony-soft" : eventType === "religious" ? "holy-communion-classic" : eventType === "business" ? "business-opening-modern" : "floral-wedding",
     theme: "blush",
     status: "draft",
     slug: generateSlug(title),

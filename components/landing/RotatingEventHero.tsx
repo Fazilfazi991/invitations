@@ -38,7 +38,7 @@ export function RotatingEventHero() {
         <Link href="/" className="w-[145px] shrink-0 font-serif text-4xl font-bold text-primary xl:w-[170px]">
           Jashnly<span className="align-top text-lg text-gold">&hearts;</span>
         </Link>
-        <div className="hidden min-w-0 overflow-x-auto lg:flex lg:justify-center">
+        <div className="hidden min-w-0 overflow-x-auto md:flex md:justify-center">
           <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} />
         </div>
         <div className="flex shrink-0 gap-1.5">
@@ -46,9 +46,6 @@ export function RotatingEventHero() {
           <Button className="h-9 px-4 text-sm" asChild size="sm"><Link href="/categories">Create Event</Link></Button>
         </div>
       </header>
-      <div className="px-6 lg:hidden">
-        <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} />
-      </div>
       <div className="mx-auto grid max-w-[1584px] gap-5 px-4 py-6 lg:min-h-[calc(100vh-96px)] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-5 xl:gap-7 xl:px-6">
         <div className="relative z-10 max-w-[560px]">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-primary shadow-card">
@@ -84,6 +81,9 @@ export function RotatingEventHero() {
             onNext={() => rotateTo(selectedIndex + 1)}
             onToggleMute={toggleMute}
           />
+        </div>
+        <div className="-mt-3 min-w-0 md:hidden">
+          <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} compact />
         </div>
       </div>
       <HeroFeatureCards />

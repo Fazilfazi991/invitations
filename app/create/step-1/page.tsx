@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { StepProgress } from "@/components/shared";
+import { LiveTemplatePreview } from "@/components/create/LiveTemplatePreview";
+import { SelectedTemplatePreview } from "@/components/create/SelectedTemplatePreview";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getDefaultDraft, generateSlug } from "@/lib/event-draft";
 import { eventTypeOptions, getEventTypeLabel, normalizeEventType, type EventType } from "@/lib/event-types";
+import { getDefaultTemplateForType, getTemplateById, SELECTED_TEMPLATE_KEY, templateCategoryToEventType, templateMoodToTheme } from "@/lib/templates";
 import { useEventDraft } from "@/hooks/use-event-draft";
 
 function nameFieldConfig(type: EventType) {
@@ -28,12 +31,25 @@ export default function StepOnePage() {
   const { draft, setDraft } = useEventDraft();
   const [error, setError] = useState("");
   const config = nameFieldConfig(draft.eventType);
+  const selectedTemplate = getTemplateById(draft.templateId) ?? getDefaultTemplateForType(draft.eventType);
 
   useEffect(() => {
-    const paramType = new URLSearchParams(window.location.search).get("type");
-    if (!paramType) return;
-    const type = normalizeEventType(paramType);
-    setDraft((current) => current.eventType === type ? current : { ...getDefaultDraft(type), ...current, eventType: type });
+    const params = new URLSearchParams(window.location.search);
+    const paramTemplate = getTemplateById(params.get("template"));
+    const storedTemplate = getTemplateById(window.localStorage.getItem(SELECTED_TEMPLATE_KEY));
+    const template = paramTemplate ?? storedTemplate;
+    const type = template ? templateCategoryToEventType(template.category) : normalizeEventType(params.get("type"));
+    setDraft((current) => {
+      const shouldResetType = current.eventType !== type;
+      const base = shouldResetType ? { ...getDefaultDraft(type), ...current, eventType: type } : current;
+      if (!template && !params.get("type")) return base;
+      return {
+        ...base,
+        templateId: template?.id ?? base.templateId,
+        eventType: type,
+        theme: template ? templateMoodToTheme(template.style.mood) : base.theme,
+      };
+    });
   }, []);
 
   function update<K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) {
@@ -42,6 +58,7 @@ export default function StepOnePage() {
 
   function changeType(value: EventType) {
     const typed = getDefaultDraft(value);
+    const template = getDefaultTemplateForType(value);
     setDraft((current) => ({
       ...typed,
       title: current.title || typed.title,
@@ -51,7 +68,10 @@ export default function StepOnePage() {
       address: current.address,
       city: current.city,
       eventType: value,
+      templateId: template.id,
+      theme: templateMoodToTheme(template.style.mood),
     }));
+    window.localStorage.setItem(SELECTED_TEMPLATE_KEY, template.id);
   }
 
   function continueNext() {
@@ -73,6 +93,12 @@ export default function StepOnePage() {
           <Button onClick={continueNext} size="sm">Next</Button>
         </div>
         <StepProgress step={1} />
+        <div className="mb-5 space-y-4">
+          <SelectedTemplatePreview template={selectedTemplate} />
+          <div>
+            <p className="text-sm font-semibold text-primary">You&apos;re creating with {selectedTemplate.name}</p>
+          </div>
+        </div>
         <Card className="space-y-4 p-5">
           <h2 className="font-serif text-2xl font-bold"><Heart className="mr-2 inline h-5 w-5 text-primary" />Basic Details</h2>
           <label className="block space-y-2 text-sm font-semibold">
@@ -109,6 +135,9 @@ export default function StepOnePage() {
           </label>
           {error && <p className="rounded-xl bg-primary-soft px-4 py-3 text-sm font-semibold text-primary">{error}</p>}
         </Card>
+        <div className="mt-5">
+          <LiveTemplatePreview draft={draft} template={selectedTemplate} />
+        </div>
       </div>
       <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Save & Continue</Button></div>
     </main>

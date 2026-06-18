@@ -27,9 +27,11 @@ import { MemoryModeCard } from "@/components/dashboard/MemoryModeCard";
 import { ShareActions } from "@/components/share/ShareActions";
 import { WhatsAppMessageGenerator } from "@/components/share/WhatsAppMessageGenerator";
 import { DashboardMetricCard, FooterTrust, Section } from "@/components/shared";
+import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { eventUrl, sampleEvent } from "@/lib/mock-data";
 import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
+import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 
 const actions = [
   { label: "Share Link", icon: Share2 },
@@ -45,6 +47,7 @@ export default function DashboardDetailPage() {
   const eventDate = localEvent ? formatEventDate(localEvent.date) : sampleEvent.date;
   const eventTime = localEvent ? formatEventTime(localEvent.time) : sampleEvent.time;
   const eventLocation = localEvent ? `${localEvent.venueName}, ${localEvent.city}` : sampleEvent.location;
+  const template = getTemplateById(localEvent?.templateId) ?? getDefaultTemplateForType(localEvent?.eventType ?? "wedding");
 
   useEffect(() => {
     setLocalEvent(loadPublishedEvents().find((event) => event.slug === params.id) ?? null);
@@ -73,6 +76,19 @@ export default function DashboardDetailPage() {
         <div className="mt-5">
           <EventCompletionChecklist />
         </div>
+
+        <Card className="mt-5 p-5">
+          <h2 className="font-serif text-2xl font-bold">Template</h2>
+          <p className="mt-1 text-sm text-muted">Change the invitation style anytime before sharing your event.</p>
+          <div className="mt-4 flex gap-4">
+            <TemplatePreview template={template} compact className="w-28 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <Badge>{template.category}</Badge>
+              <h3 className="mt-2 font-serif text-2xl font-bold">{template.name}</h3>
+              <Button asChild variant="outline" size="sm" className="mt-3"><Link href={`/categories?event=${params.id}&mode=change-template`}>Change template</Link></Button>
+            </div>
+          </div>
+        </Card>
 
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3">
           <DashboardMetricCard label="Total Views" value="12,842" icon={Eye} trend="+18.6%" />

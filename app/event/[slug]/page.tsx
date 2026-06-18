@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Phone } from "lucide-react";
@@ -16,6 +17,7 @@ import { FooterTrust, GuestEventHero, QRCodeCard, RSVPForm, Section, ShareCard, 
 import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getEventHeroLabel } from "@/lib/event-types";
+import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 
 export default function GuestEventPage() {
   const params = useParams<{ slug: string }>();
@@ -42,9 +44,11 @@ export default function GuestEventPage() {
       }))
     : schedule;
   const contacts = localEvent?.contacts.length ? localEvent.contacts.map((contact) => ({ name: contact.name, phone: contact.phone })) : familyContacts;
+  const template = getTemplateById(localEvent?.templateId) ?? getDefaultTemplateForType(eventType);
+  const accentStyle = { "--template-primary": template.style.primary, "--template-secondary": template.style.secondary } as CSSProperties;
 
   return (
-    <main className="phone-shell min-h-screen pb-20">
+    <main className="phone-shell min-h-screen pb-20" style={{ background: `linear-gradient(180deg, ${template.style.background}, #fffdf9 55%)`, ...accentStyle }}>
       <MobileHeader action="search" />
       <Section className="space-y-4 pt-3">
         {isMemoryMode ? (
@@ -52,9 +56,9 @@ export default function GuestEventPage() {
         ) : (
           <>
             {localEvent ? (
-              <Card className="floral overflow-hidden p-5 text-center">
-                <p className="text-xs font-bold uppercase tracking-[0.24em] text-gold">{getEventHeroLabel(eventType)}</p>
-                <h1 className="mt-2 font-serif text-5xl font-bold text-primary">{eventTitle}</h1>
+              <Card className="overflow-hidden p-5 text-center" style={{ background: `linear-gradient(135deg, ${template.style.background}, #fff)`, borderColor: template.style.secondary }}>
+                <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: template.style.secondary }}>{getEventHeroLabel(eventType)}</p>
+                <h1 className="mt-2 font-serif text-5xl font-bold" style={{ color: template.style.primary }}>{eventTitle}</h1>
                 <img src={sampleEvent.coupleImage} alt="" className="mx-auto mt-5 h-36 w-36 rounded-full border-4 border-white object-cover shadow-soft" />
                 <div className="mt-5 space-y-2 text-sm">
                   <p>{formatEventDate(eventDate)} · {formatEventTime(eventTime)}</p>
@@ -62,7 +66,7 @@ export default function GuestEventPage() {
                 </div>
                 <EventCountdown date={eventDate} time={eventTime} />
                 <div className="mt-5 grid grid-cols-3 gap-2">
-                  {localEvent.rsvpEnabled && <Button asChild variant="soft" size="sm"><Link href={`/event/${localEvent.slug}/rsvp`}>RSVP</Link></Button>}
+                  {localEvent.rsvpEnabled && <Button asChild size="sm" style={{ backgroundColor: template.style.primary }}><Link href={`/event/${localEvent.slug}/rsvp`}>RSVP</Link></Button>}
                   <Button asChild variant="outline" size="sm"><Link href={`/event/${localEvent.slug}/locations`}>Location</Link></Button>
                   {localEvent.youtubeLink && <Button asChild variant="outline" size="sm"><a href={localEvent.youtubeLink}>Live</a></Button>}
                 </div>

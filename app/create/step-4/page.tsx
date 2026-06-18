@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/shared";
+import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { generateSlug, savePublishedEvent } from "@/lib/event-draft";
 import { getEventTypeLabel, type ThemeName } from "@/lib/event-types";
+import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +28,7 @@ export default function StepFourPage() {
   const { draft, setDraft } = useEventDraft();
   const [error, setError] = useState("");
   const previewSlug = draft.slug || generateSlug(draft.title);
+  const selectedTemplate = getTemplateById(draft.templateId) ?? getDefaultTemplateForType(draft.eventType);
 
   function publish() {
     if (!draft.title || !draft.date || !draft.time || !draft.venueName) {
@@ -56,6 +59,18 @@ export default function StepFourPage() {
               <p><b className="text-foreground">When:</b> {formatEventDate(draft.date)} at {formatEventTime(draft.time)}</p>
               <p><b className="text-foreground">Venue:</b> {draft.venueName}, {draft.city}</p>
               <p><b className="text-foreground">RSVP:</b> {draft.rsvpEnabled ? "Enabled" : "Disabled"} · <b className="text-foreground">QR:</b> {draft.qrEnabled ? "Enabled" : "Disabled"}</p>
+            </div>
+          </Card>
+          <Card className="p-5">
+            <h2 className="font-serif text-2xl font-bold">Selected Template</h2>
+            <p className="mt-1 text-sm text-muted">This invitation style will be used when your event is published.</p>
+            <div className="mt-4 flex gap-4">
+              <TemplatePreview template={selectedTemplate} compact className="w-28 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <Badge>{selectedTemplate.category}</Badge>
+                <h3 className="mt-2 font-serif text-2xl font-bold">{selectedTemplate.name}</h3>
+                <Button asChild variant="outline" size="sm" className="mt-3"><Link href="/categories">Change template</Link></Button>
+              </div>
             </div>
           </Card>
           <div>
