@@ -71,6 +71,9 @@ export function RotatingEventHero() {
             Loved by thousands of hosts worldwide <Heart className="h-5 w-5 text-primary" />
           </div>
         </div>
+        <div className="min-w-0 md:hidden">
+          <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} compact />
+        </div>
         <div className="relative mx-auto w-full max-w-[650px] min-w-0">
           <HeroOrbitCarousel
             events={heroCategories}
@@ -81,9 +84,6 @@ export function RotatingEventHero() {
             onNext={() => rotateTo(selectedIndex + 1)}
             onToggleMute={toggleMute}
           />
-        </div>
-        <div className="-mt-3 min-w-0 md:hidden">
-          <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} compact />
         </div>
       </div>
       <HeroFeatureCards />

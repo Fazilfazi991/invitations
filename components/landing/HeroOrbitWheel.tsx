@@ -35,12 +35,12 @@ function mobileCardPose(relative: number, total: number) {
 
 function Controls({ muted, onPrevious, onNext, onToggleMute }: Pick<HeroOrbitWheelProps, "muted" | "onPrevious" | "onNext" | "onToggleMute">) {
   return (
-    <div className="absolute bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-white/95 p-1.5 shadow-card backdrop-blur">
-      <Button className="h-9 w-9" variant="ghost" size="icon" onClick={onPrevious} aria-label="Previous celebration"><ChevronLeft className="h-4 w-4" /></Button>
-      <button onClick={onToggleMute} className="rounded-full bg-primary-soft px-2.5 py-2 text-primary" aria-label="Toggle carousel sound">
+    <div className="absolute bottom-5 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border bg-white/95 p-1 shadow-card backdrop-blur">
+      <Button className="h-8 w-8" variant="ghost" size="icon" onClick={onPrevious} aria-label="Previous celebration"><ChevronLeft className="h-4 w-4" /></Button>
+      <button onClick={onToggleMute} className="grid h-8 w-8 place-items-center rounded-full bg-primary-soft text-primary" aria-label="Toggle carousel sound">
         {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
       </button>
-      <Button className="h-9 w-9" variant="ghost" size="icon" onClick={onNext} aria-label="Next celebration"><ChevronRight className="h-4 w-4" /></Button>
+      <Button className="h-8 w-8" variant="ghost" size="icon" onClick={onNext} aria-label="Next celebration"><ChevronRight className="h-4 w-4" /></Button>
     </div>
   );
 }
