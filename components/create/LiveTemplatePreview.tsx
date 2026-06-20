@@ -6,7 +6,11 @@ import { getEventHeroLabel } from "@/lib/event-types";
 import type { EventTemplate } from "@/lib/templates";
 
 function previewTitle(draft: EventDraft) {
-  if (draft.eventType === "birthday") return draft.primaryName ? `${draft.primaryName}${draft.age ? ` turns ${draft.age}` : ""}` : draft.title;
+  if (draft.eventType === "birthday") {
+    const name = draft.childName || draft.birthdayPersonName || draft.primaryName;
+    const age = draft.ageTurning || draft.age;
+    return name ? `${name}${age ? ` turns ${age}` : ""}` : draft.title;
+  }
   if (draft.eventType === "housewarming") return draft.primaryName || draft.hostName || draft.title;
   if (draft.eventType === "naming") return draft.childName || draft.primaryName || draft.title;
   if (draft.eventType === "business") return draft.businessName || draft.title;

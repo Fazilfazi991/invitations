@@ -17,7 +17,7 @@ import { getDefaultTemplateForType, getTemplateById, SELECTED_TEMPLATE_KEY, temp
 import { useEventDraft } from "@/hooks/use-event-draft";
 
 function nameFieldConfig(type: EventType) {
-  if (type === "birthday") return { primary: "Birthday person name", secondary: "Age turning (optional)", host: "Hosted by (optional)" };
+  if (type === "birthday") return { primary: "Birthday person name", secondary: "Age turning", host: "Hosted by (optional)" };
   if (type === "housewarming") return { primary: "Host family name", secondary: "New home name (optional)" };
   if (type === "naming") return { primary: "Parent / host names", secondary: "Baby / child name (optional)" };
   if (type === "religious") return { primary: "Host / family / organization name" };
@@ -41,7 +41,7 @@ export default function StepOnePage() {
     const type = template ? templateCategoryToEventType(template.category) : normalizeEventType(params.get("type"));
     setDraft((current) => {
       const shouldResetType = current.eventType !== type;
-      const base = shouldResetType ? { ...getDefaultDraft(type), ...current, eventType: type } : current;
+      const base = shouldResetType ? { ...getDefaultDraft(type), date: current.date, time: current.time, eventType: type } : current;
       if (!template && !params.get("type")) return base;
       return {
         ...base,
@@ -61,7 +61,6 @@ export default function StepOnePage() {
     const template = getDefaultTemplateForType(value);
     setDraft((current) => ({
       ...typed,
-      title: current.title || typed.title,
       date: current.date,
       time: current.time,
       venueName: current.venueName,
@@ -75,7 +74,7 @@ export default function StepOnePage() {
   }
 
   function continueNext() {
-    const requiredName = draft.eventType === "business" ? draft.businessName : draft.eventType === "naming" ? draft.hostName || draft.primaryName : draft.primaryName || draft.hostName;
+    const requiredName = draft.eventType === "business" ? draft.businessName : draft.eventType === "birthday" ? draft.childName || draft.birthdayPersonName || draft.primaryName : draft.eventType === "naming" ? draft.hostName || draft.primaryName : draft.primaryName || draft.hostName;
     if (!draft.title.trim() || !requiredName?.trim() || !draft.date || !draft.time) {
       setError("Please add the event title, required name, date and time.");
       return;
@@ -107,15 +106,34 @@ export default function StepOnePage() {
               {eventTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </label>
-          <label className="block space-y-2 text-sm font-semibold"><span>Event title</span><Input value={draft.title} onChange={(event) => update("title", event.target.value)} /></label>
+          <label className="block space-y-2 text-sm font-semibold"><span>Event title</span><Input value={draft.title} onChange={(event) => update("title", event.target.value)} placeholder={draft.eventType === "birthday" ? "Ava's 5th Birthday" : "Event title"} /></label>
           <label className="block space-y-2 text-sm font-semibold"><span>{config.primary}</span><Input value={draft.eventType === "business" ? draft.businessName || "" : draft.primaryName || draft.hostName || ""} onChange={(event) => {
             if (draft.eventType === "business") update("businessName", event.target.value);
             else if (draft.eventType === "religious" || draft.eventType === "custom") update("hostName", event.target.value);
-            else update("primaryName", event.target.value);
+            else if (draft.eventType === "birthday") {
+              const name = event.target.value;
+              setDraft((current) => ({
+                ...current,
+                primaryName: name,
+                childName: name,
+                birthdayPersonName: name,
+                title: current.title && !current.title.includes("Birthday") ? current.title : `${name || "Ava"}'s ${current.ageTurning || current.age || "5"}th Birthday`,
+                slug: generateSlug(`${name || "Ava"}'s ${current.ageTurning || current.age || "5"}th Birthday`),
+              }));
+            } else update("primaryName", event.target.value);
           }} /></label>
           {config.secondary && (
             <label className="block space-y-2 text-sm font-semibold"><span>{config.secondary}</span><Input value={draft.eventType === "birthday" ? draft.age || "" : draft.eventType === "housewarming" ? draft.homeName || "" : draft.eventType === "naming" ? draft.childName || "" : draft.secondaryName || draft.hostName || ""} onChange={(event) => {
-              if (draft.eventType === "birthday") update("age", event.target.value);
+              if (draft.eventType === "birthday") {
+                const age = event.target.value;
+                setDraft((current) => ({
+                  ...current,
+                  age,
+                  ageTurning: age,
+                  title: `${current.childName || current.birthdayPersonName || current.primaryName || "Ava"}'s ${age || "5"}th Birthday`,
+                  slug: generateSlug(`${current.childName || current.birthdayPersonName || current.primaryName || "Ava"}'s ${age || "5"}th Birthday`),
+                }));
+              }
               else if (draft.eventType === "housewarming") update("homeName", event.target.value);
               else if (draft.eventType === "naming") update("childName", event.target.value);
               else if (draft.eventType === "business") update("hostName", event.target.value);

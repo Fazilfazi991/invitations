@@ -6,7 +6,7 @@ import { Crown, Globe2, Headphones, Users, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TemplateCard } from "@/components/templates/TemplateCard";
 import { TemplateFilters, templateFilterOptions, type TemplateFilterValue } from "@/components/templates/TemplateFilters";
-import { TemplatePreview } from "@/components/templates/TemplatePreview";
+import { TemplateFullPagePreview } from "@/components/templates/TemplateFullPagePreview";
 import {
   SELECTED_TEMPLATE_KEY,
   templateCategoryToEventType,
@@ -62,18 +62,40 @@ export function TemplateGallery() {
       {!visibleTemplates.length && <p className="rounded-2xl border border-border bg-white p-5 text-center text-muted shadow-card">No templates found. Try another celebration type.</p>}
       <PremiumTemplateBanner />
       {preview && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/30 p-5 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[2rem] border border-[#F3D8DE] bg-white p-4 shadow-soft">
-            <div className="mb-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">{preview.category}</p>
-                <h2 className="font-serif text-2xl font-bold text-[#2B171C]">{preview.name}</h2>
-                <p className="mt-1 text-sm leading-6 text-muted">{preview.description}</p>
+        <div className="fixed inset-0 z-50 bg-foreground/35 backdrop-blur-sm md:grid md:place-items-center md:p-5">
+          <div className="flex h-dvh w-full flex-col overflow-hidden bg-white shadow-soft md:max-h-[92vh] md:max-w-5xl md:rounded-[2rem] md:border md:border-[#F3D8DE]">
+            <div className="shrink-0 border-b border-[#F3D8DE] bg-white/95 px-4 py-4 md:px-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{preview.category}</p>
+                  <h2 className="mt-1 font-serif text-2xl font-bold leading-tight text-[#2B171C] md:text-3xl">{preview.name}</h2>
+                  <p className="mt-1 max-w-3xl text-sm leading-6 text-muted md:text-base">{preview.description}</p>
+                </div>
+                <Button type="button" variant="ghost" size="icon" onClick={() => setPreview(null)} aria-label="Close preview">
+                  <X className="h-5 w-5" />
+                </Button>
               </div>
-              <Button type="button" variant="ghost" size="icon" onClick={() => setPreview(null)}><X className="h-5 w-5" /></Button>
             </div>
-            <TemplatePreview template={preview} className="h-80 rounded-[1.5rem]" />
-            <Button type="button" onClick={() => useTemplate(preview)} className="mt-4 w-full bg-[#D94F70] hover:bg-[#B93558]">Use this template</Button>
+            <div className="min-h-0 flex-1 bg-[#FFF7F8] p-3 md:p-5">
+              <div className="mx-auto flex h-full max-w-3xl flex-col overflow-hidden rounded-[1.75rem] border border-[#F3D8DE] bg-white shadow-[0_24px_70px_rgba(217,79,112,0.14)]">
+                <div className="flex shrink-0 items-center justify-between border-b border-[#F3D8DE] bg-[#FFFDF9] px-4 py-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#F9A8B8]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#F7D58D]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#A7D8B8]" />
+                  </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Scroll to preview full template</p>
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth bg-[#FFFDF9]">
+                  <TemplateFullPagePreview template={preview} />
+                </div>
+              </div>
+            </div>
+            <div className="sticky bottom-0 shrink-0 border-t border-[#F3D8DE] bg-white/95 p-4 backdrop-blur md:px-5">
+              <Button type="button" onClick={() => useTemplate(preview)} className="w-full bg-[#D94F70] hover:bg-[#B93558] md:mx-auto md:flex md:max-w-sm">
+                Use this template
+              </Button>
+            </div>
           </div>
         </div>
       )}

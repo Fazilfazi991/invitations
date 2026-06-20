@@ -23,7 +23,7 @@ export type EventTemplate = {
     secondary: string;
     background: string;
     headingFont?: string;
-    mood: "romantic" | "cute" | "minimal" | "traditional" | "modern" | "spiritual" | "luxury";
+    mood: "romantic" | "cute" | "minimal" | "traditional" | "modern" | "spiritual" | "luxury" | "princess" | "playful" | "adventure";
   };
 };
 
@@ -77,26 +77,66 @@ export const weddingTemplates: EventTemplate[] = [
   },
 ];
 
+export const birthdayTemplates: EventTemplate[] = [
+  {
+    id: "pink-teddy-birthday",
+    name: "Pink Teddy Birthday",
+    category: "birthday",
+    description: "A soft pink birthday page with teddy bears, florals, balloons and sweet party details.",
+    previewImage: "/templates/previews/birthday/pink-teddy-birthday-preview.png",
+    isPremium: false,
+    style: { primary: "#E63F76", secondary: "#F7B6C8", background: "#FFF7FA", mood: "cute" },
+  },
+  {
+    id: "blue-sky-birthday",
+    name: "Blue Sky Birthday",
+    category: "birthday",
+    description: "A dreamy blue birthday template with clouds, stars, balloons and a light playful mood.",
+    previewImage: "/templates/previews/birthday/blue-sky-birthday-preview.png",
+    isPremium: false,
+    style: { primary: "#2563EB", secondary: "#F8C7DD", background: "#F1F8FF", mood: "cute" },
+  },
+  {
+    id: "floral-princess-birthday",
+    name: "Floral Princess Birthday",
+    category: "birthday",
+    description: "A graceful princess-style birthday page with purple florals, soft pinks and elegant party sections.",
+    previewImage: "/templates/previews/birthday/floral-princess-birthday-preview.png",
+    isPremium: true,
+    style: { primary: "#A855F7", secondary: "#E85D9E", background: "#FFF9FC", mood: "princess" },
+  },
+  {
+    id: "black-gold-luxe-birthday",
+    name: "Black Gold Luxe Birthday",
+    category: "birthday",
+    description: "A premium black and gold birthday page for stylish milestone celebrations.",
+    previewImage: "/templates/previews/birthday/black-gold-luxe-birthday-preview.png",
+    isPremium: true,
+    style: { primary: "#D6A84F", secondary: "#111827", background: "#090909", mood: "luxury" },
+  },
+  {
+    id: "candyland-birthday",
+    name: "Candyland Birthday",
+    category: "birthday",
+    description: "A playful candy-themed birthday page with sweets, pastel balloons, cake and colorful details.",
+    previewImage: "/templates/previews/birthday/candyland-birthday-preview.png",
+    isPremium: false,
+    style: { primary: "#E83E8C", secondary: "#F9A8D4", background: "#FFF5FB", mood: "playful" },
+  },
+  {
+    id: "dino-adventure-birthday",
+    name: "Dino Adventure Birthday",
+    category: "birthday",
+    description: "A jungle dinosaur birthday page with green adventure styling, playful icons and kid-friendly sections.",
+    previewImage: "/templates/previews/birthday/dino-adventure-birthday-preview.png",
+    isPremium: true,
+    style: { primary: "#2F6B24", secondary: "#A3B18A", background: "#FFFBEA", mood: "adventure" },
+  },
+];
+
 export const templates: EventTemplate[] = [
   ...weddingTemplates,
-  {
-    id: "cute-birthday",
-    name: "Cute Birthday",
-    category: "birthday",
-    description: "Playful pastel invite for sweet birthday celebrations.",
-    previewImage: "/templates/previews/cute_birthday_preview.png",
-    isPremium: false,
-    style: { primary: "#8B5CF6", secondary: "#F9A8D4", background: "#FFF7FD", mood: "cute" },
-  },
-  {
-    id: "pastel-birthday",
-    name: "Pastel Birthday",
-    category: "birthday",
-    description: "Soft balloons, cheerful tones, and a gentle party feel.",
-    previewImage: "/templates/previews/pastel_birthday_preview.png",
-    isPremium: true,
-    style: { primary: "#EC6F8F", secondary: "#F7C7A9", background: "#FFF4F5", mood: "cute" },
-  },
+  ...birthdayTemplates,
   {
     id: "warm-housewarming",
     name: "Warm Housewarming",
@@ -161,6 +201,7 @@ export function templateCategoryToEventType(category: TemplateCategory): EventTy
 export function templateMoodToTheme(mood: EventTemplate["style"]["mood"]): ThemeName {
   if (mood === "spiritual" || mood === "traditional" || mood === "luxury") return "classic";
   if (mood === "modern") return "royal";
-  if (mood === "minimal") return "sage";
+  if (mood === "minimal" || mood === "adventure") return "sage";
+  if (mood === "princess" || mood === "playful") return "royal";
   return "blush";
 }

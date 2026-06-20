@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { BlessingsWall } from "@/components/event/BlessingsWall";
 import { EventCountdown } from "@/components/event/EventCountdown";
 import { MemoryModePreview } from "@/components/event/MemoryModePreview";
+import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/BirthdayTemplateRenderer";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import { familyContacts, galleryImages, locations, sampleEvent, schedule } from "@/lib/mock-data";
 import { FooterTrust, GuestEventHero, QRCodeCard, RSVPForm, Section, ShareCard, TimelineItem } from "@/components/shared";
@@ -47,20 +48,40 @@ export default function GuestEventPage() {
   const contacts = localEvent?.contacts.length ? localEvent.contacts.map((contact) => ({ name: contact.name, phone: contact.phone })) : familyContacts;
   const template = getTemplateById(localEvent?.templateId) ?? getDefaultTemplateForType(eventType);
   const accentStyle = { "--template-primary": template.style.primary, "--template-secondary": template.style.secondary } as CSSProperties;
+  const fallbackEventType = params.slug.includes("birthday") ? "birthday" : "wedding";
   const renderedEvent: EventDraft = localEvent ?? {
-    ...getDefaultDraft("wedding"),
+    ...getDefaultDraft(fallbackEventType),
     slug: params.slug,
-    templateId: "floral-wedding-elegance",
-    title: sampleEvent.couple,
-    primaryName: "Afsal",
-    secondaryName: "Fathima",
-    groomName: "Afsal",
-    brideName: "Fathima",
-    venueName: "Grand Seasons",
-    address: "Kozhikode, Kerala",
-    city: "Kozhikode, Kerala",
+    ...(fallbackEventType === "birthday"
+      ? {
+          templateId: "pink-teddy-birthday",
+          title: "Ava's 5th Birthday",
+          primaryName: "Ava",
+          childName: "Ava",
+          birthdayPersonName: "Ava",
+          age: "5",
+          ageTurning: "5",
+          venueName: "The Party Place",
+          address: "Bangalore",
+          city: "Bangalore",
+        }
+      : {
+          templateId: "floral-wedding-elegance",
+          title: sampleEvent.couple,
+          primaryName: "Afsal",
+          secondaryName: "Fathima",
+          groomName: "Afsal",
+          brideName: "Fathima",
+          venueName: "Grand Seasons",
+          address: "Kozhikode, Kerala",
+          city: "Kozhikode, Kerala",
+        }),
   };
   const isWeddingLike = ["wedding", "engagement", "reception"].includes(renderedEvent.eventType);
+
+  if (!isMemoryMode && renderedEvent.eventType === "birthday") {
+    return <BirthdayTemplateRenderer event={renderedEvent} />;
+  }
 
   if (!isMemoryMode && isWeddingLike) {
     return <WeddingTemplateRenderer event={renderedEvent} />;

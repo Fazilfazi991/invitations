@@ -25,8 +25,10 @@ export type EventDraft = {
   brideName?: string;
   hostName?: string;
   childName?: string;
+  birthdayPersonName?: string;
   businessName?: string;
   age?: string;
+  ageTurning?: string;
   homeName?: string;
   date: string;
   time: string;
@@ -56,7 +58,7 @@ export const PUBLISHED_EVENTS_KEY = "jashnly_published_events";
 const defaultsByType: Record<EventType, Partial<EventDraft>> = {
   wedding: { title: "Afsal & Fathima Wedding", primaryName: "Afsal", secondaryName: "Fathima" },
   engagement: { title: "Afsal & Fathima Engagement", primaryName: "Afsal", secondaryName: "Fathima" },
-  birthday: { title: "Ayaan's 1st Birthday", primaryName: "Ayaan", hostName: "Rahman Family" },
+  birthday: { title: "Ava's 5th Birthday", primaryName: "Ava", childName: "Ava", hostName: "Rahman Family" },
   housewarming: { title: "Rahman Family Housewarming", primaryName: "Rahman Family" },
   naming: { title: "Baby Naming Ceremony", childName: "Baby", hostName: "Rahman Family" },
   religious: { title: "Family Dua Gathering", hostName: "Rahman Family" },
@@ -86,7 +88,9 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     hostName: typedDefaults.hostName,
     childName: typedDefaults.childName,
     businessName: typedDefaults.businessName,
-    age: "",
+    birthdayPersonName: typedDefaults.childName || typedDefaults.primaryName,
+    age: eventType === "birthday" ? "5" : "",
+    ageTurning: eventType === "birthday" ? "5" : "",
     homeName: "",
     date: "2025-05-24",
     time: "18:00",
@@ -107,7 +111,7 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     contacts: [
       { id: "contact-1", name: "Afsal's Family", role: "Family", phone: "+91 999 555 1234" },
     ],
-    templateId: eventType === "birthday" ? "cute-birthday" : eventType === "housewarming" ? "warm-housewarming" : eventType === "naming" ? "naming-ceremony-soft" : eventType === "religious" ? "holy-communion-classic" : eventType === "business" ? "business-opening-modern" : "floral-wedding-elegance",
+    templateId: eventType === "birthday" ? "pink-teddy-birthday" : eventType === "housewarming" ? "warm-housewarming" : eventType === "naming" ? "naming-ceremony-soft" : eventType === "religious" ? "holy-communion-classic" : eventType === "business" ? "business-opening-modern" : "floral-wedding-elegance",
     theme: "blush",
     status: "draft",
     slug: generateSlug(title),

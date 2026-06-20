@@ -85,7 +85,7 @@ export default function DashboardDetailPage() {
             <div className="min-w-0 flex-1">
               <Badge>{template.category}</Badge>
               <h3 className="mt-2 font-serif text-2xl font-bold">{template.name}</h3>
-              <Button asChild variant="outline" size="sm" className="mt-3"><Link href={`/categories?event=${params.id}&mode=change-template&type=wedding`}>Change template</Link></Button>
+              <Button asChild variant="outline" size="sm" className="mt-3"><Link href={`/categories?event=${params.id}&mode=change-template&type=${localEvent?.eventType ?? template.category}`}>Change template</Link></Button>
             </div>
           </div>
         </Card>
