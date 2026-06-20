@@ -116,14 +116,23 @@ export function TemplateGallery({ event, title, primary }: { event: WeddingEvent
 
 export function TemplateRSVP({ primary, summary = false }: { primary: string; summary?: boolean }) {
   return (
-    <section className={cn("rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card", summary && "grid gap-4 sm:grid-cols-2")}>
+    <section className={cn("rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card", summary && "grid gap-4")}>
       <div>
         <h2 className="font-serif text-2xl font-bold">RSVP</h2>
         <p className="text-sm text-muted">Kindly respond and make the day perfect.</p>
         <input className="mt-3 h-11 w-full rounded-full border border-border px-4 text-sm" placeholder="Enter your name" />
-        <div className="mt-3 grid grid-cols-2 gap-2"><Button style={{ backgroundColor: primary }}>Will Attend</Button><Button variant="outline">Can't Attend</Button></div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Button className="px-2 text-xs" style={{ backgroundColor: primary }}>Will Attend</Button>
+          <Button className="px-2 text-xs" variant="outline">Can&apos;t Attend</Button>
+        </div>
       </div>
-      {summary && <div className="rounded-2xl p-4 text-white" style={{ backgroundColor: primary }}><p className="text-sm uppercase tracking-[0.14em]">Kindly RSVP</p><b className="mt-2 block font-serif text-4xl">342</b><p className="text-sm">Guests invited</p></div>}
+      {summary && (
+        <div className="rounded-2xl p-4 text-center text-white" style={{ backgroundColor: primary }}>
+          <p className="text-sm uppercase tracking-[0.14em]">Kindly RSVP</p>
+          <b className="mt-2 block font-serif text-4xl">342</b>
+          <p className="text-sm">Guests invited</p>
+        </div>
+      )}
     </section>
   );
 }
