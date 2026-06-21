@@ -23,8 +23,8 @@ export function MemoryModeCard({ slug = "afsal-fathima" }: { slug?: string }) {
         <Badge className="bg-primary-soft text-primary">Memory Mode: Preview available</Badge>
       </div>
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <Button asChild><Link href={`/event/${slug}?mode=memory`}><Sparkles className="h-4 w-4" />Preview Memory Mode</Link></Button>
-        <Button variant="outline">Manage Memories</Button>
+        <Button asChild><Link href={`/event/${slug}/memories`}><Sparkles className="h-4 w-4" />Open Memory Album</Link></Button>
+        <Button asChild variant="outline"><Link href={`/event/${slug}?mode=memory`}>Quick preview</Link></Button>
       </div>
     </Card>
   );

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BlessingsWall } from "@/components/event/BlessingsWall";
 import { EventCountdown } from "@/components/event/EventCountdown";
+import { EventOpening } from "@/components/event/EventOpening";
 import { MemoryModePreview } from "@/components/event/MemoryModePreview";
 import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/BirthdayTemplateRenderer";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
@@ -100,14 +101,14 @@ export default function GuestEventPage() {
   if (!loaded) return <main className="phone-shell min-h-screen bg-background" aria-busy="true" />;
 
   if (!isMemoryMode && renderedEvent.eventType === "birthday") {
-    return <BirthdayTemplateRenderer event={renderedEvent} />;
+    return <EventOpening event={renderedEvent}><BirthdayTemplateRenderer event={renderedEvent} /></EventOpening>;
   }
 
   if (!isMemoryMode && isWeddingLike) {
-    return <WeddingTemplateRenderer event={renderedEvent} />;
+    return <EventOpening event={renderedEvent}><WeddingTemplateRenderer event={renderedEvent} /></EventOpening>;
   }
 
-  return (
+  const page = (
     <main className="phone-shell min-h-screen pb-20" style={{ background: `linear-gradient(180deg, ${visualStyle.background}, #fffdf9 55%)`, ...accentStyle }}>
       <MobileHeader action="search" />
       <Section className="space-y-4 pt-3">
@@ -188,4 +189,5 @@ export default function GuestEventPage() {
       <BottomNav type="guest" />
     </main>
   );
+  return isMemoryMode ? page : <EventOpening event={renderedEvent}>{page}</EventOpening>;
 }

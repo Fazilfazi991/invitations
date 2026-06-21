@@ -1,5 +1,6 @@
 import { normalizeEventType, type EventTheme, type EventType } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById, templateCategoryToEventType, templateMoodToTheme } from "@/lib/templates";
+import { getDefaultOpeningAnimation, type OpeningAnimation } from "@/lib/opening-animations";
 
 export type ScheduleDraftItem = {
   id: string;
@@ -51,6 +52,7 @@ export type EventDraft = {
   templateName: string;
   templateImage?: string;
   theme: EventTheme;
+  openingAnimation: OpeningAnimation;
   status: "draft" | "published";
   slug: string;
 };
@@ -121,6 +123,7 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     templateName: template.name,
     templateImage: template.previewImage,
     theme: templateMoodToTheme(template.style.mood),
+    openingAnimation: getDefaultOpeningAnimation(eventType),
     status: "draft",
     slug: generateSlug(title),
   };

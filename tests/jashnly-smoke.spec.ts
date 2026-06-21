@@ -85,6 +85,7 @@ test.describe("Jashnly smoke flow", () => {
 
     await expect(page.getByRole("heading", { name: "Pink Teddy Birthday" })).toBeVisible();
     await page.getByRole("button", { name: "Royal", exact: true }).click();
+    await page.getByRole("button", { name: /Celebration Pop/ }).click();
     await page.getByRole("button", { name: "Publish Event" }).click();
     await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByText("Daniel's 5th Birthday", { exact: true })).toBeVisible();
@@ -95,11 +96,16 @@ test.describe("Jashnly smoke flow", () => {
     await expect(page.getByText("Organizer only", { exact: true })).toBeVisible();
 
     await page.goto("/event/daniel-s-5th-birthday-2");
+    await expect(page.getByTestId("event-opening")).toBeVisible();
+    await page.getByRole("button", { name: "Open invitation" }).click();
+    await expect(page.getByTestId("event-opening")).toHaveCount(0);
     await expect(page.getByRole("heading", { name: /Daniel's/ })).toBeVisible();
     await expect(page.getByText("The Wedding of", { exact: true })).toHaveCount(0);
     await expect(page.getByText("May 24, 2027", { exact: true })).toBeVisible();
     await expect(page.locator("main").first()).toHaveCSS("background", /rgb\(255, 251, 255\)|rgb\(245, 236, 255\)/);
     await expect(page.getByRole("heading", { name: "Analytics preview" })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByTestId("event-opening")).toHaveCount(0);
 
     await page.goto("/event/daniel-s-5th-birthday-2/share");
     await expect(page.getByRole("heading", { name: "Event QR Code" })).toBeVisible();
@@ -109,6 +115,23 @@ test.describe("Jashnly smoke flow", () => {
     await expect(message).toHaveValue(/ജന്മദിന ആഘോഷത്തിലേക്ക്/);
     await expect(message).not.toHaveValue(/വിവാഹ/);
     await expect(message).not.toHaveValue(/�/);
+
+    await page.goto("/event/daniel-s-5th-birthday-2/memories");
+    await expect(page.getByRole("heading", { name: "Thank you for celebrating with us" })).toBeVisible();
+    await expect(page.getByTestId("event-opening")).toHaveCount(0);
+    await page.getByLabel("Guest name").fill("Maya");
+    await page.getByLabel("Photo caption").fill("Cake time!");
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "memory.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAEAQH/7Xq7WQAAAABJRU5ErkJggg==", "base64"),
+    });
+    await page.getByRole("button", { name: "Add to memories" }).click();
+    await expect(page.getByText("Photo added to the album.")).toBeVisible();
+    await expect(page.getByText("Maya", { exact: true })).toBeVisible();
+    await expect(page.getByText("Cake time!", { exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByText("Maya", { exact: true })).toBeVisible();
 
     await page.goto("/profile");
     await page.getByRole("button", { name: "Logout" }).click();

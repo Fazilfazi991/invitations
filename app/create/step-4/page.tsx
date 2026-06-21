@@ -16,6 +16,7 @@ import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 import { ensureUniqueSlug } from "@/lib/event-url";
 import { getThemeStyles, themeStyles } from "@/lib/themes";
 import { getDemoUser } from "@/lib/demo-auth";
+import { openingAnimations } from "@/lib/opening-animations";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { cn } from "@/lib/utils";
 
@@ -92,6 +93,24 @@ export default function StepFourPage() {
               <button key={themeId} onClick={() => setDraft((current) => ({ ...current, theme: themeId as keyof typeof themeStyles }))} className={cn("rounded-2xl border bg-white p-3 text-left shadow-card", draft.theme === themeId && "ring-2 ring-primary/15")} style={{ borderColor: draft.theme === themeId ? theme.primary : theme.border }}>
                 <div className="mb-3 h-24 rounded-xl" style={{ background: `linear-gradient(135deg, ${theme.soft}, ${theme.background})` }} />
                 <div className="flex items-center justify-between"><span className="font-semibold">{theme.name}</span>{draft.theme === themeId && <Check className="h-5 w-5" style={{ color: theme.primary }} />}</div>
+              </button>
+            ))}
+          </div>
+          <div>
+            <h2 className="font-serif text-3xl font-bold">Opening Experience</h2>
+            <p className="mt-2 text-muted">Choose the first moment guests see. It plays once per browser session.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {openingAnimations.map((animation) => (
+              <button
+                key={animation.id}
+                type="button"
+                onClick={() => setDraft((current) => ({ ...current, openingAnimation: animation.id }))}
+                className={cn("rounded-2xl border bg-white p-4 text-left shadow-card", draft.openingAnimation === animation.id && "ring-2 ring-primary/15")}
+                style={{ borderColor: draft.openingAnimation === animation.id ? selectedTheme.primary : selectedTheme.border }}
+              >
+                <span className="font-semibold">{animation.name}</span>
+                <span className="mt-1 block text-xs leading-5 text-muted">{animation.description}</span>
               </button>
             ))}
           </div>
