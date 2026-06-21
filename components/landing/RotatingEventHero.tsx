@@ -125,21 +125,18 @@ export function RotatingEventHero() {
         </header>
 
         <div className="mx-auto max-w-[460px] px-5 pb-8 pt-5">
-          <span className="inline-flex h-9 items-center gap-2 rounded-full bg-primary-soft px-3.5 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-            <Sparkles className="h-4 w-4" /> Celebrate beautifully
-          </span>
-          <h1 className="mt-4 font-serif text-[42px] font-bold leading-[1.01] min-[390px]:text-[46px]">
-            <span className="block">One link for every</span>
-            <span className="block"><span className="text-primary">special</span> occasion</span>
+          <h1 className="font-serif text-[clamp(31px,8.7vw,42px)] font-bold leading-[1.02]">
+            <span className="block whitespace-nowrap">One link for every</span>
+            <span className="block whitespace-nowrap"><span className="text-primary">special</span> occasion</span>
           </h1>
-          <p className="mt-3 max-w-[410px] text-base leading-6 text-muted">
-            Create beautiful event pages in minutes. Invitations, RSVP, memories &amp; more.
+          <p className="mt-3 whitespace-nowrap text-[clamp(13px,3.6vw,15px)] leading-6 text-muted">
+            Beautiful invitations, RSVPs and memories—all in one place.
           </p>
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <Button className="h-[52px] px-2 text-[13px] min-[390px]:text-sm" asChild>
+          <div className="mt-5 grid grid-cols-2 items-stretch gap-2.5">
+            <Button className="h-12 w-full px-2 text-xs min-[390px]:text-[13px]" asChild>
               <Link href="/categories">Create Your Event</Link>
             </Button>
-            <Button className="h-[52px] px-2 text-[13px] min-[390px]:text-sm" variant="outline" asChild>
+            <Button className="h-12 w-full px-2 text-xs min-[390px]:text-[13px]" variant="outline" asChild>
               <Link href="#how-it-works"><Play className="h-4 w-4" />See How It Works</Link>
             </Button>
           </div>
@@ -153,7 +150,7 @@ export function RotatingEventHero() {
                 exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
                 transition={{ duration: reducedMotion ? 0 : 0.6, ease: [0.22, 1, 0.36, 1] }}
               >
-                <HeroImageCard category={selected} fluid className="aspect-[7/9] w-full max-w-[420px] rounded-[1.5rem]" />
+                <HeroImageCard category={selected} fluid className="mx-auto aspect-[7/9] w-[90%] max-w-[378px] rounded-[1.5rem]" />
               </motion.div>
             </AnimatePresence>
           </div>
