@@ -11,7 +11,7 @@ import { categories, featurePills } from "@/lib/mock-data";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-x-hidden">
+    <main className="min-h-screen overflow-x-hidden" style={{ zoom: 1.2 }}>
       <RotatingEventHero />
       <Section>
         <h2 className="font-serif text-3xl font-bold">For every kind of celebration</h2>
