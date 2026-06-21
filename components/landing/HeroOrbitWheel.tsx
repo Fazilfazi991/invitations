@@ -1,19 +1,19 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { HeroImageCard } from "@/components/landing/HeroImageCard";
 import { getHeroIcon } from "@/components/landing/HeroEventTabs";
 import type { HeroCategory } from "@/lib/hero-events";
 import { cn } from "@/lib/utils";
 
-const spring = { type: "spring" as const, stiffness: 140, damping: 22 };
+const premiumTransition = { duration: 0.85, ease: [0.22, 1, 0.36, 1] as const };
 const orbitDots = Array.from({ length: 18 }, (_, index) => {
   const angle = (index / 18) * Math.PI * 2;
   return {
-    x: (Math.cos(angle) * 230).toFixed(3),
-    y: (Math.sin(angle) * 230).toFixed(3),
+    x: (Math.cos(angle) * 214).toFixed(3),
+    y: (Math.sin(angle) * 214).toFixed(3),
   };
 });
 
@@ -57,11 +57,13 @@ type HeroOrbitWheelProps = {
 
 export function HeroOrbitWheel({ events, selectedIndex, muted, onSelect, onPrevious, onNext, onToggleMute }: HeroOrbitWheelProps) {
   const total = events.length;
+  const reducedMotion = useReducedMotion();
+  const transition = reducedMotion ? { duration: 0 } : premiumTransition;
 
   return (
     <>
-      <div className="relative mx-auto hidden w-full overflow-hidden lg:block" style={{ maxWidth: 650, height: 560 }}>
-        <div className="absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-light/60 bg-[radial-gradient(circle,rgba(208,184,216,0.45),rgba(254,253,252,0.04)_60%,transparent_72%)] shadow-[0_0_70px_rgba(108,23,133,0.10)]" />
+      <div className="relative mx-auto hidden w-full overflow-hidden lg:block" style={{ maxWidth: 620, height: 520 }}>
+        <div className="absolute left-1/2 top-1/2 h-[448px] w-[448px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-light/60 bg-[radial-gradient(circle,rgba(208,184,216,0.38),rgba(254,253,252,0.04)_60%,transparent_72%)] shadow-[0_0_70px_rgba(108,23,133,0.10)]" />
         <div className="absolute left-1/2 top-1/2 h-[350px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/10" />
         <div className="absolute left-1/2 top-1/2 h-[250px] w-[250px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-brand-lavender/35" />
         {orbitDots.map((dot, index) => {
@@ -77,15 +79,15 @@ export function HeroOrbitWheel({ events, selectedIndex, muted, onSelect, onPrevi
           const Icon = getHeroIcon(event.icon);
           const angle = ((index - selectedIndex) / total) * Math.PI * 2 - Math.PI / 2;
           const active = index === selectedIndex;
-          const x = Math.cos(angle) * 220;
-          const y = Math.sin(angle) * 220;
+          const x = Math.cos(angle) * 210;
+          const y = Math.sin(angle) * 210;
           return (
             <motion.button
               key={event.id}
               onClick={() => onSelect(index)}
               className="absolute left-1/2 top-1/2 z-30"
               animate={{ x: x - (active ? 39 : 27), y: y - (active ? 39 : 27), scale: active ? 1 : 0.92 }}
-              transition={spring}
+              transition={transition}
             >
               <span className={cn("flex flex-col items-center justify-center rounded-full border bg-white text-[9px] font-semibold shadow-card", active ? "h-[78px] w-[78px] border-primary bg-primary text-white ring-8 ring-primary/15" : "h-[54px] w-[54px] border-border text-muted")}>
                 <Icon className="mb-1 h-5 w-5" />
@@ -103,7 +105,7 @@ export function HeroOrbitWheel({ events, selectedIndex, muted, onSelect, onPrevi
                 key={event.id}
                 className="absolute"
                 animate={{ x: pose.x - 140, y: pose.y - 180, scale: pose.scale, rotate: pose.rotate, opacity: pose.opacity, zIndex: pose.zIndex }}
-                transition={spring}
+                transition={transition}
                 style={{ pointerEvents: relative === 0 ? "auto" : "none" }}
               >
                 <HeroImageCard category={event} />
@@ -125,7 +127,7 @@ export function HeroOrbitWheel({ events, selectedIndex, muted, onSelect, onPrevi
                 key={event.id}
                 className="absolute"
                 animate={{ x: pose.x - 140, y: pose.y - 180, scale: pose.scale, rotate: pose.rotate, opacity: pose.opacity, zIndex: pose.zIndex }}
-                transition={spring}
+                transition={transition}
                 style={{ pointerEvents: relative === 0 ? "auto" : "none" }}
               >
                 <HeroImageCard category={event} />

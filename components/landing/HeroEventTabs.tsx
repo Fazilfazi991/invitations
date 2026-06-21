@@ -20,7 +20,7 @@ export function getHeroIcon(icon: string) {
 
 export function HeroEventTabs({ events, selectedIndex, onSelect, compact = false }: { events: HeroCategory[]; selectedIndex: number; onSelect: (index: number) => void; compact?: boolean }) {
   return (
-    <div className="relative max-w-full" data-hero-tabs={compact ? "mobile" : "desktop"}>
+    <div className="relative max-w-full" data-hero-tabs={compact ? "mobile" : "desktop"} role="tablist" aria-label="Celebration categories">
       {compact && (
         <>
           <span className="pointer-events-none absolute left-1 top-1/2 z-10 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-muted shadow-card">
@@ -39,7 +39,10 @@ export function HeroEventTabs({ events, selectedIndex, onSelect, compact = false
             <button
               key={event.id}
               onClick={() => onSelect(index)}
-              className={cn("relative flex flex-col items-center gap-0.5 rounded-lg font-semibold leading-tight transition", compact ? "min-w-[4.8rem] px-1.5 py-1.5 text-[11px]" : "min-w-[5.25rem] px-2 py-1.5 text-[10px] md:min-w-[6rem] md:text-[11px]", active ? "bg-primary-soft text-primary shadow-card" : "text-muted hover:bg-primary-soft/50")}
+              role="tab"
+              aria-selected={active}
+              aria-label={`Show ${event.label} invitation`}
+              className={cn("relative flex flex-col items-center gap-0.5 rounded-lg font-semibold leading-tight transition", compact ? "min-w-[4.8rem] px-1.5 py-1.5 text-[11px]" : "min-w-[4.7rem] px-1.5 py-1.5 text-[10px] xl:min-w-[5.4rem] xl:px-2 xl:text-[11px]", active ? "bg-primary-soft text-primary shadow-card" : "text-muted hover:bg-primary-soft/50")}
             >
               <Icon className={cn(compact ? "h-[17px] w-[17px]" : "h-4 w-4 md:h-[18px] md:w-[18px]")} />
               {event.label}

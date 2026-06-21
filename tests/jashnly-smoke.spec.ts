@@ -10,11 +10,13 @@ test.describe("occazn smoke flow", () => {
     await expect(page.getByRole("heading", { name: "One link for every special occasion" })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 
-    const header = page.locator("header");
-    await header.getByRole("button", { name: "Birthday", exact: true }).click();
-    await expect(page.getByText("A joyful birthday page full of smiles.", { exact: true })).toBeVisible();
-    await header.getByRole("button", { name: "Wedding", exact: true }).click();
-    await expect(page.getByText("A romantic invitation for your special day.", { exact: true })).toBeVisible();
+    const desktopTabs = page.locator('[data-hero-tabs="desktop"]');
+    const birthdayTab = desktopTabs.getByRole("tab", { name: "Show Birthday invitation" });
+    await birthdayTab.click();
+    await expect(birthdayTab).toHaveAttribute("aria-selected", "true");
+    const weddingTab = desktopTabs.getByRole("tab", { name: "Show Wedding invitation" });
+    await weddingTab.click();
+    await expect(weddingTab).toHaveAttribute("aria-selected", "true");
 
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/login\?next=%2Fdashboard/);
