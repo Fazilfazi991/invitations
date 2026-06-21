@@ -24,7 +24,7 @@ export function TemplateShell({ children, background = "#FFFDF9", className }: {
 export function BrandBar({ cta, primary }: { cta?: string; primary: string }) {
   return (
     <div className="flex items-center justify-between px-5 py-4">
-      <div className="font-serif text-3xl font-bold" style={{ color: primary }}>Jashnly<span className="align-top text-sm text-gold">&hearts;</span></div>
+      <div className="font-serif text-3xl font-bold" style={{ color: primary }}>occazn<span className="align-top text-sm text-brand-violet">.</span></div>
       <div className="flex items-center gap-2">
         {cta && <Button size="sm" style={{ backgroundColor: primary }}>{cta}</Button>}
         <span className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white/80">☰</span>
@@ -159,7 +159,7 @@ export function TemplateShare({ event, primary, title = "Share the Joy" }: { eve
 }
 
 export function TemplateFooter({ text, primary }: { text: string; primary: string }) {
-  return <footer className="px-5 py-6 text-center text-sm text-muted"><Heart className="mx-auto mb-2 h-4 w-4" style={{ color: primary }} />{text}<br /><span className="font-semibold" style={{ color: primary }}>Jashnly</span></footer>;
+  return <footer className="px-5 py-6 text-center text-sm text-muted"><Heart className="mx-auto mb-2 h-4 w-4" style={{ color: primary }} />{text}<br /><span className="font-semibold" style={{ color: primary }}>occazn</span></footer>;
 }
 
 export function SendIcon() {

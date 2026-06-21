@@ -12,7 +12,7 @@ export type Blessing = {
 export function BlessingCard({ blessing }: { blessing: Blessing }) {
   return (
     <Card className="relative overflow-hidden p-4">
-      <Sparkles className="absolute right-4 top-4 h-5 w-5 text-gold/70" />
+      <Sparkles className="absolute right-4 top-4 h-5 w-5 text-brand-violet/70" />
       <div className="flex gap-3">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-soft">
           <Heart className="h-5 w-5 text-primary" />

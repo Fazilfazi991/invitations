@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { brand } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "Jashnly - One beautiful link for every celebration",
-  description: "Create and share premium mobile-first event pages for Indian celebrations.",
+  title: brand.name,
+  description: brand.tagline,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
-        {children}
+      <body className="font-sans antialiased">
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

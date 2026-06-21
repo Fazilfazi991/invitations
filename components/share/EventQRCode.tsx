@@ -24,7 +24,7 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
     if (navigator.share) {
       await navigator.share({
         title,
-        text: "Open invitation, location and RSVP on Jashnly.",
+        text: "Open invitation, location and RSVP on occazn.",
         url,
       });
       return;
@@ -40,7 +40,7 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `jashnly-${slug}-qr.svg`;
+    link.download = `occazn-${slug}-qr.svg`;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -76,7 +76,7 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
               </Button>
             </div>
             <div className="rounded-3xl border p-6 text-center" style={{ borderColor: theme.border, background: `linear-gradient(135deg, ${theme.soft}, ${theme.background})` }}>
-              <p className="text-sm font-bold uppercase tracking-[0.24em] text-gold">You're invited</p>
+              <p className="text-sm font-bold uppercase tracking-[0.24em] text-brand-violet">You're invited</p>
               <h3 className="mt-3 font-serif text-3xl font-bold" style={{ color: theme.primary }}>{title}</h3>
               <p className="mt-2 text-sm text-muted">{date} - {location}</p>
               <div className="mx-auto mt-5 inline-block rounded-2xl bg-white p-4">

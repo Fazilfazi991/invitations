@@ -120,5 +120,5 @@ export function getBirthdayCountdown(date?: string, time?: string) {
 
 export function buildBirthdayShareText(event: Partial<BirthdayEventData>) {
   const url = getEventUrl(event.slug || "birthday");
-  return encodeURIComponent(`Join us for ${getBirthdayTitle(event)} on Jashnly.\n${url}`);
+  return encodeURIComponent(`Join us for ${getBirthdayTitle(event)} on occazn.\n${url}`);
 }

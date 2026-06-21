@@ -8,18 +8,16 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { EventCompletionChecklist } from "@/components/dashboard/EventCompletionChecklist";
 import { EventCard, FooterTrust, Section } from "@/components/shared";
-import { dashboardEvents } from "@/lib/mock-data";
-import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import type { EventDraft } from "@/lib/event-draft";
 import { formatEventDate } from "@/lib/date-utils";
 import { getDefaultTemplateForType } from "@/lib/templates";
-import { getDemoUser } from "@/lib/demo-auth";
+import { loadOrganizerEvents } from "@/lib/event-repository";
 
 export default function DashboardPage() {
   const [published, setPublished] = useState<EventDraft[]>([]);
 
   useEffect(() => {
-    const userId = getDemoUser()?.id;
-    setPublished(loadPublishedEvents().filter((event) => !event.ownerId || event.ownerId === userId));
+    loadOrganizerEvents().then(setPublished);
   }, []);
 
   const createdEvents = published.map((event) => ({
@@ -40,7 +38,13 @@ export default function DashboardPage() {
         <Button asChild className="mt-5"><Link href="/categories"><Plus className="h-4 w-4" />Create New Event</Link></Button>
         <div className="mt-6 inline-flex rounded-xl border border-border bg-white p-1 shadow-card"><span className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">Upcoming</span><span className="px-4 py-2 text-sm font-semibold text-muted">Past</span></div>
         <div className="mt-5 space-y-4">
-          {[...createdEvents, ...dashboardEvents].map((event) => <EventCard key={event.id} event={event} />)}
+          {createdEvents.length > 0 ? (
+            createdEvents.map((event) => <EventCard key={event.id} event={event} />)
+          ) : (
+            <p className="rounded-2xl border border-border bg-white p-5 text-sm text-muted shadow-card">
+              No events yet. Create your first celebration to see it here.
+            </p>
+          )}
         </div>
         <div className="mt-5"><EventCompletionChecklist event={published[0]} compact /></div>
       </Section>

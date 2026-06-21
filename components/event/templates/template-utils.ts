@@ -55,7 +55,7 @@ export function getTemplateContacts(event: Partial<WeddingEventData>) {
   return [
     { id: "bride-family", role: "Bride's Family", name: "Fathima's Family", phone: "+91 98765 43210" },
     { id: "groom-family", role: "Groom's Family", name: "Afsal's Family", phone: "+91 98765 43211" },
-    { id: "manager", role: "Event Manager", name: "Jashnly Team", phone: "+91 73560 12345" },
+    { id: "manager", role: "Event Manager", name: "occazn Team", phone: "+91 73560 12345" },
   ];
 }
 
@@ -75,5 +75,5 @@ export function getCountdownCopy(date?: string) {
 export function buildShareText(event: Partial<WeddingEventData>) {
   const { coupleName } = getCoupleNames(event);
   const url = getEventUrl(event.slug || "afsal-fathima");
-  return encodeURIComponent(`Join us to celebrate ${coupleName} on Jashnly.\n${url}`);
+  return encodeURIComponent(`Join us to celebrate ${coupleName} on occazn.\n${url}`);
 }

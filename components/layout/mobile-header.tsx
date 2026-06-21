@@ -1,21 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Menu, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getDemoUser } from "@/lib/demo-auth";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export function MobileHeader({ action = "create", className }: { action?: "create" | "settings" | "avatar" | "search"; className?: string }) {
-  const [initial, setInitial] = useState("A");
-  useEffect(() => setInitial(getDemoUser()?.name?.charAt(0).toUpperCase() || "A"), []);
+  const { user } = useAuth();
+  const initial = user?.name?.charAt(0).toUpperCase() || "A";
   return (
     <header className={cn("sticky top-0 z-30 flex h-20 items-center justify-between bg-background/90 px-5 backdrop-blur", className)}>
       <Button variant="ghost" size="icon" aria-label="Open menu"><Menu className="h-6 w-6" /></Button>
-      <Link href="/" className="font-serif text-4xl font-bold text-primary">
-        Jashnly<span className="align-top text-lg text-gold">♥</span>
-      </Link>
+      <BrandLogo imageClassName="h-12" />
       {action === "create" ? (
         <Button asChild size="sm"><Link href="/categories">Create</Link></Button>
       ) : action === "settings" ? (

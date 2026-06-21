@@ -13,14 +13,15 @@ import { ShareActions } from "@/components/share/ShareActions";
 import { WhatsAppMessageGenerator } from "@/components/share/WhatsAppMessageGenerator";
 import { Section } from "@/components/shared";
 import { eventUrl, sampleEvent } from "@/lib/mock-data";
-import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import type { EventDraft } from "@/lib/event-draft";
+import { loadPublicEvent } from "@/lib/event-repository";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getThemeStyles } from "@/lib/themes";
 
 export default function SharePage() {
   const params = useParams<{ slug: string }>();
   const [event, setEvent] = useState<EventDraft | null>(null);
-  useEffect(() => setEvent(loadPublishedEvents().find((item) => item.slug === params.slug) ?? null), [params.slug]);
+  useEffect(() => { loadPublicEvent(params.slug).then(setEvent); }, [params.slug]);
   const title = event?.title ?? sampleEvent.title;
   const date = event ? formatEventDate(event.date) : sampleEvent.date;
   const time = event ? formatEventTime(event.time) : sampleEvent.time;

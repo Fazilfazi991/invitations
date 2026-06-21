@@ -1,6 +1,8 @@
-# Jashnly
+# occazn
 
-Jashnly is a mobile-first event invitation MVP built around one shareable link for weddings, birthdays, housewarmings, naming ceremonies, religious events, receptions, business openings, and custom celebrations.
+occazn is a mobile-first event invitation MVP built around one shareable link for weddings, birthdays, housewarmings, naming ceremonies, religious events, receptions, business openings, and custom celebrations.
+
+Tagline: One beautiful link for every celebration.
 
 The current release includes:
 
@@ -11,8 +13,9 @@ The current release includes:
 - Date, time, venue, schedule, countdown, RSVP, contacts, gallery, blessings, QR, and WhatsApp sharing
 - Organizer dashboard with event-aware checklist and demo analytics
 - Public guest invitation and subpages
-- Post-event memory albums and browser-local guest photo contributions
-- Browser-local demo registration, login, session, and protected organizer routes
+- Post-event memory albums and Supabase Storage-backed guest photo contributions
+- Supabase registration, login, session, and protected organizer routes
+- Supabase Postgres persistence, Row Level Security, and Storage-backed guest photos
 - Playwright end-to-end smoke coverage
 
 ## Tech Stack
@@ -26,7 +29,8 @@ The current release includes:
 - framer-motion
 - qrcode.react
 - Playwright
-- localStorage and sessionStorage demo persistence
+- Supabase Auth, Postgres, Storage, and Row Level Security
+- localStorage cache and sessionStorage opening-animation state
 
 ## Routes
 
@@ -47,7 +51,7 @@ The current release includes:
 - `/event/[slug]/memories`
 - `/event/[slug]?mode=memory`
 
-### Demo-auth protected organizer routes
+### Auth-protected organizer routes
 
 - `/create/step-1`
 - `/create/step-2`
@@ -57,27 +61,54 @@ The current release includes:
 - `/dashboard/[id]`
 - `/profile`
 
-## Demo Authentication
+## Supabase Setup
 
-Registration and login are intentionally browser-local for this MVP:
+1. Copy the environment template:
 
-- User and session records are stored in localStorage.
-- Organizer pages redirect unauthenticated visitors to `/login`.
-- Public event pages remain accessible without login.
-- Logout clears the demo session.
+```bash
+copy .env.example .env.local
+```
 
-This is product-flow separation, not production security. Real authentication, secure password handling, server-side authorization, account recovery, and multi-device sessions require a backend.
+2. Set:
 
-## Storage Limitations
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+```
 
-Jashnly currently has no backend.
+3. Apply [`supabase/migrations/202606210001_jashnly_mvp.sql`](./supabase/migrations/202606210001_jashnly_mvp.sql) using the Supabase SQL Editor, or link the Supabase CLI and run `supabase db push`.
 
-- Drafts, published events, demo users, and guest memories exist only in the current browser.
-- Clearing browser storage removes this data.
-- Data does not synchronize across browsers or devices.
-- Guest photo uploads are stored as small data URLs, limited to 1 MB each and eight photos per event.
-- File-name placeholders from create-flow uploads are not durable media uploads.
-- Analytics and RSVP totals are demo data rather than server-collected metrics.
+4. In Supabase Auth URL configuration, add local and deployed login URLs as allowed redirect URLs.
+
+The migration creates:
+
+- `profiles`
+- `event_drafts`
+- `events`
+- `guest_memories`
+- RLS policies for owners and public published events
+- Public `guest-memories` Storage bucket with constrained upload policies
+- New-user profile trigger
+
+Only the anon/publishable key belongs in `NEXT_PUBLIC_*`. Never expose a service-role key.
+
+## Authentication and Persistence
+
+- Registration, login, email confirmation, sessions, and logout use Supabase Auth.
+- Middleware and client guards protect organizer routes.
+- Drafts are cached locally for responsive editing and queued to `event_drafts`.
+- Published events are stored in `events`; public pages read only published records.
+- Guest photos upload to Supabase Storage and metadata is stored in `guest_memories`.
+- RLS restricts organizer data to `auth.uid()` while allowing public invitation reads.
+- The old browser-local auth adapter is used only when Playwright builds with `NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE=true`.
+
+## Current Limitations
+
+- The migration is applied to the current Supabase project; it must also be applied to every new environment before live persistence is available there.
+- Drafts and published events retain a local cache as an offline/demo fallback.
+- Existing legacy localStorage events are not automatically imported into Supabase.
+- Analytics and RSVP totals remain demo data rather than server-collected metrics.
+- Guest uploads are public-by-link and auto-approved in this MVP; production moderation is still required.
 
 ## Run Locally
 
@@ -113,12 +144,12 @@ Optional interactive runner:
 npm run test:e2e:ui
 ```
 
-The smoke test covers demo auth, protected routes, landing carousel behavior, birthday creation and publishing, collision-safe slugs, theme persistence, opening animation session behavior, organizer/public separation, QR/share data, Malayalam messaging, memory albums, guest uploads, and logout.
+The smoke test uses an isolated local adapter and covers auth flow, protected routes, landing carousel behavior, birthday creation and publishing, collision-safe slugs, theme persistence, opening animation session behavior, organizer/public separation, QR/share data, Malayalam messaging, memory albums, guest uploads, and logout.
 
 ## Known Remaining Issues
 
-- Demo authentication and authorization are not suitable for production.
-- Media uploads need object storage, moderation, and server metadata.
+- The initial Supabase migration must be deployed to each environment.
+- Guest media needs moderation, abuse controls, and lifecycle policies.
 - Instagram and Facebook actions remain visual placeholders.
 - Analytics and RSVP persistence need backend event tracking.
 - No lint npm script is configured yet.

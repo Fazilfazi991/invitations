@@ -6,7 +6,8 @@ import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { MemoryModePreview } from "@/components/event/MemoryModePreview";
 import { Section } from "@/components/shared";
-import { getDefaultDraft, loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import { getDefaultDraft, type EventDraft } from "@/lib/event-draft";
+import { loadPublicEvent } from "@/lib/event-repository";
 
 export default function MemoriesPage() {
   const params = useParams<{ slug: string }>();
@@ -14,8 +15,10 @@ export default function MemoriesPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setEvent(loadPublishedEvents().find((item) => item.slug === params.slug) ?? null);
-    setLoaded(true);
+    loadPublicEvent(params.slug).then((event) => {
+      setEvent(event);
+      setLoaded(true);
+    });
   }, [params.slug]);
 
   if (!loaded) return <main className="phone-shell min-h-screen bg-background" aria-busy="true" />;

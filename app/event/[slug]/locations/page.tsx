@@ -7,12 +7,13 @@ import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { LocationCard, Section } from "@/components/shared";
 import { locations } from "@/lib/mock-data";
-import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import type { EventDraft } from "@/lib/event-draft";
+import { loadPublicEvent } from "@/lib/event-repository";
 
 export default function LocationsPage() {
   const params = useParams<{ slug: string }>();
   const [event, setEvent] = useState<EventDraft | null>(null);
-  useEffect(() => setEvent(loadPublishedEvents().find((item) => item.slug === params.slug) ?? null), [params.slug]);
+  useEffect(() => { loadPublicEvent(params.slug).then(setEvent); }, [params.slug]);
   const eventAddress = event ? `${event.venueName}, ${event.address}${event.address.toLowerCase().includes(event.city.toLowerCase()) ? "" : `, ${event.city}`}` : "";
   const eventLocations = event ? [{ title: "Event Venue", address: eventAddress, detail: event.eventType }] : locations;
   return (

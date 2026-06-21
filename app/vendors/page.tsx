@@ -12,7 +12,7 @@ export default function VendorsPage() {
       <MobileHeader action="search" />
       <Section>
         <h1 className="font-serif text-5xl font-bold">Trusted Vendors</h1>
-        <p className="mt-2 text-muted">Coming soon to Jashnly.</p>
+        <p className="mt-2 text-muted">Coming soon to occazn.</p>
         <div className="mt-5 flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 shadow-card">
           <Search className="h-5 w-5 text-muted" />
           <span className="text-sm text-muted">Search photographers, halls, decor...</span>
@@ -33,7 +33,7 @@ export default function VendorsPage() {
                   </div>
                   <Badge>Coming soon</Badge>
                 </div>
-                <p className="mt-3 flex items-center gap-1 text-sm font-semibold text-gold">
+                <p className="mt-3 flex items-center gap-1 text-sm font-semibold text-brand-violet">
                   <Star className="h-4 w-4 fill-current" />{vendor.rating}
                 </p>
               </div>

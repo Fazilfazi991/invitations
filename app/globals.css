@@ -3,7 +3,16 @@
 @tailwind utilities;
 
 :root {
-  background: #fffdf9;
+  --brand-primary: #6C1785;
+  --brand-deep: #500D68;
+  --brand-violet: #7B3892;
+  --brand-lavender: #A477B4;
+  --brand-light-lavender: #D0B8D8;
+  --brand-white: #FFFFFF;
+  --brand-off-white: #FEFDFC;
+  --font-inter: Inter, system-ui, sans-serif;
+  --font-playfair: "Playfair Display", Georgia, serif;
+  background: var(--brand-off-white);
   color: #1f2937;
   font-size: 75%;
 }
@@ -22,8 +31,8 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at top right, rgba(255, 241, 244, 0.95), transparent 34rem),
-    linear-gradient(180deg, #fffdf9 0%, #fff9f3 100%);
+    radial-gradient(circle at top right, rgba(208, 184, 216, 0.55), transparent 34rem),
+    linear-gradient(180deg, #fefdfc 0%, #ffffff 100%);
 }
 
 button,
@@ -37,15 +46,15 @@ textarea {
 .phone-shell {
   width: min(100%, 980px);
   margin-inline: auto;
-  background: rgba(255, 253, 249, 0.92);
+  background: rgba(254, 253, 252, 0.92);
 }
 
 .floral {
   background:
-    radial-gradient(circle at 12% 12%, rgba(255, 208, 214, 0.52) 0 8px, transparent 9px),
-    radial-gradient(circle at 18% 17%, rgba(214, 168, 79, 0.18) 0 5px, transparent 6px),
-    radial-gradient(circle at 85% 14%, rgba(255, 208, 214, 0.45) 0 10px, transparent 11px),
-    linear-gradient(135deg, #fff8ef, #fffdf9 55%, #fff1f4);
+    radial-gradient(circle at 12% 12%, rgba(208, 184, 216, 0.58) 0 8px, transparent 9px),
+    radial-gradient(circle at 18% 17%, rgba(164, 119, 180, 0.18) 0 5px, transparent 6px),
+    radial-gradient(circle at 85% 14%, rgba(208, 184, 216, 0.45) 0 10px, transparent 11px),
+    linear-gradient(135deg, #ffffff, #fefdfc 55%, #f5eff8);
 }
 
 .map-bg {

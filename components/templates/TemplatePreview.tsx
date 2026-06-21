@@ -9,7 +9,7 @@ export function TemplatePreview({ template, className, compact = false }: { temp
   const background = `linear-gradient(135deg, ${template.style.background}, #fff 52%, ${template.style.secondary}33)`;
 
   return (
-    <div className={cn("relative overflow-hidden rounded-[1.5rem] border border-[#F3D8DE] bg-white", compact ? "h-32" : "aspect-[4/3]", className)} style={{ background }}>
+    <div className={cn("relative overflow-hidden rounded-[1.5rem] border border-brand-light bg-white", compact ? "h-32" : "aspect-[4/3]", className)} style={{ background }}>
       {!failed && template.previewImage ? (
         <img
           src={template.previewImage}

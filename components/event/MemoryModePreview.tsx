@@ -23,7 +23,7 @@ export function MemoryModePreview({ event }: { event?: EventDraft }) {
   const heroImage = event?.coverImage || event?.templateImage || sampleEvent.coupleImage;
   const [guestMemories, setGuestMemories] = useState<GuestMemory[]>([]);
 
-  useEffect(() => setGuestMemories(loadGuestMemories(slug)), [slug]);
+  useEffect(() => { loadGuestMemories(slug).then(setGuestMemories); }, [slug]);
 
   return (
     <div className="space-y-5">

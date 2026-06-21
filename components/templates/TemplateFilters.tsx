@@ -29,7 +29,7 @@ export function TemplateFilters({
           key={option.value}
           type="button"
           onClick={() => onSelect(option.value)}
-          className={cn("h-11 shrink-0 rounded-full border border-[#F3D8DE] bg-white px-6 text-sm font-semibold text-[#6B7280] transition hover:bg-[#FFF1F4]", selected === option.value && "border-[#D94F70] bg-[#D94F70] text-white shadow-sm hover:bg-[#D94F70]")}
+          className={cn("h-11 shrink-0 rounded-full border border-brand-light bg-white px-6 text-sm font-semibold text-[#6B7280] transition hover:bg-primary-soft", selected === option.value && "border-brand-primary bg-brand-primary text-white shadow-sm hover:bg-brand-violet")}
         >
           {option.label}
         </button>

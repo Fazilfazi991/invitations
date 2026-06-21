@@ -19,9 +19,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npm run start -- -p 3000",
+    command: "cross-env NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE=true npm run start -- -p 3000",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: true,
-    timeout: 300_000,
+    timeout: 120_000,
   },
 });

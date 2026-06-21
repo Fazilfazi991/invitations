@@ -83,7 +83,7 @@ export function generateSlug(title: string) {
 
 export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
   const typedDefaults = defaultsByType[eventType];
-  const title = typedDefaults.title ?? "Jashnly Event";
+  const title = typedDefaults.title ?? "occazn Event";
   const template = getDefaultTemplateForType(eventType);
   const defaultContactName = typedDefaults.hostName || typedDefaults.primaryName || "Event Host";
   return {
@@ -146,7 +146,7 @@ export function withTemplateMetadata(draft: EventDraft, templateId?: string | nu
   };
 }
 
-function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
+export function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
   const storedTemplate = getTemplateById(value.templateId);
   const eventType = value.eventType
     ? normalizeEventType(value.eventType)

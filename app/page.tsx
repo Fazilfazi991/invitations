@@ -23,7 +23,7 @@ export default function HomePage() {
       </Section>
       <Section>
         <Card className="p-5">
-          <h2 className="text-center font-serif text-3xl font-bold">How Jashnly works</h2>
+          <h2 className="text-center font-serif text-3xl font-bold">How occazn works</h2>
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
             {["Create", "Customize", "Share", "Celebrate"].map((step, index) => (
               <div key={step} className="text-center">

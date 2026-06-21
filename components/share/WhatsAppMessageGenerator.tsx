@@ -171,7 +171,7 @@ export function WhatsAppMessageGenerator({
       </div>
       {!compact && (
         <p className="mt-4 flex items-center gap-2 text-xs text-muted">
-          <Sparkles className="h-4 w-4 text-gold" /> Tip: personalize the first line before sending to family groups.
+          <Sparkles className="h-4 w-4 text-brand-violet" /> Tip: personalize the first line before sending to family groups.
         </p>
       )}
     </Card>

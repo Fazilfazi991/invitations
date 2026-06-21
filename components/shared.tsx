@@ -122,14 +122,14 @@ export function QRCodeCard() {
   return <Card className="p-5 text-center"><div className="mx-auto grid h-36 w-36 place-items-center rounded-2xl border border-border bg-white"><QrCode className="h-28 w-28 text-foreground" /></div><p className="mt-3 text-sm text-muted">Scan to share</p><Button variant="outline" className="mt-4">Download QR</Button></Card>;
 }
 
-export function ShareCard({ title = sampleEvent.title, url = "https://jashnly.com/event/afsal-fathima" }: { title?: string; url?: string }) {
+export function ShareCard({ title = sampleEvent.title, url = "https://occazn.com/event/afsal-fathima" }: { title?: string; url?: string }) {
     return <Card className="space-y-4 p-5"><div className="flex items-center gap-3"><Share2 className="h-6 w-6 text-primary" /><h3 className="font-serif text-2xl font-bold">Share the Joy</h3></div><div className="flex gap-2"><Button asChild className="flex-1"><a href={`https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`} target="_blank" rel="noreferrer">WhatsApp</a></Button><Button variant="outline" className="flex-1" onClick={() => navigator.clipboard.writeText(url)}>Copy</Button></div><div className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm"><span className="min-w-0 flex-1 truncate">{url}</span><Copy className="h-4 w-4 text-primary" /></div></Card>;
 }
 
 export function GuestEventHero() {
   return (
     <Card className="floral overflow-hidden p-5 text-center">
-      <p className="text-xs font-bold uppercase tracking-[0.24em] text-gold">The Wedding Of</p>
+      <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-violet">The Wedding Of</p>
       <h1 className="mt-2 font-serif text-5xl font-bold text-primary">{sampleEvent.couple}</h1>
       <img src={sampleEvent.coupleImage} alt={sampleEvent.couple} className="mx-auto mt-5 h-36 w-36 rounded-full border-4 border-white object-cover shadow-soft" />
       <div className="mt-5 space-y-2 text-sm"><p><CalendarDays className="mr-2 inline h-4 w-4 text-primary" />{sampleEvent.date} · {sampleEvent.time}</p><p><MapPin className="mr-2 inline h-4 w-4 text-primary" />{sampleEvent.location}</p></div>
@@ -146,7 +146,7 @@ export function GuestEventHero() {
 }
 
 export function TemplateCard({ title, image, tags }: { title: string; image: string; tags: string[] }) {
-  return <Card className="overflow-hidden"><div className="relative"><img src={image} alt="" className="h-44 w-full object-cover" /><span className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white text-gold shadow-card"><Crown className="h-5 w-5" /></span></div><div className="p-4"><h3 className="font-serif text-xl font-bold">{title}</h3><div className="my-3 flex gap-2">{tags.map((tag) => <Badge key={tag}>{tag}</Badge>)}</div><Button variant="outline" className="w-full">Use Template</Button></div></Card>;
+  return <Card className="overflow-hidden"><div className="relative"><img src={image} alt="" className="h-44 w-full object-cover" /><span className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white text-brand-violet shadow-card"><Crown className="h-5 w-5" /></span></div><div className="p-4"><h3 className="font-serif text-xl font-bold">{title}</h3><div className="my-3 flex gap-2">{tags.map((tag) => <Badge key={tag}>{tag}</Badge>)}</div><Button variant="outline" className="w-full">Use Template</Button></div></Card>;
 }
 
 export function FooterTrust() {

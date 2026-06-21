@@ -6,13 +6,14 @@ import { useParams } from "next/navigation";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Section, TimelineItem } from "@/components/shared";
 import { schedule } from "@/lib/mock-data";
-import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import type { EventDraft } from "@/lib/event-draft";
+import { loadPublicEvent } from "@/lib/event-repository";
 import { formatEventTime } from "@/lib/date-utils";
 
 export default function SchedulePage() {
   const params = useParams<{ slug: string }>();
   const [event, setEvent] = useState<EventDraft | null>(null);
-  useEffect(() => setEvent(loadPublishedEvents().find((item) => item.slug === params.slug) ?? null), [params.slug]);
+  useEffect(() => { loadPublicEvent(params.slug).then(setEvent); }, [params.slug]);
   const items = event?.schedule.length ? event.schedule.map((item) => ({
     title: item.title || "Event moment",
     time: `${formatEventTime(item.startTime)}${item.endTime ? ` - ${formatEventTime(item.endTime)}` : ""}`,

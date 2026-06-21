@@ -70,7 +70,7 @@ function GenericTemplatePage({ template }: { template: EventTemplate }) {
         <span className="absolute -left-16 top-24 h-44 w-44 rounded-full opacity-30 blur-3xl" style={{ backgroundColor: secondary }} />
         <span className="absolute -right-20 top-8 h-52 w-52 rounded-full opacity-25 blur-3xl" style={{ backgroundColor: primary }} />
         <div className="relative z-10 flex items-center justify-between">
-          <p className="font-serif text-3xl font-bold" style={{ color: primary }}>Jashnly</p>
+          <p className="font-serif text-3xl font-bold" style={{ color: primary }}>occazn</p>
           <span className="grid h-10 w-10 place-items-center rounded-full border bg-white/80" style={{ borderColor: `${primary}33`, color: primary }}>
             <Sparkles className="h-5 w-5" />
           </span>

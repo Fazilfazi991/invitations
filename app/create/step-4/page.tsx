@@ -10,12 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { StepProgress } from "@/components/shared";
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
-import { generateSlug, loadPublishedEvents, savePublishedEvent } from "@/lib/event-draft";
+import { generateSlug } from "@/lib/event-draft";
 import { getEventTypeLabel } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
-import { ensureUniqueSlug } from "@/lib/event-url";
 import { getThemeStyles, themeStyles } from "@/lib/themes";
-import { getDemoUser } from "@/lib/demo-auth";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { publishEvent } from "@/lib/event-repository";
 import { openingAnimations } from "@/lib/opening-animations";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { cn } from "@/lib/utils";
@@ -24,32 +24,36 @@ const themes = Object.entries(themeStyles);
 
 export default function StepFourPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const { draft, setDraft } = useEventDraft();
   const [error, setError] = useState("");
   const previewSlug = draft.slug || generateSlug(draft.title);
   const selectedTemplate = getTemplateById(draft.templateId) ?? getDefaultTemplateForType(draft.eventType);
   const selectedTheme = getThemeStyles(draft.theme);
 
-  function publish() {
+  async function publish() {
     if (!draft.title || !draft.date || !draft.time || !draft.venueName) {
       setError("Please complete title, date, time and venue before publishing.");
       return;
     }
-    const slug = ensureUniqueSlug(generateSlug(draft.title), loadPublishedEvents());
-    const published = {
+    const candidate = {
       ...draft,
-      ownerId: getDemoUser()?.id,
+      ownerId: user?.id,
       eventType: draft.eventType,
       theme: draft.theme,
       templateId: selectedTemplate.id,
       templateName: selectedTemplate.name,
       templateImage: selectedTemplate.previewImage,
       status: "published" as const,
-      slug,
+      slug: generateSlug(draft.title),
     };
-    setDraft(published);
-    savePublishedEvent(published);
-    router.push("/dashboard");
+    try {
+      const published = await publishEvent(candidate);
+      setDraft(published);
+      router.push("/dashboard");
+    } catch (publishError) {
+      setError(publishError instanceof Error ? publishError.message : "Unable to publish this event.");
+    }
   }
 
   return (

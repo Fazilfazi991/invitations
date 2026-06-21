@@ -17,16 +17,18 @@ import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import { familyContacts, galleryImages, locations, sampleEvent, schedule } from "@/lib/mock-data";
 import { FooterTrust, GuestEventHero, QRCodeCard, RSVPForm, Section, ShareCard, TimelineItem } from "@/components/shared";
-import { getDefaultDraft, loadDraft, loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import { getDefaultDraft, loadDraft, type EventDraft } from "@/lib/event-draft";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getEventHeroLabel } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 import { getThemeStyles } from "@/lib/themes";
 import { getEventUrl } from "@/lib/event-url";
-import { isDemoAuthenticated } from "@/lib/demo-auth";
+import { loadPublicEvent } from "@/lib/event-repository";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export default function GuestEventPage() {
   const params = useParams<{ slug: string }>();
+  const { user } = useAuth();
   const [isMemoryMode, setIsMemoryMode] = useState(false);
   const [localEvent, setLocalEvent] = useState<EventDraft | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -34,10 +36,17 @@ export default function GuestEventPage() {
   useEffect(() => {
     const search = new URLSearchParams(window.location.search);
     setIsMemoryMode(search.get("mode") === "memory");
-    const previewDraft = search.get("preview") === "draft" && isDemoAuthenticated() ? loadDraft() : null;
-    setLocalEvent(previewDraft ?? loadPublishedEvents().find((event) => event.slug === params.slug) ?? null);
-    setLoaded(true);
-  }, [params.slug]);
+    const previewDraft = search.get("preview") === "draft" && user ? loadDraft() : null;
+    if (previewDraft) {
+      setLocalEvent(previewDraft);
+      setLoaded(true);
+      return;
+    }
+    loadPublicEvent(params.slug).then((event) => {
+      setLocalEvent(event);
+      setLoaded(true);
+    });
+  }, [params.slug, user]);
 
   const eventTitle = localEvent?.title ?? sampleEvent.couple;
   const eventType = localEvent?.eventType ?? "wedding";

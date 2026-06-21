@@ -14,11 +14,13 @@ import {
   templates,
   type EventTemplate,
 } from "@/lib/templates";
-import { getDefaultDraft, loadDraft, loadPublishedEvents, PUBLISHED_EVENTS_KEY, saveDraft } from "@/lib/event-draft";
-import { getDemoUser, isDemoAuthenticated } from "@/lib/demo-auth";
+import { getDefaultDraft, type EventDraft } from "@/lib/event-draft";
+import { loadEventDraft, loadOrganizerEvents, persistEventDraft, updatePublishedEvent } from "@/lib/event-repository";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export function TemplateGallery() {
   const router = useRouter();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const queryType = searchParams.get("type") as TemplateFilterValue | null;
   const initialType = templateFilterOptions.some((option) => option.value === queryType) ? queryType ?? "all" : "all";
@@ -32,38 +34,37 @@ export function TemplateGallery() {
     return templates.filter((template) => filter === "all" || template.category === filter);
   }, [filter]);
 
-  function useTemplate(template: EventTemplate) {
+  async function useTemplate(template: EventTemplate) {
     const eventType = templateCategoryToEventType(template.category);
     const theme = templateMoodToTheme(template.style.mood);
     window.localStorage.setItem(SELECTED_TEMPLATE_KEY, template.id);
     setSelectedId(template.id);
 
     if (mode === "change-template" && eventSlug) {
-      if (!isDemoAuthenticated()) {
+      if (!user) {
         router.push(`/login?next=${encodeURIComponent(`/categories?event=${eventSlug}&mode=change-template&type=${eventType}`)}`);
         return;
       }
-      const events = loadPublishedEvents();
-      const currentEvent = events.find((event) => event.slug === eventSlug);
-      const userId = getDemoUser()?.id;
-      if (!currentEvent || (currentEvent.ownerId && currentEvent.ownerId !== userId) || currentEvent.eventType !== eventType) {
+      const events = await loadOrganizerEvents();
+      const currentEvent = events.find((event: EventDraft) => event.slug === eventSlug);
+      if (!currentEvent || currentEvent.eventType !== eventType) {
         window.alert(`Please choose a ${currentEvent?.eventType ?? "matching"} template for this event.`);
         return;
       }
-      const nextEvents = events.map((event) => event.slug === eventSlug ? {
-        ...event,
+      const updated = {
+        ...currentEvent,
         templateId: template.id,
         templateName: template.name,
         templateImage: template.previewImage,
-        eventType: event.eventType,
+        eventType: currentEvent.eventType,
         theme,
-      } : event);
-      window.localStorage.setItem(PUBLISHED_EVENTS_KEY, JSON.stringify(nextEvents));
+      };
+      await updatePublishedEvent(updated);
       router.push(`/dashboard/${eventSlug}`);
       return;
     }
 
-    const current = loadDraft();
+    const current = await loadEventDraft();
     const base = current.eventType === eventType && current.status === "draft" ? current : getDefaultDraft(eventType);
     const draft = {
       ...base,
@@ -73,7 +74,7 @@ export function TemplateGallery() {
       eventType,
       theme,
     };
-    saveDraft(draft);
+    await persistEventDraft(draft);
     router.push(`/create/step-1?template=${template.id}&type=${eventType}`);
   }
 
@@ -89,8 +90,8 @@ export function TemplateGallery() {
       <PremiumTemplateBanner />
       {preview && (
         <div className="fixed inset-0 z-50 bg-foreground/35 backdrop-blur-sm md:grid md:place-items-center md:p-5">
-          <div className="flex h-dvh w-full flex-col overflow-hidden bg-white shadow-soft md:max-h-[92vh] md:max-w-5xl md:rounded-[2rem] md:border md:border-[#F3D8DE]">
-            <div className="shrink-0 border-b border-[#F3D8DE] bg-white/95 px-4 py-4 md:px-5">
+          <div className="flex h-dvh w-full flex-col overflow-hidden bg-white shadow-soft md:max-h-[92vh] md:max-w-5xl md:rounded-[2rem] md:border md:border-brand-light">
+            <div className="shrink-0 border-b border-brand-light bg-white/95 px-4 py-4 md:px-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{preview.category}</p>
@@ -102,23 +103,23 @@ export function TemplateGallery() {
                 </Button>
               </div>
             </div>
-            <div className="min-h-0 flex-1 bg-[#FFF7F8] p-3 md:p-5">
-              <div className="mx-auto flex h-full max-w-3xl flex-col overflow-hidden rounded-[1.75rem] border border-[#F3D8DE] bg-white shadow-[0_24px_70px_rgba(217,79,112,0.14)]">
-                <div className="flex shrink-0 items-center justify-between border-b border-[#F3D8DE] bg-[#FFFDF9] px-4 py-2">
+            <div className="min-h-0 flex-1 bg-primary-soft p-3 md:p-5">
+              <div className="mx-auto flex h-full max-w-3xl flex-col overflow-hidden rounded-[1.75rem] border border-brand-light bg-white shadow-[0_24px_70px_rgba(108,23,133,0.14)]">
+                <div className="flex shrink-0 items-center justify-between border-b border-brand-light bg-brand-offWhite px-4 py-2">
                   <div className="flex items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#F9A8B8]" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#F7D58D]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-brand-primary" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-brand-violet" />
                     <span className="h-2.5 w-2.5 rounded-full bg-[#A7D8B8]" />
                   </div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">Scroll to preview full template</p>
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth bg-[#FFFDF9]">
+                <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth bg-brand-offWhite">
                   <TemplateFullPagePreview template={preview} />
                 </div>
               </div>
             </div>
-            <div className="sticky bottom-0 shrink-0 border-t border-[#F3D8DE] bg-white/95 p-4 backdrop-blur md:px-5">
-              <Button type="button" onClick={() => useTemplate(preview)} className="w-full bg-[#D94F70] hover:bg-[#B93558] md:mx-auto md:flex md:max-w-sm">
+            <div className="sticky bottom-0 shrink-0 border-t border-brand-light bg-white/95 p-4 backdrop-blur md:px-5">
+              <Button type="button" onClick={() => useTemplate(preview)} className="w-full bg-brand-deep hover:bg-brand-primary md:mx-auto md:flex md:max-w-sm">
                 Use this template
               </Button>
             </div>
@@ -138,10 +139,10 @@ function PremiumTemplateBanner() {
   ];
 
   return (
-    <section className="rounded-[2rem] border border-[#F3D8DE] bg-white/80 p-5 shadow-[0_18px_55px_rgba(217,79,112,0.08)] sm:p-6 lg:p-7">
+    <section className="rounded-[2rem] border border-brand-light bg-white/80 p-5 shadow-[0_18px_55px_rgba(108,23,133,0.08)] sm:p-6 lg:p-7">
       <div className="grid gap-6 lg:grid-cols-[1.1fr_2fr_0.8fr] lg:items-center">
         <div className="flex items-start gap-4">
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-[#F3D8DE] bg-[#FFF1F4] text-primary">
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-brand-light bg-primary-soft text-primary">
             <Crown className="h-7 w-7" />
           </span>
           <div>
@@ -154,7 +155,7 @@ function PremiumTemplateBanner() {
             const Icon = feature.icon;
             return (
               <div key={feature.label} className="flex items-center gap-3 text-sm font-medium text-[#4B5563]">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[#F3D8DE] bg-[#FFF7F8] text-primary">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-brand-light bg-primary-soft text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
                 {feature.label}
@@ -163,7 +164,7 @@ function PremiumTemplateBanner() {
           })}
         </div>
         <div className="flex flex-col gap-3 lg:items-end">
-          <Button type="button" className="h-12 rounded-xl bg-[#D94F70] px-7 font-semibold hover:bg-[#B93558]">
+          <Button type="button" className="h-12 rounded-xl bg-brand-deep px-7 font-semibold hover:bg-brand-primary">
             <Crown className="h-4 w-4" />
             Explore Premium
           </Button>

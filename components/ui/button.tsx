@@ -14,7 +14,7 @@ const buttonVariants = cva(
         default: "bg-primary text-white shadow-soft hover:bg-primary-dark",
         outline: "border border-border bg-white text-primary hover:bg-primary-soft",
         ghost: "text-foreground hover:bg-primary-soft",
-        soft: "bg-primary-soft text-primary hover:bg-rose-100",
+        soft: "bg-primary-soft text-primary hover:bg-brand-light/50",
       },
       size: {
         default: "h-12 px-5",

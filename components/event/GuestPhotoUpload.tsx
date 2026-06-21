@@ -5,7 +5,7 @@ import { Camera, CheckCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { loadGuestMemories, saveGuestMemory, type GuestMemory } from "@/lib/guest-memories";
+import { saveGuestMemory, type GuestMemory } from "@/lib/guest-memories";
 import { getThemeStyles } from "@/lib/themes";
 import type { EventTheme } from "@/lib/event-types";
 
@@ -13,6 +13,7 @@ export function GuestPhotoUpload({ slug, theme, onAdded }: { slug: string; theme
   const [guestName, setGuestName] = useState("");
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -28,30 +29,25 @@ export function GuestPhotoUpload({ slug, theme, onAdded }: { slug: string; theme
     reader.onload = () => {
       setImage(String(reader.result || ""));
       setFileName(file.name);
+      setFile(file);
     };
     reader.readAsDataURL(file);
   }
 
-  function submit(event: React.FormEvent) {
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!guestName.trim() || !image) return setError("Add your name and choose a photo.");
-    const memory: GuestMemory = {
-      id: crypto.randomUUID(),
-      guestName: guestName.trim(),
-      caption: caption.trim(),
-      image,
-      createdAt: new Date().toISOString(),
-    };
+    if (!guestName.trim() || !file) return setError("Add your name and choose a photo.");
     try {
-      saveGuestMemory(slug, memory);
-    } catch {
-      return setError("This browser has no room for another demo photo.");
+      const memory = await saveGuestMemory(slug, { guestName: guestName.trim(), caption: caption.trim(), file });
+      onAdded?.(memory);
+    } catch (uploadError) {
+      return setError(uploadError instanceof Error ? uploadError.message : "Unable to upload this photo.");
     }
-    onAdded?.(memory);
     setSuccess(true);
     setGuestName("");
     setCaption("");
     setImage("");
+    setFile(null);
     setFileName("");
     window.setTimeout(() => setSuccess(false), 2400);
   }
@@ -60,7 +56,7 @@ export function GuestPhotoUpload({ slug, theme, onAdded }: { slug: string; theme
     <Card className="overflow-hidden p-5" style={{ borderColor: colors.border, backgroundColor: colors.background }}>
       <div className="flex items-start gap-3">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full" style={{ backgroundColor: colors.soft, color: colors.primary }}><Camera className="h-5 w-5" /></span>
-        <div><h2 className="font-serif text-2xl font-bold">Share a photo</h2><p className="mt-1 text-sm text-muted">Add a favorite moment to this browser-local guest album.</p></div>
+        <div><h2 className="font-serif text-2xl font-bold">Share a photo</h2><p className="mt-1 text-sm text-muted">Add a favorite moment to this event&apos;s shared guest album.</p></div>
       </div>
       <form onSubmit={submit} className="mt-5 space-y-3">
         <Input aria-label="Guest name" placeholder="Your name" value={guestName} onChange={(event) => setGuestName(event.target.value)} />
@@ -74,7 +70,7 @@ export function GuestPhotoUpload({ slug, theme, onAdded }: { slug: string; theme
         {success && <p className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-700"><CheckCircle className="h-4 w-4" />Photo added to the album.</p>}
         <Button className="w-full" type="submit" style={{ backgroundColor: colors.primary }}>Add to memories</Button>
       </form>
-      <p className="mt-3 text-xs text-muted">{loadGuestMemories(slug).length}/8 demo guest photos saved in this browser.</p>
+      <p className="mt-3 text-xs text-muted">Guest photos are uploaded to this event&apos;s shared album.</p>
     </Card>
   );
 }

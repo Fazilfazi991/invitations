@@ -6,7 +6,7 @@ import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Card } from "@/components/ui/card";
 import { Section } from "@/components/shared";
-import { getDemoUser, logoutDemoUser } from "@/lib/demo-auth";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const menu = [
   { label: "My Events", icon: UserRound },
@@ -19,11 +19,11 @@ const menu = [
 
 export default function ProfilePage() {
   const router = useRouter();
-  const user = getDemoUser();
+  const { user, signOut } = useAuth();
   const initial = user?.name?.charAt(0).toUpperCase() || "A";
 
-  function logout() {
-    logoutDemoUser();
+  async function logout() {
+    await signOut();
     router.replace("/");
   }
 

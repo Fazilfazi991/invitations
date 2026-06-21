@@ -230,7 +230,7 @@ function HeroSection({
   return (
     <section className="relative overflow-hidden rounded-b-[2.25rem] pb-5 text-center">
       <div className="flex items-center justify-between">
-        <p className="font-serif text-2xl font-bold" style={{ color: config.primary }}>Jashnly</p>
+        <p className="font-serif text-2xl font-bold" style={{ color: config.primary }}>occazn</p>
         <span className="grid h-10 w-10 place-items-center rounded-full border" style={{ borderColor: config.border, backgroundColor: isDark ? "#17120A" : "rgba(255,255,255,0.78)", color: config.primary }}>
           <Music className="h-5 w-5" />
         </span>
@@ -413,7 +413,7 @@ function ShareSection({ config, shareText, closing, isDark }: { config: Birthday
         <a href={`https://wa.me/?text=${shareText}`} target="_blank" rel="noreferrer"><Send className="h-4 w-4" />Share Invite</a>
       </Button>
       <p className="mt-4 font-serif text-lg italic" style={{ color: config.primary }}>{closing}</p>
-      <p className="mt-2 text-xs" style={{ color: config.muted }}>Made with love on Jashnly</p>
+      <p className="mt-2 text-xs" style={{ color: config.muted }}>Made with love on occazn</p>
     </section>
   );
 }

@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("Jashnly smoke flow", () => {
+test.describe("occazn smoke flow", () => {
   test("homepage carousel and birthday create/publish/share flow", async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
     await page.reload();
 
-    await expect(page.getByRole("link", { name: /Jashnly/ })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "One Hero. Endless Celebrations." })).toBeVisible();
+    await expect(page.getByRole("link", { name: /occazn/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "One link for every special occasion" })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 
     const header = page.locator("header");
@@ -102,7 +102,7 @@ test.describe("Jashnly smoke flow", () => {
     await expect(page.getByRole("heading", { name: /Daniel's/ })).toBeVisible();
     await expect(page.getByText("The Wedding of", { exact: true })).toHaveCount(0);
     await expect(page.getByText("May 24, 2027", { exact: true })).toBeVisible();
-    await expect(page.locator("main").first()).toHaveCSS("background", /rgb\(255, 251, 255\)|rgb\(245, 236, 255\)/);
+    await expect(page.locator("main").first()).toHaveCSS("background", /rgb\(254, 253, 252\).*rgb\(245, 239, 248\)/);
     await expect(page.getByRole("heading", { name: "Analytics preview" })).toHaveCount(0);
     await page.reload();
     await expect(page.getByTestId("event-opening")).toHaveCount(0);

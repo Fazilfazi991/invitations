@@ -42,7 +42,7 @@ export function EventCountdown({ date, time }: { date: string; time: string }) {
 
   return (
     <div className="mt-5 rounded-2xl border border-border bg-white/75 p-3">
-      <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-gold">
+      <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-violet">
         {state.passed ? "Memories are now live" : "Countdown to celebration"}
       </p>
       <div className="grid grid-cols-4 divide-x divide-border">

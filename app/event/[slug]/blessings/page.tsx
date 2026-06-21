@@ -9,12 +9,13 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { BlessingsWall } from "@/components/event/BlessingsWall";
 import { Section } from "@/components/shared";
-import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import type { EventDraft } from "@/lib/event-draft";
+import { loadPublicEvent } from "@/lib/event-repository";
 
 export default function BlessingsPage() {
   const params = useParams<{ slug: string }>();
   const [event, setEvent] = useState<EventDraft | null>(null);
-  useEffect(() => setEvent(loadPublishedEvents().find((item) => item.slug === params.slug) ?? null), [params.slug]);
+  useEffect(() => { loadPublicEvent(params.slug).then(setEvent); }, [params.slug]);
   return (
     <main className="phone-shell min-h-screen pb-20">
       <MobileHeader action="search" />

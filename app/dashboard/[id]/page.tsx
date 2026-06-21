@@ -29,13 +29,13 @@ import { WhatsAppMessageGenerator } from "@/components/share/WhatsAppMessageGene
 import { DashboardMetricCard, FooterTrust, Section } from "@/components/shared";
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { eventUrl, sampleEvent } from "@/lib/mock-data";
-import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
+import type { EventDraft } from "@/lib/event-draft";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 import { getEventTypeLabel } from "@/lib/event-types";
 import { getThemeStyles } from "@/lib/themes";
 import { getEventUrl } from "@/lib/event-url";
-import { getDemoUser } from "@/lib/demo-auth";
+import { loadOrganizerEvents } from "@/lib/event-repository";
 
 const actions = [
   { label: "Share Link", icon: Share2 },
@@ -57,9 +57,10 @@ export default function DashboardDetailPage() {
   const currentEventUrl = localEvent ? getEventUrl(localEvent.slug) : eventUrl;
 
   useEffect(() => {
-    const userId = getDemoUser()?.id;
-    setLocalEvent(loadPublishedEvents().find((event) => event.slug === params.id && (!event.ownerId || event.ownerId === userId)) ?? null);
-    setLoaded(true);
+    loadOrganizerEvents().then((events) => {
+      setLocalEvent(events.find((event: EventDraft) => event.slug === params.id) ?? null);
+      setLoaded(true);
+    });
   }, [params.id]);
 
   async function copyEventLink() {

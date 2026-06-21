@@ -87,7 +87,7 @@ export const dashboardEvents = [
   { id: "new-home", title: "New Home Celebration", date: "June 1, 2025", status: "Published", coverImage: galleryImages[3] },
 ];
 
-export const eventUrl = "https://jashnly.com/event/afsal-fathima";
+export const eventUrl = "https://occazn.com/event/afsal-fathima";
 
 export const eventChecklist = [
   {

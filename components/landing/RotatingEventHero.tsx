@@ -9,21 +9,19 @@ import { HeroFeatureCards } from "@/components/landing/HeroFeatureCards";
 import { HeroOrbitCarousel } from "@/components/landing/HeroOrbitCarousel";
 import { heroCategories } from "@/lib/hero-events";
 import { playSoftTick } from "@/lib/sound";
-import { getDemoUser, isDemoAuthenticated } from "@/lib/demo-auth";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
 const SOUND_KEY = "jashnly_hero_sound_muted";
 
 export function RotatingEventHero() {
   const [selectedIndex, setSelectedIndex] = useState(1);
   const [muted, setMuted] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [userName, setUserName] = useState("");
+  const { user } = useAuth();
   const selected = heroCategories[selectedIndex];
 
   useEffect(() => {
     setMuted(window.localStorage.getItem(SOUND_KEY) === "true");
-    setAuthenticated(isDemoAuthenticated());
-    setUserName(getDemoUser()?.name || "");
   }, []);
 
   function rotateTo(index: number, userAction = true) {
@@ -40,31 +38,29 @@ export function RotatingEventHero() {
   return (
     <section className="relative min-h-screen overflow-x-hidden bg-background pb-6">
       <header className="mx-auto grid max-w-[1584px] grid-cols-[auto_1fr_auto] items-center gap-2 px-4 py-3 xl:gap-3 xl:px-6">
-        <Link href="/" className="w-[145px] shrink-0 font-serif text-4xl font-bold text-primary xl:w-[170px]">
-          Jashnly<span className="align-top text-lg text-gold">&hearts;</span>
-        </Link>
+        <BrandLogo className="w-[145px] shrink-0 xl:w-[170px]" imageClassName="h-12 xl:h-14" />
         <div className="hidden min-w-0 overflow-x-auto md:flex md:justify-center">
           <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} />
         </div>
         <div className="flex shrink-0 gap-1.5">
-          {authenticated ? (
-            <Button className="h-9 px-4 text-sm" variant="outline" asChild size="sm"><Link href="/dashboard">{userName || "Dashboard"}</Link></Button>
+          {user ? (
+            <Button className="h-9 px-4 text-sm" variant="outline" asChild size="sm"><Link href="/dashboard">{user.name || "Dashboard"}</Link></Button>
           ) : (
             <Button className="h-9 px-4 text-sm" variant="outline" asChild size="sm"><Link href="/login">Login</Link></Button>
           )}
-          <Button className="h-9 px-4 text-sm" asChild size="sm"><Link href={authenticated ? "/categories" : "/register"}>{authenticated ? "Create Event" : "Get Started"}</Link></Button>
+          <Button className="h-9 px-4 text-sm" asChild size="sm"><Link href={user ? "/categories" : "/register"}>{user ? "Create Event" : "Get Started"}</Link></Button>
         </div>
       </header>
       <div className="mx-auto grid max-w-[1584px] gap-5 px-4 py-6 lg:min-h-[calc(100vh-96px)] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-5 xl:gap-7 xl:px-6">
         <div className="relative z-10 max-w-[560px]">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-primary shadow-card">
-            <Sparkles className="h-4 w-4" /> Design once. Celebrate forever.
+            <Sparkles className="h-4 w-4" /> Celebrate beautifully
           </span>
           <h1 className="mt-5 font-serif text-5xl font-bold leading-[0.95] md:text-6xl xl:text-7xl">
-            One Hero. <span className="text-primary">Endless</span> Celebrations.
+            One link for every <span className="text-primary">special</span> occasion
           </h1>
           <p className="mt-4 max-w-lg text-lg leading-7 text-muted">
-            Switch any celebration type and watch the hero rotate to reveal your perfect event.
+            Create elegant event pages with invitations, RSVP, QR sharing, memories, and guest moments — all in one place.
           </p>
           <p className="mt-3 text-base font-semibold text-primary">{selected.heroLine}</p>
           <div className="mt-5 flex flex-wrap gap-3">

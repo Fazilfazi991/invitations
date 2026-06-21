@@ -10,25 +10,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#FFFDF9",
+        background: "#FEFDFC",
         foreground: "#1F2937",
         card: "#FFFFFF",
-        border: "#F3D8DE",
+        border: "#D0B8D8",
         primary: {
-          DEFAULT: "#D94F70",
-          dark: "#B93558",
-          soft: "#FFF1F4",
+          DEFAULT: "#6C1785",
+          dark: "#500D68",
+          soft: "#F5EFF8",
         },
-        gold: "#D6A84F",
+        gold: "#7B3892",
+        brand: {
+          primary: "#6C1785",
+          deep: "#500D68",
+          violet: "#7B3892",
+          lavender: "#A477B4",
+          light: "#D0B8D8",
+          white: "#FFFFFF",
+          offWhite: "#FEFDFC",
+        },
         muted: "#6B7280",
-        ivory: "#FFFDF9",
+        ivory: "#FEFDFC",
       },
       fontFamily: {
         serif: ["var(--font-playfair)", "Georgia", "serif"],
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        soft: "0 16px 45px rgba(217, 79, 112, 0.10)",
+        soft: "0 16px 45px rgba(108, 23, 133, 0.10)",
         card: "0 10px 30px rgba(31, 41, 55, 0.06)",
       },
     },

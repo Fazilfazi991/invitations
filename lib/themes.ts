@@ -38,15 +38,15 @@ export const themeStyles: Record<EventTheme, {
   },
   royal: {
     name: "Royal",
-    primary: "#8A3FFC",
-    accent: "#D6A84F",
-    background: "#FFFBFF",
-    soft: "#F5ECFF",
-    border: "#E6D7FF",
-    button: "bg-[#8A3FFC] text-white",
+    primary: "#6C1785",
+    accent: "#7B3892",
+    background: "#FEFDFC",
+    soft: "#F5EFF8",
+    border: "#D0B8D8",
+    button: "bg-[#500D68] text-white",
   },
 };
 
 export function getThemeStyles(theme?: EventTheme | null) {
-  return themeStyles[theme ?? "blush"] ?? themeStyles.blush;
+  return themeStyles[theme ?? "royal"] ?? themeStyles.royal;
 }
