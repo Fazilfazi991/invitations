@@ -38,7 +38,7 @@ export function RotatingEventHero() {
   return (
     <section className="relative min-h-screen overflow-x-hidden bg-background pb-6">
       <header className="mx-auto grid max-w-[1584px] grid-cols-[auto_1fr_auto] items-center gap-2 px-4 py-3 xl:gap-3 xl:px-6">
-        <BrandLogo className="w-[145px] shrink-0 xl:w-[170px]" imageClassName="h-12 xl:h-14" />
+        <BrandLogo className="w-[232px] shrink-0 xl:w-[272px]" imageClassName="h-[77px] xl:h-[90px]" />
         <div className="hidden min-w-0 overflow-x-auto md:flex md:justify-center">
           <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} />
         </div>
