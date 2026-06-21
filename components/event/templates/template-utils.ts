@@ -1,4 +1,5 @@
 import type { EventDraft } from "@/lib/event-draft";
+import { getEventUrl } from "@/lib/event-url";
 import { formatEventDate as formatDate, formatEventTime as formatTime } from "@/lib/date-utils";
 
 export type WeddingEventData = EventDraft;
@@ -73,5 +74,6 @@ export function getCountdownCopy(date?: string) {
 
 export function buildShareText(event: Partial<WeddingEventData>) {
   const { coupleName } = getCoupleNames(event);
-  return encodeURIComponent(`Join us to celebrate ${coupleName} on Jashnly.`);
+  const url = getEventUrl(event.slug || "afsal-fathima");
+  return encodeURIComponent(`Join us to celebrate ${coupleName} on Jashnly.\n${url}`);
 }

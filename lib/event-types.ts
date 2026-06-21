@@ -9,7 +9,8 @@ export type EventType =
   | "business"
   | "custom";
 
-export type ThemeName = "blush" | "sage" | "classic" | "royal";
+export type EventTheme = "blush" | "sage" | "classic" | "royal";
+export type ThemeName = EventTheme;
 
 export const eventTypeOptions: { value: EventType; label: string }[] = [
   { value: "wedding", label: "Wedding" },

@@ -16,9 +16,10 @@ import {
 } from "@/components/event/templates/shared/TemplateParts";
 import { getCoupleNames, isUsableImage, type WeddingEventData } from "@/components/event/templates/template-utils";
 import { sampleEvent } from "@/lib/mock-data";
+import { getThemeStyles } from "@/lib/themes";
 
 export function ContemporaryLuxeWedding({ event }: { event: WeddingEventData }) {
-  const primary = "#B93558";
+  const primary = getThemeStyles(event.theme).primary;
   const { coupleName } = getCoupleNames(event);
   const heroImage = isUsableImage(event.coverImage) ? event.coverImage : sampleEvent.coupleImage;
 
@@ -42,7 +43,7 @@ export function ContemporaryLuxeWedding({ event }: { event: WeddingEventData }) 
         <TemplateCountdown event={event} title="Counting Down To Our Big Day" primary={primary} />
         <TemplateTimeline event={event} title="Our Big Day" primary={primary} />
         <TemplateLocation event={event} primary={primary} />
-        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} summary />}
+        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} />}
         <TemplateGallery event={event} title="Our Gallery" primary={primary} />
         {event.youtubeLink && <section className="grid gap-4 rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card sm:grid-cols-2"><div><h2 className="font-serif text-2xl font-bold">Can't join us in person?</h2><p className="mt-2 text-sm text-muted">Be a part of our live stream.</p><Button asChild className="mt-3" style={{ backgroundColor: primary }}><a href={event.youtubeLink}><Play className="h-4 w-4" />Watch Live</a></Button></div><div className="rounded-2xl bg-gradient-to-br from-rose-100 to-amber-50" /></section>}
         <TemplateBlessings primary={primary} title="Share Your Memories" />

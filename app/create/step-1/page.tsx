@@ -46,6 +46,8 @@ export default function StepOnePage() {
       return {
         ...base,
         templateId: template?.id ?? base.templateId,
+        templateName: template?.name ?? base.templateName,
+        templateImage: template?.previewImage ?? base.templateImage,
         eventType: type,
         theme: template ? templateMoodToTheme(template.style.mood) : base.theme,
       };
@@ -68,6 +70,8 @@ export default function StepOnePage() {
       city: current.city,
       eventType: value,
       templateId: template.id,
+      templateName: template.name,
+      templateImage: template.previewImage,
       theme: templateMoodToTheme(template.style.mood),
     }));
     window.localStorage.setItem(SELECTED_TEMPLATE_KEY, template.id);

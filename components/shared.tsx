@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { ArrowRight, CalendarDays, Check, Copy, Crown, Heart, ImagePlus, MapPin, QrCode, Share2, Upload, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { galleryImages, sampleEvent } from "@/lib/mock-data";
+import type { EventTheme } from "@/lib/event-types";
+import { getThemeStyles } from "@/lib/themes";
 
 export function Section({ children, className, id }: { children: React.ReactNode; className?: string; id?: string }) {
   return <motion.section id={id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className={cn("px-5 py-6", className)}>{children}</motion.section>;
@@ -29,12 +32,13 @@ export function FeaturePill({ label, icon: Icon }: { label: string; icon: React.
   return <div className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-3 text-sm font-medium shadow-card"><Icon className="h-5 w-5 text-primary" />{label}</div>;
 }
 
-export function EventCard({ event }: { event: { id: string; title: string; date: string; status: string; coverImage: string } }) {
-  return (
-    <Link href={`/dashboard/${event.id}`} className="flex items-center gap-4 rounded-2xl border border-border bg-white p-3 shadow-card">
+export function EventCard({ event }: { event: { id: string; title: string; date: string; status: string; coverImage: string; theme?: EventTheme } }) {
+    const theme = getThemeStyles(event.theme);
+    return (
+      <Link href={`/dashboard/${event.id}`} className="flex items-center gap-4 rounded-2xl border bg-white p-3 shadow-card" style={{ borderColor: theme.border, backgroundColor: theme.background }}>
       <img src={event.coverImage} alt="" className="h-20 w-24 rounded-xl object-cover" />
       <div className="min-w-0 flex-1">
-        <h3 className="font-serif text-xl font-bold text-primary">{event.title}</h3>
+          <h3 className="font-serif text-xl font-bold" style={{ color: theme.primary }}>{event.title}</h3>
         <p className="mt-1 text-sm text-muted">{event.date}</p>
         <Badge className="mt-2">{event.status}</Badge>
       </div>
@@ -100,9 +104,11 @@ export function GalleryGrid() {
 }
 
 export function RSVPForm() {
-  return (
-    <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); alert("RSVP submitted. Thank you!"); }}>
-      <Input placeholder="Your Name" />
+    const [submitted, setSubmitted] = useState(false);
+    if (submitted) return <div className="rounded-2xl bg-emerald-50 p-5 text-center"><Check className="mx-auto h-8 w-8 text-emerald-600" /><p className="mt-2 font-semibold text-emerald-700">RSVP submitted. Thank you!</p></div>;
+    return (
+      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
+        <Input placeholder="Your Name" required />
       <Input placeholder="Phone Number" />
       <select className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm"><option>Yes, I&apos;ll be there</option><option>Maybe</option><option>Sorry, can&apos;t make it</option></select>
       <Input placeholder="Number of guests" type="number" min={1} defaultValue={1} />
@@ -116,8 +122,8 @@ export function QRCodeCard() {
   return <Card className="p-5 text-center"><div className="mx-auto grid h-36 w-36 place-items-center rounded-2xl border border-border bg-white"><QrCode className="h-28 w-28 text-foreground" /></div><p className="mt-3 text-sm text-muted">Scan to share</p><Button variant="outline" className="mt-4">Download QR</Button></Card>;
 }
 
-export function ShareCard() {
-  return <Card className="space-y-4 p-5"><div className="flex items-center gap-3"><Share2 className="h-6 w-6 text-primary" /><h3 className="font-serif text-2xl font-bold">Share the Joy</h3></div><div className="flex gap-2"><Button className="flex-1">WhatsApp</Button><Button variant="outline" className="flex-1">More</Button></div><div className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm"><span className="min-w-0 flex-1 truncate">jashnly.app/event/afsal-fathima</span><Copy className="h-4 w-4 text-primary" /></div></Card>;
+export function ShareCard({ title = sampleEvent.title, url = "https://jashnly.com/event/afsal-fathima" }: { title?: string; url?: string }) {
+    return <Card className="space-y-4 p-5"><div className="flex items-center gap-3"><Share2 className="h-6 w-6 text-primary" /><h3 className="font-serif text-2xl font-bold">Share the Joy</h3></div><div className="flex gap-2"><Button asChild className="flex-1"><a href={`https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`} target="_blank" rel="noreferrer">WhatsApp</a></Button><Button variant="outline" className="flex-1" onClick={() => navigator.clipboard.writeText(url)}>Copy</Button></div><div className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm"><span className="min-w-0 flex-1 truncate">{url}</span><Copy className="h-4 w-4 text-primary" /></div></Card>;
 }
 
 export function GuestEventHero() {

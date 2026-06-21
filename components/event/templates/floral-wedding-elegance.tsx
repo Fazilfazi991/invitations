@@ -17,9 +17,10 @@ import {
   TemplateTimeline,
 } from "@/components/event/templates/shared/TemplateParts";
 import { getCoupleNames, type WeddingEventData } from "@/components/event/templates/template-utils";
+import { getThemeStyles } from "@/lib/themes";
 
 export function FloralWeddingElegance({ event }: { event: WeddingEventData }) {
-  const primary = "#D94F70";
+  const primary = getThemeStyles(event.theme).primary;
   const secondary = "#D6A84F";
   const { groom, bride } = getCoupleNames(event);
 

@@ -9,7 +9,7 @@ import { BlessingCard, type Blessing } from "@/components/event/BlessingCard";
 import { BlessingForm } from "@/components/event/BlessingForm";
 import { blessings as initialBlessings, sampleEvent } from "@/lib/mock-data";
 
-export function BlessingsWall({ showForm = false, compact = false }: { showForm?: boolean; compact?: boolean }) {
+export function BlessingsWall({ showForm = false, compact = false, eventTitle = sampleEvent.couple, slug = "afsal-fathima" }: { showForm?: boolean; compact?: boolean; eventTitle?: string; slug?: string }) {
   const [items, setItems] = useState<Blessing[]>(initialBlessings);
   const [formOpen, setFormOpen] = useState(showForm);
   const [success, setSuccess] = useState(false);
@@ -29,7 +29,7 @@ export function BlessingsWall({ showForm = false, compact = false }: { showForm?
         </div>
         <div>
           <h2 className="font-serif text-2xl font-bold">Blessings & Wishes</h2>
-          <p className="mt-1 text-sm leading-6 text-muted">Leave a little love for {sampleEvent.couple}.</p>
+          <p className="mt-1 text-sm leading-6 text-muted">Leave a little love for {eventTitle}.</p>
         </div>
       </div>
       {success && <p className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-600">Your blessing was added with love.</p>}
@@ -47,7 +47,7 @@ export function BlessingsWall({ showForm = false, compact = false }: { showForm?
         </Button>
         {compact && (
           <Button asChild variant="outline" className="flex-1">
-            <Link href="/event/afsal-fathima/blessings">View all wishes</Link>
+            <Link href={`/event/${slug}/blessings`}>View all wishes</Link>
           </Button>
         )}
       </div>

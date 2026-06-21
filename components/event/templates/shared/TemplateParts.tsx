@@ -114,9 +114,9 @@ export function TemplateGallery({ event, title, primary }: { event: WeddingEvent
   );
 }
 
-export function TemplateRSVP({ primary, summary = false }: { primary: string; summary?: boolean }) {
+export function TemplateRSVP({ primary }: { primary: string }) {
   return (
-    <section className={cn("rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card", summary && "grid gap-4")}>
+    <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card">
       <div>
         <h2 className="font-serif text-2xl font-bold">RSVP</h2>
         <p className="text-sm text-muted">Kindly respond and make the day perfect.</p>
@@ -126,13 +126,6 @@ export function TemplateRSVP({ primary, summary = false }: { primary: string; su
           <Button className="px-2 text-xs" variant="outline">Can&apos;t Attend</Button>
         </div>
       </div>
-      {summary && (
-        <div className="rounded-2xl p-4 text-center text-white" style={{ backgroundColor: primary }}>
-          <p className="text-sm uppercase tracking-[0.14em]">Kindly RSVP</p>
-          <b className="mt-2 block font-serif text-4xl">342</b>
-          <p className="text-sm">Guests invited</p>
-        </div>
-      )}
     </section>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { CalendarHeart, Home, Image, PlusCircle, Share2, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,15 +13,16 @@ const dashboardItems = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
-const guestItems = [
-  { href: "/event/afsal-fathima", label: "Event", icon: Home },
-  { href: "/event/afsal-fathima/schedule", label: "Schedule", icon: CalendarHeart },
-  { href: "/event/afsal-fathima/rsvp", label: "RSVP", icon: Users },
-  { href: "/event/afsal-fathima/gallery", label: "Gallery", icon: Image },
-  { href: "/event/afsal-fathima/share", label: "Share", icon: Share2 },
-];
-
 export function BottomNav({ type = "dashboard" }: { type?: "dashboard" | "guest" }) {
+  const params = useParams<{ slug?: string }>();
+  const slug = params?.slug || "afsal-fathima";
+  const guestItems = [
+    { href: `/event/${slug}`, label: "Event", icon: Home },
+    { href: `/event/${slug}/schedule`, label: "Schedule", icon: CalendarHeart },
+    { href: `/event/${slug}/rsvp`, label: "RSVP", icon: Users },
+    { href: `/event/${slug}/gallery`, label: "Gallery", icon: Image },
+    { href: `/event/${slug}/share`, label: "Share", icon: Share2 },
+  ];
   const items = type === "guest" ? guestItems : dashboardItems;
   return (
     <nav className="sticky bottom-0 z-40 border-t border-border bg-white/95 px-3 py-2 backdrop-blur">

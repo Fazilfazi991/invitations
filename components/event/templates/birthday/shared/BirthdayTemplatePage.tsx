@@ -39,6 +39,7 @@ import {
   type BirthdayThemeConfig,
 } from "@/components/event/templates/birthday/birthday-template-utils";
 import { cn } from "@/lib/utils";
+import { getThemeStyles } from "@/lib/themes";
 
 type ThemeArt = {
   heroTitle: string;
@@ -145,6 +146,14 @@ const motifIconMap = {
 };
 
 export function BirthdayTemplatePage({ event, config }: { event: BirthdayEventData; config: BirthdayThemeConfig }) {
+  const selectedTheme = getThemeStyles(event.theme);
+  config = {
+    ...config,
+    primary: selectedTheme.primary,
+    secondary: selectedTheme.accent,
+    border: selectedTheme.border,
+    background: `linear-gradient(180deg, ${selectedTheme.background}, ${selectedTheme.soft})`,
+  };
   const art = themeArt[config.id] ?? themeArt["pink-teddy-birthday"];
   const name = getBirthdayName(event);
   const ageLabel = getBirthdayAgeLabel(event);

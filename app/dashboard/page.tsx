@@ -8,15 +8,18 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { EventCompletionChecklist } from "@/components/dashboard/EventCompletionChecklist";
 import { EventCard, FooterTrust, Section } from "@/components/shared";
-import { dashboardEvents, sampleEvent } from "@/lib/mock-data";
+import { dashboardEvents } from "@/lib/mock-data";
 import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
 import { formatEventDate } from "@/lib/date-utils";
+import { getDefaultTemplateForType } from "@/lib/templates";
+import { getDemoUser } from "@/lib/demo-auth";
 
 export default function DashboardPage() {
   const [published, setPublished] = useState<EventDraft[]>([]);
 
   useEffect(() => {
-    setPublished(loadPublishedEvents());
+    const userId = getDemoUser()?.id;
+    setPublished(loadPublishedEvents().filter((event) => !event.ownerId || event.ownerId === userId));
   }, []);
 
   const createdEvents = published.map((event) => ({
@@ -24,7 +27,8 @@ export default function DashboardPage() {
     title: event.title,
     date: formatEventDate(event.date),
     status: "Published",
-    coverImage: sampleEvent.coverImage,
+    coverImage: event.coverImage || event.templateImage || getDefaultTemplateForType(event.eventType).previewImage,
+    theme: event.theme,
   }));
 
   return (
@@ -38,7 +42,7 @@ export default function DashboardPage() {
         <div className="mt-5 space-y-4">
           {[...createdEvents, ...dashboardEvents].map((event) => <EventCard key={event.id} event={event} />)}
         </div>
-        <div className="mt-5"><EventCompletionChecklist compact /></div>
+        <div className="mt-5"><EventCompletionChecklist event={published[0]} compact /></div>
       </Section>
       <FooterTrust />
       <BottomNav />

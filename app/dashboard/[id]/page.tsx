@@ -32,6 +32,10 @@ import { eventUrl, sampleEvent } from "@/lib/mock-data";
 import { loadPublishedEvents, type EventDraft } from "@/lib/event-draft";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
+import { getEventTypeLabel } from "@/lib/event-types";
+import { getThemeStyles } from "@/lib/themes";
+import { getEventUrl } from "@/lib/event-url";
+import { getDemoUser } from "@/lib/demo-auth";
 
 const actions = [
   { label: "Share Link", icon: Share2 },
@@ -43,19 +47,26 @@ const actions = [
 export default function DashboardDetailPage() {
   const params = useParams<{ id: string }>();
   const [localEvent, setLocalEvent] = useState<EventDraft | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const eventTitle = localEvent?.title ?? sampleEvent.title;
   const eventDate = localEvent ? formatEventDate(localEvent.date) : sampleEvent.date;
   const eventTime = localEvent ? formatEventTime(localEvent.time) : sampleEvent.time;
   const eventLocation = localEvent ? `${localEvent.venueName}, ${localEvent.city}` : sampleEvent.location;
   const template = getTemplateById(localEvent?.templateId) ?? getDefaultTemplateForType(localEvent?.eventType ?? "wedding");
+  const theme = getThemeStyles(localEvent?.theme);
+  const currentEventUrl = localEvent ? getEventUrl(localEvent.slug) : eventUrl;
 
   useEffect(() => {
-    setLocalEvent(loadPublishedEvents().find((event) => event.slug === params.id) ?? null);
+    const userId = getDemoUser()?.id;
+    setLocalEvent(loadPublishedEvents().find((event) => event.slug === params.id && (!event.ownerId || event.ownerId === userId)) ?? null);
+    setLoaded(true);
   }, [params.id]);
 
   async function copyEventLink() {
-    await navigator.clipboard.writeText(localEvent ? `https://jashnly.com/event/${localEvent.slug}` : eventUrl);
+    await navigator.clipboard.writeText(currentEventUrl);
   }
+
+  if (!loaded) return <main className="phone-shell min-h-screen bg-background" aria-busy="true" />;
 
   return (
     <main className="phone-shell min-h-screen pb-20">
@@ -63,18 +74,21 @@ export default function DashboardDetailPage() {
       <Section>
         <h1 className="font-serif text-5xl font-bold">Dashboard</h1>
         <p className="mt-2 text-muted">Welcome back, Afsal Events</p>
-        <Card className="mt-5 flex items-center gap-4 p-4">
-          <img src={sampleEvent.coupleImage} alt="" className="h-24 w-28 rounded-xl object-cover" />
+        <Card className="mt-5 flex items-center gap-4 p-4" style={{ borderColor: theme.border, backgroundColor: theme.background }}>
+          <img src={localEvent?.coverImage || localEvent?.templateImage || sampleEvent.coupleImage} alt="" className="h-24 w-28 rounded-xl object-cover" />
           <div className="flex-1">
-            <h2 className="font-serif text-2xl font-bold text-primary">{eventTitle}</h2>
+            <h2 className="font-serif text-2xl font-bold" style={{ color: theme.primary }}>{eventTitle}</h2>
             <p className="mt-2 text-muted">{eventDate} - {eventTime}</p>
             <p className="text-muted">{eventLocation}</p>
           </div>
-          <Badge>Live</Badge>
+          <div className="space-y-2 text-right">
+            <Badge>Live</Badge>
+            {localEvent && <p className="text-xs font-semibold text-muted">{getEventTypeLabel(localEvent.eventType)}</p>}
+          </div>
         </Card>
 
         <div className="mt-5">
-          <EventCompletionChecklist />
+          <EventCompletionChecklist event={localEvent} />
         </div>
 
         <Card className="mt-5 p-5">
@@ -90,7 +104,8 @@ export default function DashboardDetailPage() {
           </div>
         </Card>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3">
+        <div className="mt-5 flex items-center justify-between"><h2 className="font-serif text-2xl font-bold">Analytics preview</h2><Badge>Organizer only</Badge></div>
+        <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
           <DashboardMetricCard label="Total Views" value="12,842" icon={Eye} trend="+18.6%" />
           <DashboardMetricCard label="RSVPs" value="862" icon={Users} trend="+12.4%" />
           <DashboardMetricCard label="Pending" value="128" icon={Clock} trend="-4.7%" />
@@ -104,21 +119,21 @@ export default function DashboardDetailPage() {
           <p className="mt-1 text-sm text-muted">Copy the event link, open the share screen, or prepare guest messages.</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Button onClick={copyEventLink} variant="outline"><Copy className="h-4 w-4" />Copy event link</Button>
-            <Button asChild variant="outline"><Link href="/event/afsal-fathima/share"><Share2 className="h-4 w-4" />Open share page</Link></Button>
-            <Button asChild variant="outline"><Link href="/event/afsal-fathima/share"><Download className="h-4 w-4" />Download QR</Link></Button>
-            <Button asChild variant="soft"><Link href="/event/afsal-fathima/share"><MessageCircle className="h-4 w-4" />WhatsApp message</Link></Button>
+            <Button asChild variant="outline"><Link href={`/event/${localEvent?.slug ?? "afsal-fathima"}/share`}><Share2 className="h-4 w-4" />Open share page</Link></Button>
+            <Button asChild variant="outline"><Link href={`/event/${localEvent?.slug ?? "afsal-fathima"}/share`}><Download className="h-4 w-4" />Download QR</Link></Button>
+            <Button asChild variant="soft"><Link href={`/event/${localEvent?.slug ?? "afsal-fathima"}/share`}><MessageCircle className="h-4 w-4" />WhatsApp message</Link></Button>
           </div>
           <div className="mt-4">
-            <ShareActions includeOpenSharePage />
+            <ShareActions includeOpenSharePage title={eventTitle} url={currentEventUrl} slug={localEvent?.slug} />
           </div>
         </Card>
 
         <div className="mt-5">
-          <WhatsAppMessageGenerator compact />
+          <WhatsAppMessageGenerator compact event={{ title: eventTitle, date: eventDate, time: eventTime, venue: eventLocation, url: currentEventUrl, eventLabel: localEvent?.eventType }} />
         </div>
 
         <div className="mt-5">
-          <MemoryModeCard />
+          <MemoryModeCard slug={localEvent?.slug} />
         </div>
 
         <Card className="mt-5 p-5">

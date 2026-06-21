@@ -9,16 +9,21 @@ import { HeroFeatureCards } from "@/components/landing/HeroFeatureCards";
 import { HeroOrbitCarousel } from "@/components/landing/HeroOrbitCarousel";
 import { heroCategories } from "@/lib/hero-events";
 import { playSoftTick } from "@/lib/sound";
+import { getDemoUser, isDemoAuthenticated } from "@/lib/demo-auth";
 
 const SOUND_KEY = "jashnly_hero_sound_muted";
 
 export function RotatingEventHero() {
   const [selectedIndex, setSelectedIndex] = useState(1);
   const [muted, setMuted] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [userName, setUserName] = useState("");
   const selected = heroCategories[selectedIndex];
 
   useEffect(() => {
     setMuted(window.localStorage.getItem(SOUND_KEY) === "true");
+    setAuthenticated(isDemoAuthenticated());
+    setUserName(getDemoUser()?.name || "");
   }, []);
 
   function rotateTo(index: number, userAction = true) {
@@ -42,8 +47,12 @@ export function RotatingEventHero() {
           <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} />
         </div>
         <div className="flex shrink-0 gap-1.5">
-          <Button className="h-9 px-4 text-sm" variant="outline" size="sm">Login</Button>
-          <Button className="h-9 px-4 text-sm" asChild size="sm"><Link href="/categories">Create Event</Link></Button>
+          {authenticated ? (
+            <Button className="h-9 px-4 text-sm" variant="outline" asChild size="sm"><Link href="/dashboard">{userName || "Dashboard"}</Link></Button>
+          ) : (
+            <Button className="h-9 px-4 text-sm" variant="outline" asChild size="sm"><Link href="/login">Login</Link></Button>
+          )}
+          <Button className="h-9 px-4 text-sm" asChild size="sm"><Link href={authenticated ? "/categories" : "/register"}>{authenticated ? "Create Event" : "Get Started"}</Link></Button>
         </div>
       </header>
       <div className="mx-auto grid max-w-[1584px] gap-5 px-4 py-6 lg:min-h-[calc(100vh-96px)] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-5 xl:gap-7 xl:px-6">

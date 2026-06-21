@@ -13,19 +13,19 @@ import {
   PlayCircle,
   QrCode,
   Sparkles,
-  Upload,
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { eventChecklist } from "@/lib/mock-data";
+import type { EventDraft } from "@/lib/event-draft";
+import { calculateEventChecklist, calculateEventCompletionPercent } from "@/lib/event-checklist";
 import { cn } from "@/lib/utils";
 
 const icons: Record<string, ElementType> = {
   "basic-details": CalendarCheck,
   "cover-image": Image,
-  "invitation-card": Upload,
+  template: Sparkles,
   schedule: Sparkles,
   location: MapPin,
   rsvp: Users,
@@ -33,12 +33,13 @@ const icons: Record<string, ElementType> = {
   "family-contacts": Contact,
   "qr-code": QrCode,
   "whatsapp-message": MessageCircle,
+  gallery: Image,
 };
 
 const actionHref: Record<string, string> = {
   "basic-details": "/create/step-1",
   "cover-image": "/create/step-1",
-  "invitation-card": "/create/step-3",
+  template: "/categories",
   schedule: "/create/step-3",
   location: "/create/step-2",
   rsvp: "/create/step-3",
@@ -46,12 +47,14 @@ const actionHref: Record<string, string> = {
   "family-contacts": "/create/step-3",
   "qr-code": "/event/afsal-fathima/share",
   "whatsapp-message": "/event/afsal-fathima/share",
+  gallery: "/create/step-3",
 };
 
-export function EventCompletionChecklist({ compact = false }: { compact?: boolean }) {
-  const completed = eventChecklist.filter((item) => item.completed).length;
-  const percent = Math.round((completed / eventChecklist.length) * 100);
+export function EventCompletionChecklist({ event, compact = false }: { event?: Partial<EventDraft> | null; compact?: boolean }) {
+  const eventChecklist = calculateEventChecklist(event);
+  const percent = calculateEventCompletionPercent(eventChecklist);
   const visibleItems = compact ? eventChecklist.filter((item) => !item.completed).slice(0, 3) : eventChecklist;
+  const slug = event?.slug || "afsal-fathima";
 
   return (
     <Card className={cn("overflow-hidden p-5", compact && "bg-gradient-to-br from-white to-primary-soft/40")}>
@@ -70,6 +73,9 @@ export function EventCompletionChecklist({ compact = false }: { compact?: boolea
       <div className={cn("mt-5 space-y-3", compact && "mt-4")}>
         {visibleItems.map((item) => {
           const Icon = icons[item.id] ?? Sparkles;
+          const href = ["qr-code", "whatsapp-message"].includes(item.id)
+            ? `/event/${slug}/share`
+            : actionHref[item.id] ?? "/create/step-1";
           return (
             <div key={item.id} className="flex gap-3 rounded-2xl border border-border bg-white/85 p-3">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-soft">
@@ -93,7 +99,7 @@ export function EventCompletionChecklist({ compact = false }: { compact?: boolea
                   </Badge>
                   {!item.completed && (
                     <Button asChild variant="outline" size="sm">
-                      <Link href={actionHref[item.id] ?? "/create/step-1"}>{item.actionLabel}</Link>
+                      <Link href={href}>{item.actionLabel}</Link>
                     </Button>
                   )}
                 </div>
@@ -104,7 +110,7 @@ export function EventCompletionChecklist({ compact = false }: { compact?: boolea
       </div>
       {compact && (
         <Button asChild variant="ghost" className="mt-4 w-full">
-          <Link href="/dashboard/afsal-fathima">View full setup</Link>
+          <Link href={`/dashboard/${slug}`}>View full setup</Link>
         </Button>
       )}
     </Card>

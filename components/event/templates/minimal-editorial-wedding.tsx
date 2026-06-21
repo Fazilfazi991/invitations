@@ -16,9 +16,10 @@ import {
 } from "@/components/event/templates/shared/TemplateParts";
 import { getCoupleNames, isUsableImage, type WeddingEventData } from "@/components/event/templates/template-utils";
 import { sampleEvent } from "@/lib/mock-data";
+import { getThemeStyles } from "@/lib/themes";
 
 export function MinimalEditorialWedding({ event }: { event: WeddingEventData }) {
-  const primary = "#C24D6A";
+  const primary = getThemeStyles(event.theme).primary;
   const { groom, bride } = getCoupleNames(event);
   const heroImage = isUsableImage(event.coverImage) ? event.coverImage : sampleEvent.coupleImage;
 

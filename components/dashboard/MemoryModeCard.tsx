@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-export function MemoryModeCard() {
+export function MemoryModeCard({ slug = "afsal-fathima" }: { slug?: string }) {
   return (
     <Card className="overflow-hidden p-5">
       <div className="flex items-start gap-3">
@@ -23,7 +23,7 @@ export function MemoryModeCard() {
         <Badge className="bg-primary-soft text-primary">Memory Mode: Preview available</Badge>
       </div>
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <Button asChild><Link href="/event/afsal-fathima?mode=memory"><Sparkles className="h-4 w-4" />Preview Memory Mode</Link></Button>
+        <Button asChild><Link href={`/event/${slug}?mode=memory`}><Sparkles className="h-4 w-4" />Preview Memory Mode</Link></Button>
         <Button variant="outline">Manage Memories</Button>
       </div>
     </Card>

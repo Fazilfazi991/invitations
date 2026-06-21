@@ -14,7 +14,8 @@ import {
   templates,
   type EventTemplate,
 } from "@/lib/templates";
-import { DRAFT_KEY, loadDraft, loadPublishedEvents, PUBLISHED_EVENTS_KEY, saveDraft } from "@/lib/event-draft";
+import { getDefaultDraft, loadDraft, loadPublishedEvents, PUBLISHED_EVENTS_KEY, saveDraft } from "@/lib/event-draft";
+import { getDemoUser, isDemoAuthenticated } from "@/lib/demo-auth";
 
 export function TemplateGallery() {
   const router = useRouter();
@@ -38,16 +39,41 @@ export function TemplateGallery() {
     setSelectedId(template.id);
 
     if (mode === "change-template" && eventSlug) {
+      if (!isDemoAuthenticated()) {
+        router.push(`/login?next=${encodeURIComponent(`/categories?event=${eventSlug}&mode=change-template&type=${eventType}`)}`);
+        return;
+      }
       const events = loadPublishedEvents();
-      const nextEvents = events.map((event) => event.slug === eventSlug ? { ...event, templateId: template.id, eventType, theme } : event);
+      const currentEvent = events.find((event) => event.slug === eventSlug);
+      const userId = getDemoUser()?.id;
+      if (!currentEvent || (currentEvent.ownerId && currentEvent.ownerId !== userId) || currentEvent.eventType !== eventType) {
+        window.alert(`Please choose a ${currentEvent?.eventType ?? "matching"} template for this event.`);
+        return;
+      }
+      const nextEvents = events.map((event) => event.slug === eventSlug ? {
+        ...event,
+        templateId: template.id,
+        templateName: template.name,
+        templateImage: template.previewImage,
+        eventType: event.eventType,
+        theme,
+      } : event);
       window.localStorage.setItem(PUBLISHED_EVENTS_KEY, JSON.stringify(nextEvents));
       router.push(`/dashboard/${eventSlug}`);
       return;
     }
 
-    const draft = { ...loadDraft(), templateId: template.id, eventType, theme };
+    const current = loadDraft();
+    const base = current.eventType === eventType && current.status === "draft" ? current : getDefaultDraft(eventType);
+    const draft = {
+      ...base,
+      templateId: template.id,
+      templateName: template.name,
+      templateImage: template.previewImage,
+      eventType,
+      theme,
+    };
     saveDraft(draft);
-    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     router.push(`/create/step-1?template=${template.id}&type=${eventType}`);
   }
 

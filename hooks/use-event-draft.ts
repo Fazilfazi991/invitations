@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getDefaultDraft, loadDraft, saveDraft, type EventDraft } from "@/lib/event-draft";
+import { getDefaultDraft, loadDraft, saveDraft, withTemplateMetadata, type EventDraft } from "@/lib/event-draft";
 import type { EventType } from "@/lib/event-types";
 
 export function useEventDraft(initialType?: EventType) {
@@ -11,7 +11,7 @@ export function useEventDraft(initialType?: EventType) {
   useEffect(() => {
     const existing = loadDraft();
     if (initialType && existing.eventType !== initialType) {
-      const next = { ...getDefaultDraft(initialType), ...existing, eventType: initialType };
+      const next = withTemplateMetadata({ ...getDefaultDraft(initialType), ...existing, eventType: initialType }, null);
       setDraftState(next);
       saveDraft(next);
     } else {

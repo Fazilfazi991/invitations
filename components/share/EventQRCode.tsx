@@ -6,13 +6,16 @@ import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { eventUrl, sampleEvent } from "@/lib/mock-data";
+import type { EventTheme } from "@/lib/event-types";
+import { getThemeStyles } from "@/lib/themes";
 
-export function EventQRCode() {
+export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date, location = sampleEvent.location, url = eventUrl, slug = "afsal-fathima", theme: themeId }: { title?: string; date?: string; location?: string; url?: string; slug?: string; theme?: EventTheme }) {
   const [copied, setCopied] = useState(false);
   const [posterOpen, setPosterOpen] = useState(false);
+  const theme = getThemeStyles(themeId);
 
   async function copyLink() {
-    await navigator.clipboard.writeText(eventUrl);
+    await navigator.clipboard.writeText(url);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1600);
   }
@@ -20,9 +23,9 @@ export function EventQRCode() {
   async function shareEvent() {
     if (navigator.share) {
       await navigator.share({
-        title: sampleEvent.title,
+        title,
         text: "Open invitation, location and RSVP on Jashnly.",
-        url: eventUrl,
+        url,
       });
       return;
     }
@@ -37,24 +40,24 @@ export function EventQRCode() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "jashnly-afsal-fathima-qr.svg";
+    link.download = `jashnly-${slug}-qr.svg`;
     link.click();
     URL.revokeObjectURL(url);
   }
 
   return (
     <>
-      <Card className="p-5 text-center">
+      <Card className="p-5 text-center" style={{ borderColor: theme.border, backgroundColor: theme.background }}>
         <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary-soft">
           <QrCode className="h-6 w-6 text-primary" />
         </div>
         <h2 className="mt-3 font-serif text-2xl font-bold">Event QR Code</h2>
         <p className="mt-1 text-sm leading-6 text-muted">Guests can scan this to open your event page.</p>
         <div className="mx-auto mt-5 inline-block rounded-3xl border border-border bg-white p-5 shadow-card">
-          <QRCodeSVG id="event-qr-code" value={eventUrl} size={190} fgColor="#1F2937" bgColor="#FFFFFF" />
+          <QRCodeSVG id="event-qr-code" value={url} size={190} fgColor={theme.primary} bgColor="#FFFFFF" />
         </div>
-        <h3 className="mt-4 font-serif text-xl font-bold text-primary">{sampleEvent.title}</h3>
-        <p className="text-sm text-muted">{sampleEvent.date}</p>
+        <h3 className="mt-4 font-serif text-xl font-bold" style={{ color: theme.primary }}>{title}</h3>
+        <p className="text-sm text-muted">{date}</p>
         {copied && <p className="mt-3 text-sm font-semibold text-emerald-600">Link copied</p>}
         <div className="mt-5 grid grid-cols-2 gap-3">
           <Button onClick={downloadQr}><Download className="h-4 w-4" />Download QR</Button>
@@ -72,12 +75,12 @@ export function EventQRCode() {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="floral rounded-3xl border border-border p-6 text-center">
+            <div className="rounded-3xl border p-6 text-center" style={{ borderColor: theme.border, background: `linear-gradient(135deg, ${theme.soft}, ${theme.background})` }}>
               <p className="text-sm font-bold uppercase tracking-[0.24em] text-gold">You're invited</p>
-              <h3 className="mt-3 font-serif text-3xl font-bold text-primary">{sampleEvent.title}</h3>
-              <p className="mt-2 text-sm text-muted">{sampleEvent.date} - {sampleEvent.location}</p>
+              <h3 className="mt-3 font-serif text-3xl font-bold" style={{ color: theme.primary }}>{title}</h3>
+              <p className="mt-2 text-sm text-muted">{date} - {location}</p>
               <div className="mx-auto mt-5 inline-block rounded-2xl bg-white p-4">
-                <QRCodeSVG value={eventUrl} size={150} fgColor="#1F2937" />
+                <QRCodeSVG value={url} size={150} fgColor={theme.primary} />
               </div>
               <p className="mt-4 text-sm font-semibold">Scan to view invitation, location and RSVP</p>
             </div>

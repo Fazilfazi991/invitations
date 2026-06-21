@@ -1,4 +1,5 @@
-import type { EventType, ThemeName } from "@/lib/event-types";
+import { normalizeEventType, type EventTheme, type EventType } from "@/lib/event-types";
+import { getDefaultTemplateForType, getTemplateById, templateCategoryToEventType, templateMoodToTheme } from "@/lib/templates";
 
 export type ScheduleDraftItem = {
   id: string;
@@ -17,6 +18,7 @@ export type ContactDraftItem = {
 };
 
 export type EventDraft = {
+  ownerId?: string;
   eventType: EventType;
   title: string;
   primaryName: string;
@@ -45,8 +47,10 @@ export type EventDraft = {
   qrEnabled: boolean;
   schedule: ScheduleDraftItem[];
   contacts: ContactDraftItem[];
-  templateId?: string;
-  theme: ThemeName;
+  templateId: string;
+  templateName: string;
+  templateImage?: string;
+  theme: EventTheme;
   status: "draft" | "published";
   slug: string;
 };
@@ -78,6 +82,8 @@ export function generateSlug(title: string) {
 export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
   const typedDefaults = defaultsByType[eventType];
   const title = typedDefaults.title ?? "Jashnly Event";
+  const template = getDefaultTemplateForType(eventType);
+  const defaultContactName = typedDefaults.hostName || typedDefaults.primaryName || "Event Host";
   return {
     eventType,
     title,
@@ -92,7 +98,7 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     age: eventType === "birthday" ? "5" : "",
     ageTurning: eventType === "birthday" ? "5" : "",
     homeName: "",
-    date: "2025-05-24",
+    date: "2026-12-24",
     time: "18:00",
     venueName: "Calicut Convention Centre",
     address: "Mini Bypass Rd, Kozhikode, Kerala",
@@ -109,13 +115,43 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
       { id: "schedule-1", title: "Welcome", startTime: "18:00", endTime: "18:30", venue: "Main Hall", description: "Guests arrive and settle in." },
     ],
     contacts: [
-      { id: "contact-1", name: "Afsal's Family", role: "Family", phone: "+91 999 555 1234" },
+      { id: "contact-1", name: defaultContactName, role: "Family", phone: "+91 999 555 1234" },
     ],
-    templateId: eventType === "birthday" ? "pink-teddy-birthday" : eventType === "housewarming" ? "warm-housewarming" : eventType === "naming" ? "naming-ceremony-soft" : eventType === "religious" ? "holy-communion-classic" : eventType === "business" ? "business-opening-modern" : "floral-wedding-elegance",
-    theme: "blush",
+    templateId: template.id,
+    templateName: template.name,
+    templateImage: template.previewImage,
+    theme: templateMoodToTheme(template.style.mood),
     status: "draft",
     slug: generateSlug(title),
   };
+}
+
+export function withTemplateMetadata(draft: EventDraft, templateId?: string | null): EventDraft {
+  const selected = getTemplateById(templateId);
+  const selectedType = selected ? templateCategoryToEventType(selected.category) : null;
+  const isCompatible = selectedType === draft.eventType
+    || (["wedding", "engagement", "reception"].includes(draft.eventType) && selectedType === "wedding");
+  const template = selected && isCompatible
+    ? selected
+    : getDefaultTemplateForType(draft.eventType);
+
+  return {
+    ...draft,
+    templateId: template.id,
+    templateName: template.name,
+    templateImage: template.previewImage,
+  };
+}
+
+function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
+  const storedTemplate = getTemplateById(value.templateId);
+  const eventType = value.eventType
+    ? normalizeEventType(value.eventType)
+    : storedTemplate
+      ? templateCategoryToEventType(storedTemplate.category)
+      : "wedding";
+  const defaults = getDefaultDraft(eventType);
+  return withTemplateMetadata({ ...defaults, ...value, eventType } as EventDraft, value.templateId);
 }
 
 export function loadDraft() {
@@ -123,7 +159,7 @@ export function loadDraft() {
   const raw = window.localStorage.getItem(DRAFT_KEY);
   if (!raw) return getDefaultDraft((window.localStorage.getItem(EVENT_TYPE_KEY) as EventType) || "wedding");
   try {
-    return { ...getDefaultDraft(), ...JSON.parse(raw) } as EventDraft;
+    return normalizeStoredEvent(JSON.parse(raw));
   } catch {
     return getDefaultDraft();
   }
@@ -131,8 +167,9 @@ export function loadDraft() {
 
 export function saveDraft(draft: EventDraft) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-  window.localStorage.setItem(EVENT_TYPE_KEY, draft.eventType);
+  const normalized = withTemplateMetadata(draft, draft.templateId);
+  window.localStorage.setItem(DRAFT_KEY, JSON.stringify(normalized));
+  window.localStorage.setItem(EVENT_TYPE_KEY, normalized.eventType);
 }
 
 export function clearDraft() {
@@ -143,7 +180,9 @@ export function clearDraft() {
 export function loadPublishedEvents() {
   if (typeof window === "undefined") return [] as EventDraft[];
   try {
-    return JSON.parse(window.localStorage.getItem(PUBLISHED_EVENTS_KEY) || "[]") as EventDraft[];
+    const events = (JSON.parse(window.localStorage.getItem(PUBLISHED_EVENTS_KEY) || "[]") as Partial<EventDraft>[]).map(normalizeStoredEvent);
+    window.localStorage.setItem(PUBLISHED_EVENTS_KEY, JSON.stringify(events));
+    return events;
   } catch {
     return [];
   }
@@ -151,6 +190,7 @@ export function loadPublishedEvents() {
 
 export function savePublishedEvent(event: EventDraft) {
   if (typeof window === "undefined") return;
-  const current = loadPublishedEvents().filter((item) => item.slug !== event.slug);
-  window.localStorage.setItem(PUBLISHED_EVENTS_KEY, JSON.stringify([event, ...current]));
+  const normalized = withTemplateMetadata(event, event.templateId);
+  const current = loadPublishedEvents().filter((item) => item.slug !== normalized.slug);
+  window.localStorage.setItem(PUBLISHED_EVENTS_KEY, JSON.stringify([normalized, ...current]));
 }

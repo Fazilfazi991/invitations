@@ -17,9 +17,10 @@ import {
   TemplateTimeline,
 } from "@/components/event/templates/shared/TemplateParts";
 import { getCoupleNames, type WeddingEventData } from "@/components/event/templates/template-utils";
+import { getThemeStyles } from "@/lib/themes";
 
 export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
-  const primary = "#C24D6A";
+  const primary = getThemeStyles(event.theme).primary;
   const secondary = "#D6A84F";
   const { coupleName } = getCoupleNames(event);
 
@@ -40,7 +41,7 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
         </section>
         <TemplateTimeline event={event} title="Schedule" primary={primary} boxed />
         <TemplateLocation event={event} primary={primary} imageStyle="photo" />
-        <TemplateRSVP primary={primary} summary />
+        <TemplateRSVP primary={primary} />
         <TemplateCountdown event={event} title="RSVP Summary" primary={primary} />
         <TemplateGallery event={event} title="Gallery" primary={primary} />
         <TemplateBlessings primary={primary} title="Blessings Wall" />

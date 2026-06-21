@@ -1,5 +1,6 @@
 import type { EventDraft } from "@/lib/event-draft";
 import { formatEventDate as formatDate, formatEventTime as formatTime } from "@/lib/date-utils";
+import { getEventUrl } from "@/lib/event-url";
 
 export type BirthdayEventData = EventDraft;
 
@@ -118,5 +119,6 @@ export function getBirthdayCountdown(date?: string, time?: string) {
 }
 
 export function buildBirthdayShareText(event: Partial<BirthdayEventData>) {
-  return encodeURIComponent(`Join us for ${getBirthdayTitle(event)} on Jashnly.`);
+  const url = getEventUrl(event.slug || "birthday");
+  return encodeURIComponent(`Join us for ${getBirthdayTitle(event)} on Jashnly.\n${url}`);
 }
