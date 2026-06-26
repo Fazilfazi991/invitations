@@ -11,7 +11,18 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+debug.log
 
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+test-results/
+
+# Raw design/source asset packs. Commit only optimized assets used by the app.
+event_cards_webp.zip
+event_cards_webp/
+jashnly_template_previews.zip
+jashnly_template_previews/
+occazn_logo_asset_pack.zip
+occazn_logo_asset_pack/
