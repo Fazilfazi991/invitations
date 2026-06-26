@@ -109,6 +109,14 @@ export async function loadPublicEvent(slug: string) {
 }
 
 export async function publishEvent(event: EventDraft) {
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("Publishing event template:", {
+      slug: event.slug,
+      templateId: event.templateId,
+      eventType: event.eventType,
+    });
+  }
+
   if (localTestMode) {
     const slug = ensureUniqueSlug(event.slug || event.title, loadPublishedEvents());
     const publicUrl = getEventUrl(slug);
@@ -127,6 +135,13 @@ export async function publishEvent(event: EventDraft) {
   const publicUrl = getEventUrl(slug);
   const qrCodeData = await createQrCodeSvg(publicUrl);
   const published = { ...event, ownerId: user.id, slug, publicUrl, qrCodeData, status: "published" as const };
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("Published event template:", {
+      slug: published.slug,
+      templateId: published.templateId,
+      publicUrl: published.publicUrl,
+    });
+  }
   const { error } = await supabase.from("events").insert({
     owner_id: user.id,
     slug,

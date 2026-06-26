@@ -181,6 +181,13 @@ export function loadDraft() {
 export function saveDraft(draft: EventDraft) {
   if (typeof window === "undefined") return;
   const normalized = withTemplateMetadata(draft, draft.templateId);
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("Saving draft template:", {
+      templateId: normalized.templateId,
+      templateName: normalized.templateName,
+      eventType: normalized.eventType,
+    });
+  }
   window.localStorage.setItem(DRAFT_KEY, JSON.stringify(normalized));
   window.localStorage.setItem(EVENT_TYPE_KEY, normalized.eventType);
 }

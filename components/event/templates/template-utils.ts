@@ -7,6 +7,7 @@ export type WeddingEventData = EventDraft & {
   invitationOpening?: string;
   invitationLine?: string;
   lunchTime?: string;
+  story?: string;
 };
 
 export function formatEventDate(date?: string) {

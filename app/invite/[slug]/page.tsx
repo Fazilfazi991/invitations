@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
+import { InviteRouteClient } from "./InviteRouteClient";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 
 const invitationSlug = "muhammed-suhaib-fathima-gafoor";
@@ -41,11 +40,7 @@ export async function generateMetadata({ params }: InvitePageProps): Promise<Met
 export default async function InvitePage({ params }: InvitePageProps) {
   const { slug } = await params;
 
-  if (slug !== invitationSlug) {
-    notFound();
-  }
-
-  return <WeddingTemplateRenderer event={suhaibFathimaInvitation} />;
+  return <InviteRouteClient slug={slug} fallbackEvent={slug === invitationSlug ? suhaibFathimaInvitation : undefined} />;
 }
 
 const suhaibFathimaInvitation: WeddingEventData = {

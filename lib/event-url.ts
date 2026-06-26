@@ -20,6 +20,6 @@ export function ensureUniqueSlug(baseSlug: string, publishedEvents: Partial<Even
 }
 
 export function getEventUrl(slug: string) {
-  const path = `/event/${slug}`;
+  const path = `/invite/${slug}`;
   return typeof window === "undefined" ? path : `${window.location.origin}${path}`;
 }

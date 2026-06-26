@@ -7,18 +7,20 @@ import { RoyalNikahElegance } from "@/components/event/templates/royal-nikah-ele
 import { SoftTraditionalWedding } from "@/components/event/templates/soft-traditional-wedding";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 
+export const weddingTemplateRegistry = {
+  "royal-nikah-elegance": RoyalNikahElegance,
+  "minimal-editorial-wedding": MinimalEditorialWedding,
+  "soft-traditional-wedding": SoftTraditionalWedding,
+  "contemporary-luxe-wedding": ContemporaryLuxeWedding,
+  "floral-wedding-elegance": FloralWeddingElegance,
+} as const;
+
 export function WeddingTemplateRenderer({ event }: { event: WeddingEventData }) {
-  switch (event.templateId) {
-    case "royal-nikah-elegance":
-      return <RoyalNikahElegance event={event} />;
-    case "minimal-editorial-wedding":
-      return <MinimalEditorialWedding event={event} />;
-    case "soft-traditional-wedding":
-      return <SoftTraditionalWedding event={event} />;
-    case "contemporary-luxe-wedding":
-      return <ContemporaryLuxeWedding event={event} />;
-    case "floral-wedding-elegance":
-    default:
-      return <FloralWeddingElegance event={event} />;
+  const Template = weddingTemplateRegistry[event.templateId as keyof typeof weddingTemplateRegistry] ?? FloralWeddingElegance;
+
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("Wedding template renderer:", event.templateId, Template.name);
   }
+
+  return <Template event={event} />;
 }
