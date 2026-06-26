@@ -35,7 +35,8 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
   function downloadQr() {
     const svg = document.getElementById("event-qr-code");
     if (!svg && !qrCodeData) return;
-    const source = qrCodeData || new XMLSerializer().serializeToString(svg);
+    const source = qrCodeData || (svg ? new XMLSerializer().serializeToString(svg) : "");
+    if (!source) return;
     const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");

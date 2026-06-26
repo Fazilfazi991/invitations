@@ -4,13 +4,14 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Phone } from "lucide-react";
+import { CalendarX, Phone } from "lucide-react";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BlessingsWall } from "@/components/event/BlessingsWall";
 import { EventCountdown } from "@/components/event/EventCountdown";
+import { EventMusicControl } from "@/components/event/EventMusicControl";
 import { EventOpening } from "@/components/event/EventOpening";
 import { MemoryModePreview } from "@/components/event/MemoryModePreview";
 import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/BirthdayTemplateRenderer";
@@ -109,12 +110,37 @@ export default function GuestEventPage() {
 
   if (!loaded) return <main className="phone-shell min-h-screen bg-background" aria-busy="true" />;
 
+  if (!localEvent) {
+    return (
+      <main className="phone-shell grid min-h-screen place-items-center bg-background px-5 text-center">
+        <Card className="max-w-sm p-6">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary-soft text-primary">
+            <CalendarX className="h-7 w-7" />
+          </div>
+          <h1 className="mt-4 font-serif text-3xl font-bold">Event not found</h1>
+          <p className="mt-2 text-sm leading-6 text-muted">This invitation link may be incorrect, unpublished, or no longer available.</p>
+          <Button asChild className="mt-5"><Link href="/">Go to Occazn</Link></Button>
+        </Card>
+      </main>
+    );
+  }
+
   if (!isMemoryMode && renderedEvent.eventType === "birthday") {
-    return <EventOpening event={renderedEvent}><BirthdayTemplateRenderer event={renderedEvent} /></EventOpening>;
+    return (
+      <EventOpening event={renderedEvent}>
+        <BirthdayTemplateRenderer event={renderedEvent} />
+        <EventMusicControl music={renderedEvent.music} eventSlug={renderedEvent.slug} />
+      </EventOpening>
+    );
   }
 
   if (!isMemoryMode && isWeddingLike) {
-    return <EventOpening event={renderedEvent}><WeddingTemplateRenderer event={renderedEvent} /></EventOpening>;
+    return (
+      <EventOpening event={renderedEvent}>
+        <WeddingTemplateRenderer event={renderedEvent} />
+        <EventMusicControl music={renderedEvent.music} eventSlug={renderedEvent.slug} />
+      </EventOpening>
+    );
   }
 
   const page = (
@@ -194,6 +220,7 @@ export default function GuestEventPage() {
           </>
         )}
       </Section>
+      <EventMusicControl music={renderedEvent.music} eventSlug={renderedEvent.slug} />
       <FooterTrust />
       <BottomNav type="guest" />
     </main>

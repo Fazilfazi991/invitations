@@ -67,6 +67,17 @@ export default function DashboardDetailPage() {
     await navigator.clipboard.writeText(currentEventUrl);
   }
 
+  function downloadQrCode() {
+    if (!localEvent?.qrCodeData) return;
+    const blob = new Blob([localEvent.qrCodeData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `occazn-${localEvent.slug}-qr.svg`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (!loaded) return <main className="phone-shell min-h-screen bg-background" aria-busy="true" />;
 
   return (
@@ -117,12 +128,16 @@ export default function DashboardDetailPage() {
 
         <Card className="mt-5 p-5">
           <h2 className="font-serif text-2xl font-bold">Share tools</h2>
-          <p className="mt-1 text-sm text-muted">Copy the event link, open the share screen, or prepare guest messages.</p>
+          <p className="mt-1 text-sm text-muted">{localEvent?.status === "published" ? "Copy the event link, download its QR code, or share with guests." : "Publish your event to generate a shareable QR code."}</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <Button onClick={copyEventLink} variant="outline"><Copy className="h-4 w-4" />Copy event link</Button>
+            <Button onClick={copyEventLink} variant="outline" disabled={!localEvent}><Copy className="h-4 w-4" />Copy Event Link</Button>
             <Button asChild variant="outline"><Link href={`/event/${localEvent?.slug ?? "afsal-fathima"}/share`}><Share2 className="h-4 w-4" />Open share page</Link></Button>
-            <Button asChild variant="outline"><Link href={`/event/${localEvent?.slug ?? "afsal-fathima"}/share`}><Download className="h-4 w-4" />Download QR</Link></Button>
-            <Button asChild variant="soft"><Link href={`/event/${localEvent?.slug ?? "afsal-fathima"}/share`}><MessageCircle className="h-4 w-4" />WhatsApp message</Link></Button>
+            <Button onClick={downloadQrCode} variant="outline" disabled={!localEvent?.qrCodeData}><Download className="h-4 w-4" />Download QR Code</Button>
+            <Button asChild variant="soft">
+              <a href={`https://wa.me/?text=${encodeURIComponent(`${eventTitle}\n${currentEventUrl}`)}`} target="_blank" rel="noreferrer">
+                <MessageCircle className="h-4 w-4" />Share on WhatsApp
+              </a>
+            </Button>
           </div>
           <div className="mt-4">
             <ShareActions includeOpenSharePage title={eventTitle} url={currentEventUrl} slug={localEvent?.slug} />
