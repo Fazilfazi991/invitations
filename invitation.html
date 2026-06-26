@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Wedding invitation for Muhammed Suhaib and Fathima Gafoor."
+    />
+    <title>Muhammed Suhaib & Fathima Gafoor | Wedding Invitation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="invitation.css" />
+  </head>
+  <body>
+    <main class="invitation-shell">
+      <section class="hero" aria-labelledby="invitation-title">
+        <article class="invitation-card" aria-label="Wedding invitation">
+          <div class="floral-corner floral-corner--top-left" aria-hidden="true">
+            <svg viewBox="0 0 180 180" role="img" focusable="false">
+              <path d="M23 154C37 114 64 80 111 55" />
+              <path d="M45 125C38 103 44 82 63 64" />
+              <path d="M67 100C86 96 101 84 113 65" />
+              <path d="M88 76C84 56 92 39 113 26" />
+              <path d="M38 113C26 105 21 93 24 77" />
+              <path d="M109 58C126 61 141 55 153 40" />
+              <path d="M56 91C47 85 45 74 51 63" />
+              <path d="M88 76C100 76 109 70 116 58" />
+              <path d="M113 26C122 39 122 51 113 65" />
+              <path d="M152 40C148 57 138 67 121 69" />
+              <circle cx="66" cy="98" r="3" />
+              <circle cx="43" cy="127" r="2.5" />
+              <circle cx="112" cy="56" r="2.5" />
+            </svg>
+          </div>
+
+          <div class="floral-corner floral-corner--bottom-right" aria-hidden="true">
+            <svg viewBox="0 0 180 180" role="img" focusable="false">
+              <path d="M23 154C37 114 64 80 111 55" />
+              <path d="M45 125C38 103 44 82 63 64" />
+              <path d="M67 100C86 96 101 84 113 65" />
+              <path d="M88 76C84 56 92 39 113 26" />
+              <path d="M38 113C26 105 21 93 24 77" />
+              <path d="M109 58C126 61 141 55 153 40" />
+              <path d="M56 91C47 85 45 74 51 63" />
+              <path d="M88 76C100 76 109 70 116 58" />
+              <path d="M113 26C122 39 122 51 113 65" />
+              <path d="M152 40C148 57 138 67 121 69" />
+              <circle cx="66" cy="98" r="3" />
+              <circle cx="43" cy="127" r="2.5" />
+              <circle cx="112" cy="56" r="2.5" />
+            </svg>
+          </div>
+
+          <p class="bismillah" lang="ar" dir="rtl">
+            بِسْمِ ٱللَّٰهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+          </p>
+
+          <div class="divider" aria-hidden="true"></div>
+
+          <header class="names">
+            <h1 id="invitation-title">
+              <span>Muhammed Suhaib</span>
+              <small>AND</small>
+              <span>Fathima Gafoor</span>
+            </h1>
+          </header>
+
+          <p class="invitation-line">
+            With full hearts,<br />
+            joyfully invite you to their wedding
+          </p>
+
+          <section class="event-grid" aria-label="Wedding date and time">
+            <div class="event-grid__item">
+              <span>MONDAY</span>
+            </div>
+            <div class="event-grid__item event-grid__item--center">
+              <span>20th JULY, 2026</span>
+              <small>1448 SAFAR 6</small>
+            </div>
+            <div class="event-grid__item">
+              <span>AT 12:00 PM</span>
+            </div>
+          </section>
+
+          <section class="detail-block" aria-label="Lunch timing">
+            <p>LUNCH</p>
+            <strong>12:00 PM</strong>
+          </section>
+
+          <section class="detail-block detail-block--venue" aria-label="Venue">
+            <address>
+              T. M. MAHAL AUDITORIUM,<br />
+              THIRUVATHRA
+            </address>
+          </section>
+        </article>
+
+        <div class="action-row" aria-label="Invitation actions">
+          <button type="button" class="button" onclick="openGoogleMapsLocation()">
+            View Location
+          </button>
+          <button type="button" class="button button--filled" onclick="saveTheDate()">
+            Save the Date
+          </button>
+        </div>
+
+        <p class="footer-note">We look forward to celebrating with you.</p>
+      </section>
+    </main>
+
+    <button
+      type="button"
+      class="music-toggle"
+      aria-label="Music toggle disabled"
+      aria-disabled="true"
+      title="Music will be available soon"
+      onclick="toggleInvitationMusic()"
+    >
+      <span aria-hidden="true">♪</span>
+    </button>
+
+    <script src="invitation.js"></script>
+  </body>
+</html>

@@ -2,7 +2,12 @@ import type { EventDraft } from "@/lib/event-draft";
 import { getEventUrl } from "@/lib/event-url";
 import { formatEventDate as formatDate, formatEventTime as formatTime } from "@/lib/date-utils";
 
-export type WeddingEventData = EventDraft;
+export type WeddingEventData = EventDraft & {
+  hijriDate?: string;
+  invitationOpening?: string;
+  invitationLine?: string;
+  lunchTime?: string;
+};
 
 export function formatEventDate(date?: string) {
   return date ? formatDate(date) : "24 May 2025";
