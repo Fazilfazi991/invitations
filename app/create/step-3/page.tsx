@@ -7,13 +7,17 @@ import { ImagePlus, Link as LinkIcon, Plus, QrCode, Trash2, Users } from "lucide
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { GuestAuthModal } from "@/components/auth/GuestAuthModal";
 import { StepProgress } from "@/components/shared";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
 
 export default function StepThreePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const { draft, setDraft } = useEventDraft();
   const [error, setError] = useState("");
+  const [authOpen, setAuthOpen] = useState(false);
 
   function continueNext() {
     if (draft.youtubeLink && !draft.youtubeLink.startsWith("http")) {
@@ -74,9 +78,21 @@ export default function StepThreePage() {
             ].map(([key, label, Icon]) => (
               <label key={key as string} className="flex items-center justify-between rounded-xl border border-border p-3 text-sm font-semibold">
                 <span><Icon className="mr-2 inline h-4 w-4 text-primary" />{label as string}</span>
-                <input type="checkbox" checked={Boolean(draft[key as "rsvpEnabled"])} onChange={(event) => setDraft((current) => ({ ...current, [key as string]: event.target.checked }))} />
+                <input
+                  type="checkbox"
+                  checked={Boolean(draft[key as "rsvpEnabled"])}
+                  onChange={(event) => {
+                    const protectedToggle = key === "rsvpEnabled" || key === "qrEnabled";
+                    if (protectedToggle && event.target.checked && !user) {
+                      setAuthOpen(true);
+                      return;
+                    }
+                    setDraft((current) => ({ ...current, [key as string]: event.target.checked }));
+                  }}
+                />
               </label>
             ))}
+            {!user && <p className="rounded-xl bg-primary-soft px-4 py-3 text-xs font-medium text-muted">Your design is ready. Create an account when you&apos;re ready to save and share.</p>}
             {draft.familyContactsEnabled && (
               <div className="space-y-3">
                 <Button variant="ghost" size="sm" onClick={() => setDraft((current) => ({ ...current, contacts: [...current.contacts, { id: crypto.randomUUID(), name: "", role: "", phone: "" }] }))}><Plus className="h-4 w-4" />Add contact</Button>
@@ -93,7 +109,8 @@ export default function StepThreePage() {
           </Card>
         </div>
       </div>
-      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Save & Continue</Button></div>
+      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Continue to Preview</Button></div>
+      <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create/step-3" />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import { normalizeEventType, type EventTheme, type EventType } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById, templateCategoryToEventType, templateMoodToTheme } from "@/lib/templates";
 import { getDefaultOpeningAnimation, type OpeningAnimation } from "@/lib/opening-animations";
+import { getDefaultMusicForType, normalizeMusic, type EventMusic } from "@/lib/event-music";
 
 export type ScheduleDraftItem = {
   id: string;
@@ -53,8 +54,12 @@ export type EventDraft = {
   templateImage?: string;
   theme: EventTheme;
   openingAnimation: OpeningAnimation;
+  music: EventMusic;
   status: "draft" | "published";
   slug: string;
+  publicUrl: string;
+  qrCodeData: string;
+  qrCodePath?: string;
 };
 
 export const DRAFT_KEY = "jashnly_event_draft";
@@ -124,8 +129,12 @@ export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
     templateImage: template.previewImage,
     theme: templateMoodToTheme(template.style.mood),
     openingAnimation: getDefaultOpeningAnimation(eventType),
+    music: getDefaultMusicForType(eventType),
     status: "draft",
     slug: generateSlug(title),
+    publicUrl: "",
+    qrCodeData: "",
+    qrCodePath: "",
   };
 }
 
@@ -154,7 +163,8 @@ export function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
       ? templateCategoryToEventType(storedTemplate.category)
       : "wedding";
   const defaults = getDefaultDraft(eventType);
-  return withTemplateMetadata({ ...defaults, ...value, eventType } as EventDraft, value.templateId);
+  const normalized = { ...defaults, ...value, eventType } as EventDraft;
+  return withTemplateMetadata({ ...normalized, music: normalizeMusic(value.music, eventType) }, value.templateId);
 }
 
 export function loadDraft() {

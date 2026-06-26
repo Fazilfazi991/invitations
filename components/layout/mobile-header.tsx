@@ -15,7 +15,7 @@ export function MobileHeader({ action = "create", className }: { action?: "creat
       <Button variant="ghost" size="icon" aria-label="Open menu"><Menu className="h-6 w-6" /></Button>
       <BrandLogo imageClassName="h-12" />
       {action === "create" ? (
-        <Button asChild size="sm"><Link href="/categories">Create</Link></Button>
+        <Button asChild size="sm"><Link href="/create-event">Create</Link></Button>
       ) : action === "settings" ? (
         <Button variant="outline" size="icon" aria-label="Filters"><Settings2 className="h-5 w-5" /></Button>
       ) : action === "avatar" ? (

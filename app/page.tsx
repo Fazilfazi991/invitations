@@ -4,38 +4,24 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { EverythingSimpleSection } from "@/components/landing/EverythingSimpleSection";
 import { LivePreviewShowcase } from "@/components/landing/LivePreviewShowcase";
 import { RotatingEventHero } from "@/components/landing/RotatingEventHero";
 import { WhyChooseOccazn } from "@/components/landing/WhyChooseOccazn";
 import { GlobalFooter } from "@/components/layout/global-footer";
-import { CategoryCard, FeaturePill, Section } from "@/components/shared";
-import { categories, featurePills } from "@/lib/mock-data";
+import { CategoryCard, Section } from "@/components/shared";
+import { categories } from "@/lib/mock-data";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-x-hidden lg:[zoom:1.05]">
+    <main className="min-h-screen overflow-x-hidden">
       <RotatingEventHero />
       <Section>
         <h2 className="font-serif text-3xl font-bold">For every kind of celebration</h2>
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-5">{categories.slice(0, 5).map((cat) => <CategoryCard key={cat.label} {...cat} href="/categories" />)}</div>
       </Section>
-      <Section id="how-it-works">
-        <h2 className="font-serif text-3xl font-bold">Everything you need, beautifully simple</h2>
-        <div className="mt-5 flex flex-wrap gap-3">{featurePills.map((feature) => <FeaturePill key={feature.label} {...feature} />)}</div>
-      </Section>
       <Section>
-        <Card className="p-5">
-          <h2 className="text-center font-serif text-3xl font-bold">How occazn works</h2>
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {["Create", "Customize", "Share", "Celebrate"].map((step, index) => (
-              <div key={step} className="text-center">
-                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary text-lg font-bold text-white">{index + 1}</div>
-                <h3 className="mt-3 font-semibold">{step}</h3>
-                <p className="text-sm text-muted">{["Set up your event.", "Add details and style.", "Share your link.", "Collect RSVPs."][index]}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
+        <EverythingSimpleSection />
       </Section>
       <Section>
         <LivePreviewShowcase />
@@ -46,7 +32,7 @@ export default function HomePage() {
       <Section>
         <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div><h2 className="font-serif text-3xl font-bold">Make every moment memorable</h2><p className="text-muted">Create your beautiful event link today.</p></div>
-          <Button asChild><Link href="/categories">Create Your Event<ArrowRight className="h-4 w-4" /></Link></Button>
+          <Button asChild><Link href="/create-event">Create Your Event<ArrowRight className="h-4 w-4" /></Link></Button>
         </Card>
       </Section>
       <GlobalFooter />

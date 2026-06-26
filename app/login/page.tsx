@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, user, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,6 +23,12 @@ export default function LoginPage() {
     const next = new URLSearchParams(window.location.search).get("next");
     router.replace(next || "/dashboard");
   }
+
+  useEffect(() => {
+    if (loading || !user) return;
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.replace(next || "/dashboard");
+  }, [loading, router, user]);
 
   return (
     <main className="grid min-h-screen place-items-center bg-gradient-to-br from-brand-offWhite via-white to-brand-light/40 px-5 py-10">

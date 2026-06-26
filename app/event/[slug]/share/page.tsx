@@ -51,7 +51,7 @@ export default function SharePage() {
           </div>
         </Card>
         <ShareActions title={title} url={url} slug={params.slug} />
-        <EventQRCode title={title} date={date} location={location} url={url} slug={params.slug} theme={event?.theme} />
+        <EventQRCode title={title} date={date} location={location} url={url} slug={params.slug} theme={event?.theme} qrCodeData={event?.qrCodeData} published={event?.status === "published"} />
         <WhatsAppMessageGenerator event={{ title, date, time, venue: location, url, eventLabel: event?.eventType }} />
         <p className="rounded-2xl bg-primary-soft p-4 text-sm leading-6 text-muted">
           Tip: Add this QR code to your printed invitation card so guests can instantly open location, RSVP and live link.

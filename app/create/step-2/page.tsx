@@ -52,7 +52,7 @@ export default function StepTwoPage() {
           {draft.mapLink && <Button asChild variant="outline" className="mt-4"><a href={draft.mapLink} target="_blank" rel="noreferrer">Open in Maps</a></Button>}
         </Card>
       </div>
-      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Save & Continue</Button></div>
+      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Continue</Button></div>
     </main>
   );
 }

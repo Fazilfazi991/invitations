@@ -39,7 +39,7 @@ export function RotatingEventHero() {
     if (paused) return;
     const timer = window.setTimeout(() => {
       setSelectedIndex((current) => (current + 1) % heroCategories.length);
-    }, 5000);
+    }, 3000);
     return () => window.clearTimeout(timer);
   }, [selectedIndex, paused]);
 
@@ -61,22 +61,22 @@ export function RotatingEventHero() {
       onBlurCapture={() => setPaused(false)}
     >
       <div className="sticky top-0 z-40 hidden px-5 pt-5 lg:block lg:px-8">
-        <header className="mx-auto grid max-w-[1320px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6 rounded-[2rem] border border-brand-light/80 bg-white/90 px-8 py-5 shadow-[0_18px_60px_rgba(108,23,133,0.10)] backdrop-blur-xl">
-          <BrandLogo className="w-[154px] shrink-0 xl:w-[174px]" imageClassName="h-12 xl:h-14" />
+        <header className="mx-auto grid max-w-[1320px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 rounded-[2rem] border border-brand-light/80 bg-white/90 px-7 py-5 shadow-[0_18px_60px_rgba(108,23,133,0.10)] backdrop-blur-xl xl:gap-6 xl:px-8">
+          <BrandLogo className="w-[132px] shrink-0 xl:w-[158px]" imageClassName="h-11 xl:h-12" />
           <nav className="min-w-0" aria-label="Event types">
-            <div className="mx-auto flex max-w-[760px] items-center overflow-x-auto rounded-[1.35rem] border border-brand-light/70 bg-white/75 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-              {navItems.map((item, index) => {
+            <div className="mx-auto grid min-w-0 max-w-[820px] grid-cols-7 items-stretch rounded-[1.35rem] border border-brand-light/70 bg-white/75 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+              {navItems.map((item) => {
                 const active = item === "Housewarming";
                 return (
                   <Link
                     key={item}
                     href={`/categories?type=${encodeURIComponent(item.toLowerCase().replaceAll(" ", "-"))}`}
-                    className={`relative shrink-0 rounded-[1rem] px-4 py-3 text-sm font-semibold transition hover:bg-primary-soft hover:text-primary xl:px-5 ${
+                    className={`relative flex min-w-0 items-center justify-center rounded-[1rem] px-2 py-3 text-center text-[12px] font-semibold leading-tight transition hover:bg-primary-soft hover:text-primary xl:px-3 xl:text-sm ${
                       active ? "bg-primary-soft text-primary shadow-[inset_0_1px_8px_rgba(108,23,133,0.08)]" : "text-[#4B5563]"
-                    } ${index > 0 ? "before:absolute before:left-[-2px] before:top-1/2 before:h-6 before:w-px before:-translate-y-1/2 before:bg-brand-light/55" : ""}`}
+                    }`}
                   >
-                    {item}
-                    {active && <span className="absolute -bottom-2 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-primary" />}
+                    <span className="truncate">{item}</span>
+                    {active && <span className="absolute -bottom-1.5 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-primary" />}
                   </Link>
                 );
               })}
@@ -89,7 +89,7 @@ export function RotatingEventHero() {
             <Link href={user ? "/dashboard" : "/login"} className="inline-flex h-11 items-center rounded-2xl border border-brand-light bg-white px-6 text-sm font-semibold text-primary transition hover:-translate-y-0.5 hover:bg-primary-soft">
               {user ? "Dashboard" : "Log in"}
             </Link>
-            <Link href={user ? "/categories" : "/register"} className="inline-flex h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-brand-violet px-6 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(108,23,133,0.25)] transition hover:-translate-y-0.5">
+            <Link href="/create-event" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-brand-violet px-6 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(108,23,133,0.25)] transition hover:-translate-y-0.5">
               {user ? "Create Event" : "Get Started"}
               <Sparkles className="h-4 w-4" />
             </Link>
@@ -109,7 +109,7 @@ export function RotatingEventHero() {
             Create elegant event pages with invitations, RSVP, QR sharing, memories, and guest moments — all in one beautiful place.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button className="w-full px-6 sm:w-auto" asChild><Link href="/categories">Create Your Event<ArrowRight className="h-4 w-4" /></Link></Button>
+            <Button className="w-full px-6 sm:w-auto" asChild><Link href="/create-event">Create Your Event<ArrowRight className="h-4 w-4" /></Link></Button>
             <Button className="w-full bg-transparent px-4 shadow-none sm:w-auto" asChild variant="ghost"><Link href="/categories">Explore Examples<ArrowRight className="h-4 w-4" /></Link></Button>
           </div>
           <div className="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3 text-xs font-medium text-muted sm:gap-x-0">
@@ -140,7 +140,7 @@ export function RotatingEventHero() {
           <BrandLogo className="w-[126px] shrink-0" imageClassName="h-10" ariaLabel="Home" />
           <div className="flex items-center gap-2">
             <Button className="h-10 px-4 text-sm shadow-soft" asChild size="sm">
-              <Link href={user ? "/categories" : "/register"}>{user ? "Create" : "Get Started"}</Link>
+              <Link href="/create-event">{user ? "Create" : "Get Started"}</Link>
             </Button>
             <Button className="h-10 w-10 rounded-full border border-brand-light bg-white p-0" variant="ghost" asChild size="icon">
               <Link href="/categories" aria-label="Open celebration categories"><Menu className="h-5 w-5" /></Link>
@@ -165,7 +165,7 @@ export function RotatingEventHero() {
           </p>
           <div className="mt-5 grid grid-cols-2 items-stretch gap-2.5">
             <Button className="h-12 w-full px-2 text-xs min-[390px]:text-[13px]" asChild>
-              <Link href="/categories">Create Your Event</Link>
+              <Link href="/create-event">Create Your Event</Link>
             </Button>
             <Button className="h-12 w-full px-2 text-xs min-[390px]:text-[13px]" variant="outline" asChild>
               <Link href="#how-it-works"><Play className="h-4 w-4" />See How It Works</Link>

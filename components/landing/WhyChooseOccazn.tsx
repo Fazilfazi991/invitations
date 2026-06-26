@@ -40,7 +40,7 @@ const previewImage = "/templates/previews/royal_nikah_elegance_preview.png";
 
 export function WhyChooseOccazn() {
   return (
-    <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-white via-brand-offWhite to-primary-soft/40 px-5 py-10 sm:px-8 lg:px-12 lg:py-14">
+    <section className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-white via-brand-offWhite to-primary-soft/40 px-5 py-8 sm:px-7 lg:px-10 lg:py-10">
       <span className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-primary-soft/80 blur-sm" />
       <span className="pointer-events-none absolute bottom-0 left-1/4 h-56 w-56 rounded-full bg-brand-light/25 blur-sm" />
       <span className="pointer-events-none absolute -right-20 top-16 h-64 w-64 rounded-full border border-brand-light/30" />
@@ -52,16 +52,16 @@ export function WhyChooseOccazn() {
           Why Occazn
           <Sparkles className="h-4 w-4 fill-primary/20" />
         </p>
-        <h2 className="mt-4 font-serif text-[clamp(38px,6vw,68px)] font-bold leading-[1.02] text-[#172033]">
+        <h2 className="mt-3 font-serif text-[clamp(32px,4.8vw,52px)] font-bold leading-[1.03] text-[#172033]">
           Why Choose <span className="text-primary">Occazn?</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base">
           Create elegant invitations and event pages your guests will actually love.
         </p>
       </div>
 
-      <div className="relative z-10 mx-auto mt-10 grid max-w-6xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div className="relative mx-auto min-h-[430px] w-full max-w-[540px] sm:min-h-[520px]">
+      <div className="relative z-10 mx-auto mt-8 grid max-w-6xl gap-8 lg:grid-cols-[0.88fr_1.12fr] lg:items-center">
+        <div className="relative mx-auto min-h-[360px] w-full max-w-[440px] sm:min-h-[430px]">
           <div className="absolute left-0 top-12 h-[78%] w-[82%] rounded-[42%_58%_50%_50%] bg-gradient-to-br from-brand-light/45 via-primary-soft to-white shadow-[inset_0_18px_55px_rgba(108,23,133,0.08)]" />
           <div className="absolute left-3 top-16 h-[68%] w-[70%] rotate-[-8deg] rounded-[2.5rem] bg-gradient-to-br from-brand-light/55 via-primary-soft/90 to-white opacity-90" />
           <span className="absolute bottom-20 left-[52%] h-3 w-3 rounded-full bg-white shadow-[0_0_0_5px_rgba(208,184,216,0.35)]" />
@@ -85,13 +85,13 @@ export function WhyChooseOccazn() {
         <div className="rounded-[1.5rem] bg-white/40 backdrop-blur-sm">
           <div className="divide-y divide-brand-light/55">
             {features.map(({ title, description, icon: Icon }) => (
-              <article key={title} className="group flex gap-5 rounded-2xl px-2 py-5 transition hover:bg-white/70 sm:px-4">
-                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-brand-light/70 bg-primary-soft text-primary shadow-[0_12px_30px_rgba(108,23,133,0.08)] transition group-hover:bg-white group-hover:shadow-soft">
-                  <Icon className="h-7 w-7" />
+              <article key={title} className="group flex gap-4 rounded-2xl px-2 py-4 transition hover:bg-white/70 sm:px-4">
+                <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-brand-light/70 bg-primary-soft text-primary shadow-[0_10px_24px_rgba(108,23,133,0.08)] transition group-hover:bg-white group-hover:shadow-soft">
+                  <Icon className="h-6 w-6" />
                 </span>
                 <div className="pt-1">
-                  <h3 className="font-serif text-2xl font-bold leading-tight text-[#151B33]">{title}</h3>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-muted sm:text-base">{description}</p>
+                  <h3 className="font-serif text-xl font-bold leading-tight text-[#151B33]">{title}</h3>
+                  <p className="mt-1.5 max-w-md text-sm leading-6 text-muted">{description}</p>
                 </div>
               </article>
             ))}
@@ -99,10 +99,10 @@ export function WhyChooseOccazn() {
         </div>
       </div>
 
-      <div className="relative z-10 mt-9 flex justify-center">
+      <div className="relative z-10 mt-7 flex justify-center">
         <Link
-          href="/categories"
-          className="inline-flex h-13 items-center justify-center gap-3 rounded-full bg-gradient-to-r from-primary to-brand-violet px-8 py-4 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(108,23,133,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_48px_rgba(108,23,133,0.28)]"
+          href="/create-event"
+          className="inline-flex h-12 items-center justify-center gap-3 rounded-full bg-gradient-to-r from-primary to-brand-violet px-8 py-4 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(108,23,133,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_48px_rgba(108,23,133,0.28)]"
         >
           Get Started
           <ArrowRight className="h-4 w-4" />

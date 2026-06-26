@@ -6,6 +6,7 @@ export const templateFilterOptions = [
   { label: "All", value: "all" },
   { label: "Wedding", value: "wedding" },
   { label: "Birthday", value: "birthday" },
+  { label: "Engagement", value: "engagement" },
   { label: "Housewarming", value: "housewarming" },
   { label: "Naming", value: "naming" },
   { label: "Religious", value: "religious" },

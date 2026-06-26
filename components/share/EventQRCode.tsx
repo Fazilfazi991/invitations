@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Download, Printer, QrCode, Share2, X } from "lucide-react";
+import { Copy, Download, MessageCircle, Printer, QrCode, Share2, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { eventUrl, sampleEvent } from "@/lib/mock-data";
 import type { EventTheme } from "@/lib/event-types";
 import { getThemeStyles } from "@/lib/themes";
 
-export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date, location = sampleEvent.location, url = eventUrl, slug = "afsal-fathima", theme: themeId }: { title?: string; date?: string; location?: string; url?: string; slug?: string; theme?: EventTheme }) {
+export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date, location = sampleEvent.location, url = eventUrl, slug = "afsal-fathima", theme: themeId, qrCodeData, published = true }: { title?: string; date?: string; location?: string; url?: string; slug?: string; theme?: EventTheme; qrCodeData?: string; published?: boolean }) {
   const [copied, setCopied] = useState(false);
   const [posterOpen, setPosterOpen] = useState(false);
   const theme = getThemeStyles(themeId);
@@ -34,8 +34,8 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
 
   function downloadQr() {
     const svg = document.getElementById("event-qr-code");
-    if (!svg) return;
-    const source = new XMLSerializer().serializeToString(svg);
+    if (!svg && !qrCodeData) return;
+    const source = qrCodeData || new XMLSerializer().serializeToString(svg);
     const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -43,6 +43,18 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
     link.download = `occazn-${slug}-qr.svg`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  if (!published) {
+    return (
+      <Card className="p-5 text-center" style={{ borderColor: theme.border, backgroundColor: theme.background }}>
+        <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary-soft">
+          <QrCode className="h-6 w-6 text-primary" />
+        </div>
+        <h2 className="mt-3 font-serif text-2xl font-bold">Event QR Code</h2>
+        <p className="mt-2 text-sm leading-6 text-muted">Publish your event to generate a shareable QR code.</p>
+      </Card>
+    );
   }
 
   return (
@@ -54,16 +66,25 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
         <h2 className="mt-3 font-serif text-2xl font-bold">Event QR Code</h2>
         <p className="mt-1 text-sm leading-6 text-muted">Guests can scan this to open your event page.</p>
         <div className="mx-auto mt-5 inline-block rounded-3xl border border-border bg-white p-5 shadow-card">
-          <QRCodeSVG id="event-qr-code" value={url} size={190} fgColor={theme.primary} bgColor="#FFFFFF" />
+          {qrCodeData ? (
+            <div id="event-qr-code" className="h-[190px] w-[190px]" dangerouslySetInnerHTML={{ __html: qrCodeData }} />
+          ) : (
+            <QRCodeSVG id="event-qr-code" value={url} size={190} fgColor={theme.primary} bgColor="#FFFFFF" />
+          )}
         </div>
         <h3 className="mt-4 font-serif text-xl font-bold" style={{ color: theme.primary }}>{title}</h3>
         <p className="text-sm text-muted">{date}</p>
         {copied && <p className="mt-3 text-sm font-semibold text-emerald-600">Link copied</p>}
         <div className="mt-5 grid grid-cols-2 gap-3">
-          <Button onClick={downloadQr}><Download className="h-4 w-4" />Download QR</Button>
-          <Button onClick={copyLink} variant="outline"><Copy className="h-4 w-4" />Copy link</Button>
+          <Button onClick={copyLink} variant="outline"><Copy className="h-4 w-4" />Copy Event Link</Button>
+          <Button onClick={downloadQr}><Download className="h-4 w-4" />Download QR Code</Button>
+          <Button asChild variant="outline">
+            <a href={`https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`} target="_blank" rel="noreferrer">
+              <MessageCircle className="h-4 w-4" />Share on WhatsApp
+            </a>
+          </Button>
           <Button onClick={shareEvent} variant="outline"><Share2 className="h-4 w-4" />Share event</Button>
-          <Button onClick={() => setPosterOpen(true)} variant="soft"><Printer className="h-4 w-4" />Print poster</Button>
+          <Button onClick={() => setPosterOpen(true)} variant="soft" className="col-span-2"><Printer className="h-4 w-4" />Print poster</Button>
         </div>
       </Card>
       {posterOpen && (

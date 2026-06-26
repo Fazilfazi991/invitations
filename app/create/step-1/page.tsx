@@ -161,7 +161,7 @@ export default function StepOnePage() {
           <LiveTemplatePreview draft={draft} template={selectedTemplate} />
         </div>
       </div>
-      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Save & Continue</Button></div>
+      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Continue</Button></div>
     </main>
   );
 }

@@ -73,7 +73,7 @@ function SiteHeader() {
             Log in
           </Link>
           <Link
-            href="/categories"
+            href="/create-event"
             className="inline-flex h-10 items-center rounded-full bg-primary px-5 text-sm font-semibold text-white shadow-soft transition hover:bg-primary-dark"
           >
             Create Event
@@ -82,7 +82,7 @@ function SiteHeader() {
 
         <div className="flex items-center gap-2 lg:hidden">
           <Link
-            href="/categories"
+            href="/create-event"
             className="inline-flex h-10 items-center rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-soft"
           >
             Create

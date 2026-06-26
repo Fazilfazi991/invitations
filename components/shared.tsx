@@ -14,7 +14,7 @@ import type { EventTheme } from "@/lib/event-types";
 import { getThemeStyles } from "@/lib/themes";
 
 export function Section({ children, className, id }: { children: React.ReactNode; className?: string; id?: string }) {
-  return <motion.section id={id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className={cn("px-5 py-6", className)}>{children}</motion.section>;
+  return <section id={id} className={cn("px-5 py-5", className)}>{children}</section>;
 }
 
 export function CategoryCard({ label, icon: Icon, image, href = "/create/step-1" }: { label: string; icon: React.ElementType; image?: string; href?: string }) {

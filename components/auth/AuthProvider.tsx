@@ -16,6 +16,7 @@ type AuthContextValue = {
   loading: boolean;
   signUp: (data: { name: string; email: string; password: string }) => Promise<{ error?: string; confirmationRequired?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signInWithGoogle: (next?: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 };
 
@@ -88,6 +89,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) return { error: error.message };
       if (data.user) setUser(mapUser(data.user));
       return {};
+    },
+    async signInWithGoogle(next) {
+      if (localTestMode) {
+        const demo = registerDemoUser({ name: "Occazn Organizer", email: "demo@occazn.local", password: "password" });
+        setUser(demo);
+        return {};
+      }
+      const redirectTo = `${window.location.origin}/login?next=${encodeURIComponent(next || window.location.pathname)}`;
+      const { error } = await createSupabaseBrowserClient().auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+      return error ? { error: error.message } : {};
     },
     async signOut() {
       if (localTestMode) logoutDemoUser();

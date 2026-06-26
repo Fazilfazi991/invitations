@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Music2, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { GuestAuthModal } from "@/components/auth/GuestAuthModal";
 import { StepProgress } from "@/components/shared";
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
@@ -17,6 +18,7 @@ import { getThemeStyles, themeStyles } from "@/lib/themes";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { publishEvent } from "@/lib/event-repository";
 import { openingAnimations } from "@/lib/opening-animations";
+import { getMusicTrack, musicTracks, noMusicTrack } from "@/lib/event-music";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { cn } from "@/lib/utils";
 
@@ -27,11 +29,18 @@ export default function StepFourPage() {
   const { user } = useAuth();
   const { draft, setDraft } = useEventDraft();
   const [error, setError] = useState("");
+  const [authOpen, setAuthOpen] = useState(false);
   const previewSlug = draft.slug || generateSlug(draft.title);
   const selectedTemplate = getTemplateById(draft.templateId) ?? getDefaultTemplateForType(draft.eventType);
   const selectedTheme = getThemeStyles(draft.theme);
+  const selectedMusic = getMusicTrack(draft.music.trackId);
+  const [previewingTrack, setPreviewingTrack] = useState("");
 
   async function publish() {
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
     if (!draft.title || !draft.date || !draft.time || !draft.venueName) {
       setError("Please complete title, date, time and venue before publishing.");
       return;
@@ -118,6 +127,70 @@ export default function StepFourPage() {
               </button>
             ))}
           </div>
+          <Card className="space-y-4 p-5">
+            <div className="flex items-start gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary-soft text-primary">
+                <Music2 className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="font-serif text-2xl font-bold">Music</h2>
+                <p className="mt-1 text-sm leading-6 text-muted">Choose optional background music for the public event page.</p>
+              </div>
+            </div>
+            <label className="flex items-center justify-between rounded-2xl border border-border bg-white p-4 text-sm font-semibold">
+              <span>Enable music</span>
+              <input
+                type="checkbox"
+                checked={draft.music.enabled}
+                onChange={(event) => setDraft((current) => ({
+                  ...current,
+                  music: { ...current.music, enabled: event.target.checked, url: getMusicTrack(current.music.trackId).url, autoplay: false },
+                }))}
+                className="h-5 w-5 accent-primary"
+              />
+            </label>
+            <label className="block space-y-2 text-sm font-semibold">
+              <span>Select music track</span>
+              <select
+                value={draft.music.enabled ? draft.music.trackId : noMusicTrack.id}
+                onChange={(event) => {
+                  const track = getMusicTrack(event.target.value);
+                  setDraft((current) => ({
+                    ...current,
+                    music: {
+                      enabled: track.id !== noMusicTrack.id,
+                      trackId: track.id,
+                      url: track.url,
+                      autoplay: false,
+                    },
+                  }));
+                }}
+                className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm"
+              >
+                <option value={noMusicTrack.id}>{noMusicTrack.label}</option>
+                {musicTracks.map((track) => <option key={track.id} value={track.id}>{track.eventLabel} - {track.label}</option>)}
+              </select>
+            </label>
+            {draft.music.enabled && selectedMusic.url ? (
+              <div className="rounded-2xl border border-border bg-white p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{selectedMusic.label}</p>
+                    <p className="text-xs text-muted">{selectedMusic.eventLabel}</p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setPreviewingTrack((current) => current === selectedMusic.id ? "" : selectedMusic.id)}>
+                    {previewingTrack === selectedMusic.id ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    Preview
+                  </Button>
+                </div>
+                {previewingTrack === selectedMusic.id && (
+                  <audio className="mt-4 w-full" src={selectedMusic.url} controls autoPlay onEnded={() => setPreviewingTrack("")} onError={() => setPreviewingTrack("")} />
+                )}
+              </div>
+            ) : (
+              <p className="rounded-xl bg-primary-soft px-4 py-3 text-sm text-muted">No music will play on this event page.</p>
+            )}
+          </Card>
           <Card className="p-5" style={{ backgroundColor: selectedTheme.background, borderColor: selectedTheme.border }}>
             <Badge>{getEventTypeLabel(draft.eventType)}</Badge>
             <h2 className="mt-3 font-serif text-3xl font-bold" style={{ color: selectedTheme.primary }}>{draft.title}</h2>
@@ -126,9 +199,11 @@ export default function StepFourPage() {
             <Button asChild className="mt-4 w-full" style={{ backgroundColor: selectedTheme.primary }}><Link href={`/event/${previewSlug}?preview=draft`}>Preview event page<ArrowRight className="h-4 w-4" /></Link></Button>
           </Card>
           {error && <p className="rounded-xl bg-primary-soft px-4 py-3 text-sm font-semibold text-primary">{error}</p>}
+          {!user && <p className="rounded-xl bg-primary-soft px-4 py-3 text-sm font-medium text-muted">Your progress is kept on this device until you save it. Create an account when you&apos;re ready to publish and share.</p>}
         </div>
       </div>
       <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={publish} className="w-full">Publish Event</Button></div>
+      <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create/step-4" />
     </main>
   );
 }

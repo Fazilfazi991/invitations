@@ -6,7 +6,8 @@ import {
   savePublishedEvent,
   type EventDraft,
 } from "@/lib/event-draft";
-import { ensureUniqueSlug } from "@/lib/event-url";
+import { ensureUniqueSlug, getEventUrl } from "@/lib/event-url";
+import { createQrCodeSvg } from "@/lib/qr-code";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const localTestMode = process.env.NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE === "true";
@@ -110,7 +111,9 @@ export async function loadPublicEvent(slug: string) {
 export async function publishEvent(event: EventDraft) {
   if (localTestMode) {
     const slug = ensureUniqueSlug(event.slug || event.title, loadPublishedEvents());
-    const published = { ...event, slug, status: "published" as const };
+    const publicUrl = getEventUrl(slug);
+    const qrCodeData = await createQrCodeSvg(publicUrl);
+    const published = { ...event, slug, publicUrl, qrCodeData, status: "published" as const };
     savePublishedEvent(published);
     return published;
   }
@@ -120,8 +123,10 @@ export async function publishEvent(event: EventDraft) {
   const supabase = createSupabaseBrowserClient();
   const { data: existing, error: existingError } = await supabase.from("events").select("slug").ilike("slug", `${event.slug || event.title}%`);
   if (existingError) throw existingError;
-  const slug = ensureUniqueSlug(event.slug || event.title, (existing || []) as Partial<EventDraft>[]);
-  const published = { ...event, ownerId: user.id, slug, status: "published" as const };
+  const slug = ensureUniqueSlug(event.slug || event.title || event.eventType, (existing || []) as Partial<EventDraft>[]);
+  const publicUrl = getEventUrl(slug);
+  const qrCodeData = await createQrCodeSvg(publicUrl);
+  const published = { ...event, ownerId: user.id, slug, publicUrl, qrCodeData, status: "published" as const };
   const { error } = await supabase.from("events").insert({
     owner_id: user.id,
     slug,

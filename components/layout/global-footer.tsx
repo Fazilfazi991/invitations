@@ -27,7 +27,7 @@ const footerGroups = [
     title: "Account",
     links: [
       { label: "Log in", href: "/login" },
-      { label: "Get started", href: "/register" },
+      { label: "Get started", href: "/create-event" },
       { label: "Dashboard", href: "/dashboard" },
       { label: "Profile", href: "/profile" },
     ],
@@ -81,7 +81,7 @@ export function GlobalFooter() {
             <h2 className="mt-3 font-serif text-2xl font-bold text-[#172033]">Start beautifully</h2>
             <p className="mt-2 text-sm leading-6 text-muted">Choose an event type, preview your page, and share a polished invitation in minutes.</p>
             <Link
-              href="/categories"
+              href="/create-event"
               className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-primary-dark"
             >
               Get Started

@@ -12,26 +12,26 @@ const previewImage = "/templates/previews/floral_wedding_elegance_preview.png";
 
 export function LivePreviewShowcase() {
   return (
-    <section className="group relative overflow-hidden rounded-[2rem] border border-brand-light/80 bg-gradient-to-br from-white via-brand-offWhite to-primary-soft/55 px-5 py-6 shadow-[0_18px_60px_rgba(108,23,133,0.08)] transition duration-300 hover:-translate-y-1 hover:border-brand-lavender sm:px-7 sm:py-7 lg:px-8 lg:py-8">
+    <section className="group relative overflow-hidden rounded-[1.75rem] border border-brand-light/80 bg-gradient-to-br from-white via-brand-offWhite to-primary-soft/55 px-5 py-5 shadow-[0_14px_46px_rgba(108,23,133,0.07)] transition duration-300 hover:border-brand-lavender sm:px-7 sm:py-6 lg:px-8 lg:py-6">
       <span className="pointer-events-none absolute left-8 top-8 h-3 w-3 rounded-full bg-brand-light/70" />
       <span className="pointer-events-none absolute bottom-8 left-16 h-5 w-5 rounded-full bg-primary-soft" />
       <span className="pointer-events-none absolute right-8 top-8 h-6 w-6 rounded-full bg-brand-light/45" />
       <span className="pointer-events-none absolute bottom-10 right-[45%] h-4 w-4 rounded-full bg-brand-light/35" />
 
-      <div className="relative z-10 grid gap-7 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+      <div className="relative z-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div className="max-w-xl">
           <div className="flex items-center gap-3">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">LIVE PREVIEW</p>
             <span className="h-2.5 w-2.5 rounded-full bg-brand-light" />
           </div>
-          <h2 className="mt-4 font-serif text-[clamp(30px,5.2vw,46px)] font-bold leading-[1.04] text-[#172033]">
+          <h2 className="mt-3 max-w-lg font-serif text-[clamp(28px,4vw,38px)] font-bold leading-[1.05] text-[#172033]">
             See your event before you share it
           </h2>
-          <p className="mt-4 max-w-lg text-base leading-7 text-muted">
+          <p className="mt-3 max-w-lg text-sm leading-6 text-muted sm:text-base">
             Preview your invitation exactly how guests will see it - beautiful on mobile, tablet, and desktop.
           </p>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:max-w-xl">
+          <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:max-w-xl">
             {features.map(({ label, icon: Icon }) => (
               <div key={label} className="flex items-center gap-3 rounded-2xl border border-brand-light/60 bg-white/70 px-3 py-2.5 shadow-[0_10px_30px_rgba(108,23,133,0.06)] backdrop-blur">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-soft text-primary">
@@ -43,7 +43,7 @@ export function LivePreviewShowcase() {
           </div>
         </div>
 
-        <div className="relative mx-auto min-h-[260px] w-full max-w-[660px] overflow-hidden rounded-[1.5rem] pb-2 sm:min-h-[330px] lg:min-h-[360px]">
+        <div className="relative mx-auto min-h-[230px] w-full max-w-[560px] overflow-hidden rounded-[1.5rem] pb-2 sm:min-h-[285px] lg:min-h-[300px]">
           <div className="absolute right-0 top-6 w-[82%] transition duration-300 group-hover:-translate-y-1 sm:top-8">
             <LaptopPreview />
           </div>
