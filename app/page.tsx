@@ -4,14 +4,16 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { LivePreviewShowcase } from "@/components/landing/LivePreviewShowcase";
 import { RotatingEventHero } from "@/components/landing/RotatingEventHero";
-import { VendorMarketplaceTeaser } from "@/components/landing/VendorMarketplaceTeaser";
-import { CategoryCard, FeaturePill, FooterTrust, Section } from "@/components/shared";
+import { WhyChooseOccazn } from "@/components/landing/WhyChooseOccazn";
+import { GlobalFooter } from "@/components/layout/global-footer";
+import { CategoryCard, FeaturePill, Section } from "@/components/shared";
 import { categories, featurePills } from "@/lib/mock-data";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen overflow-x-hidden lg:[zoom:0.9]">
+    <main className="min-h-screen overflow-x-hidden lg:[zoom:1.05]">
       <RotatingEventHero />
       <Section>
         <h2 className="font-serif text-3xl font-bold">For every kind of celebration</h2>
@@ -36,14 +38,10 @@ export default function HomePage() {
         </Card>
       </Section>
       <Section>
-        <Card className="floral overflow-hidden p-6">
-          <p className="text-sm font-bold uppercase text-primary">Live Preview</p>
-          <h2 className="mt-2 font-serif text-3xl font-bold">See your event come to life</h2>
-          <p className="mt-2 text-muted">Beautiful on any device. Easy for everyone.</p>
-        </Card>
+        <LivePreviewShowcase />
       </Section>
       <Section>
-        <VendorMarketplaceTeaser />
+        <WhyChooseOccazn />
       </Section>
       <Section>
         <Card className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -51,7 +49,7 @@ export default function HomePage() {
           <Button asChild><Link href="/categories">Create Your Event<ArrowRight className="h-4 w-4" /></Link></Button>
         </Card>
       </Section>
-      <FooterTrust />
+      <GlobalFooter />
     </main>
   );
 }

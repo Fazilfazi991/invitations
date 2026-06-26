@@ -53,11 +53,11 @@ export const familyContacts = [
 ];
 
 export const categories = [
-  { label: "Wedding", icon: HeartHandshake },
-  { label: "Engagement", icon: Heart },
-  { label: "Birthday", icon: Cake },
-  { label: "Naming Ceremony", icon: Baby },
-  { label: "Housewarming", icon: Home },
+  { label: "Wedding", icon: HeartHandshake, image: "/New%20folder/occazn_celebration_cards_webp/wedding.webp" },
+  { label: "Engagement", icon: Heart, image: "/New%20folder/occazn_celebration_cards_webp/engagement.webp" },
+  { label: "Birthday", icon: Cake, image: "/New%20folder/occazn_celebration_cards_webp/birthday.webp" },
+  { label: "Naming Ceremony", icon: Baby, image: "/New%20folder/occazn_celebration_cards_webp/naming_ceremony.webp" },
+  { label: "Housewarming", icon: Home, image: "/New%20folder/occazn_celebration_cards_webp/housewarming.webp" },
   { label: "Religious Event", icon: Sparkles },
   { label: "Reception", icon: PartyPopper },
   { label: "Other Events", icon: Gift },

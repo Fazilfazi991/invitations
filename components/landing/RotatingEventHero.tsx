@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Clock3, Menu, Play, ShieldCheck, Smartphone, Sparkles } from "lucide-react";
+import { ArrowRight, Clock3, Menu, Play, Search, ShieldCheck, Smartphone, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroEventTabs } from "@/components/landing/HeroEventTabs";
 import { HeroImageCard } from "@/components/landing/HeroImageCard";
@@ -20,6 +20,8 @@ const trustPoints = [
   { label: "Mobile Optimized", icon: Smartphone },
   { label: "Quick to Share", icon: Clock3 },
 ];
+
+const navItems = ["Wedding", "Birthday", "Baptism", "Holy Communion", "Naming Ceremony", "Baby Shower", "Housewarming"];
 
 export function RotatingEventHero() {
   const [selectedIndex, setSelectedIndex] = useState(1);
@@ -58,20 +60,42 @@ export function RotatingEventHero() {
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <header className="mx-auto hidden max-w-[1320px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-4 lg:grid lg:px-8">
-        <BrandLogo className="w-[128px] shrink-0 xl:w-[144px]" imageClassName="h-10 xl:h-11" />
-        <div className="hidden min-w-0 justify-center overflow-x-auto lg:flex" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-          <HeroEventTabs events={heroCategories} selectedIndex={selectedIndex} onSelect={rotateTo} />
-        </div>
-        <div className="ml-auto flex shrink-0 gap-2">
-          {user ? (
-            <Button className="h-10 px-4 text-sm" variant="outline" asChild size="sm"><Link href="/dashboard">{user.name || "Dashboard"}</Link></Button>
-          ) : (
-            <Button className="h-10 px-4 text-sm" variant="outline" asChild size="sm"><Link href="/login">Log in</Link></Button>
-          )}
-          <Button className="h-10 px-5 text-sm shadow-soft" asChild size="sm"><Link href={user ? "/categories" : "/register"}>{user ? "Create Event" : "Get Started"}</Link></Button>
-        </div>
-      </header>
+      <div className="sticky top-0 z-40 hidden px-5 pt-5 lg:block lg:px-8">
+        <header className="mx-auto grid max-w-[1320px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-6 rounded-[2rem] border border-brand-light/80 bg-white/90 px-8 py-5 shadow-[0_18px_60px_rgba(108,23,133,0.10)] backdrop-blur-xl">
+          <BrandLogo className="w-[154px] shrink-0 xl:w-[174px]" imageClassName="h-12 xl:h-14" />
+          <nav className="min-w-0" aria-label="Event types">
+            <div className="mx-auto flex max-w-[760px] items-center overflow-x-auto rounded-[1.35rem] border border-brand-light/70 bg-white/75 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+              {navItems.map((item, index) => {
+                const active = item === "Housewarming";
+                return (
+                  <Link
+                    key={item}
+                    href={`/categories?type=${encodeURIComponent(item.toLowerCase().replaceAll(" ", "-"))}`}
+                    className={`relative shrink-0 rounded-[1rem] px-4 py-3 text-sm font-semibold transition hover:bg-primary-soft hover:text-primary xl:px-5 ${
+                      active ? "bg-primary-soft text-primary shadow-[inset_0_1px_8px_rgba(108,23,133,0.08)]" : "text-[#4B5563]"
+                    } ${index > 0 ? "before:absolute before:left-[-2px] before:top-1/2 before:h-6 before:w-px before:-translate-y-1/2 before:bg-brand-light/55" : ""}`}
+                  >
+                    {item}
+                    {active && <span className="absolute -bottom-2 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-primary" />}
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-3">
+            <Link href="/categories" className="grid h-11 w-11 place-items-center rounded-2xl border border-brand-light bg-white/90 text-[#4B5563] shadow-[0_10px_28px_rgba(108,23,133,0.06)] transition hover:-translate-y-0.5 hover:text-primary" aria-label="Search events">
+              <Search className="h-5 w-5" />
+            </Link>
+            <Link href={user ? "/dashboard" : "/login"} className="inline-flex h-11 items-center rounded-2xl border border-brand-light bg-white px-6 text-sm font-semibold text-primary transition hover:-translate-y-0.5 hover:bg-primary-soft">
+              {user ? "Dashboard" : "Log in"}
+            </Link>
+            <Link href={user ? "/categories" : "/register"} className="inline-flex h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-brand-violet px-6 text-sm font-semibold text-white shadow-[0_16px_36px_rgba(108,23,133,0.25)] transition hover:-translate-y-0.5">
+              {user ? "Create Event" : "Get Started"}
+              <Sparkles className="h-4 w-4" />
+            </Link>
+          </div>
+        </header>
+      </div>
 
       <div className="hidden mx-auto max-w-[1320px] gap-7 px-5 py-9 md:py-12 lg:-mt-3 lg:grid lg:min-h-[620px] lg:grid-cols-[42fr_58fr] lg:items-center lg:gap-6 lg:px-8 lg:pb-8 lg:pt-4 xl:gap-10">
         <div className="relative z-10 mx-auto max-w-[590px] lg:mx-0">
@@ -112,17 +136,24 @@ export function RotatingEventHero() {
       </div>
 
       <div className="lg:hidden">
-        <header className="flex items-center justify-between px-5 pb-2 pt-4">
-          <BrandLogo className="w-[122px] shrink-0" imageClassName="h-9" ariaLabel="Home" />
+        <header className="mx-4 mt-4 flex items-center justify-between rounded-[1.75rem] border border-brand-light/80 bg-white/90 px-4 py-3 shadow-[0_14px_40px_rgba(108,23,133,0.10)] backdrop-blur-xl">
+          <BrandLogo className="w-[126px] shrink-0" imageClassName="h-10" ariaLabel="Home" />
           <div className="flex items-center gap-2">
-            <Button className="h-10 px-4 text-sm" variant="outline" asChild size="sm">
-              <Link href={user ? "/dashboard" : "/login"}>{user ? "Dashboard" : "Login"}</Link>
+            <Button className="h-10 px-4 text-sm shadow-soft" asChild size="sm">
+              <Link href={user ? "/categories" : "/register"}>{user ? "Create" : "Get Started"}</Link>
             </Button>
-            <Button className="h-10 w-10 rounded-full p-0" variant="ghost" asChild size="icon">
+            <Button className="h-10 w-10 rounded-full border border-brand-light bg-white p-0" variant="ghost" asChild size="icon">
               <Link href="/categories" aria-label="Open celebration categories"><Menu className="h-5 w-5" /></Link>
             </Button>
           </div>
         </header>
+        <nav className="mx-4 mt-3 flex gap-2 overflow-x-auto rounded-2xl border border-brand-light/70 bg-white/75 p-2 text-sm font-semibold text-[#4B5563]" aria-label="Browse event categories">
+          {navItems.map((item) => (
+            <Link key={item} href={`/categories?type=${encodeURIComponent(item.toLowerCase().replaceAll(" ", "-"))}`} className={`shrink-0 rounded-xl px-3 py-2 ${item === "Housewarming" ? "bg-primary-soft text-primary" : ""}`}>
+              {item}
+            </Link>
+          ))}
+        </nav>
 
         <div className="mx-auto max-w-[460px] px-5 pb-8 pt-5">
           <h1 className="font-serif text-[clamp(31px,8.7vw,42px)] font-bold leading-[1.02]">

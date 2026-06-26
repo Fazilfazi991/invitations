@@ -17,12 +17,23 @@ export function Section({ children, className, id }: { children: React.ReactNode
   return <motion.section id={id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }} className={cn("px-5 py-6", className)}>{children}</motion.section>;
 }
 
-export function CategoryCard({ label, icon: Icon, href = "/create/step-1" }: { label: string; icon: React.ElementType; href?: string }) {
+export function CategoryCard({ label, icon: Icon, image, href = "/create/step-1" }: { label: string; icon: React.ElementType; image?: string; href?: string }) {
   return (
     <motion.div whileTap={{ scale: 0.97 }}>
-      <Link href={href} className="flex min-h-28 flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-white p-4 text-center shadow-card transition hover:border-primary">
-        <Icon className="h-8 w-8 text-primary" />
-        <span className="text-sm font-semibold">{label}</span>
+      <Link href={href} className="group block overflow-hidden rounded-2xl border border-border bg-white text-center shadow-card transition hover:-translate-y-0.5 hover:border-primary hover:shadow-soft">
+        {image ? (
+          <div className="relative aspect-[16/9] overflow-hidden bg-primary-soft">
+            <img src={image} alt={`${label} celebration preview`} className="h-[145%] w-full origin-top object-cover object-top transition duration-500 group-hover:scale-105" />
+            <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/90 text-primary shadow-card backdrop-blur">
+              <Icon className="h-5 w-5" />
+            </span>
+          </div>
+        ) : (
+          <div className="flex min-h-28 flex-col items-center justify-center gap-3 p-4">
+            <Icon className="h-8 w-8 text-primary" />
+          </div>
+        )}
+        <span className="block px-3 py-3 text-sm font-semibold">{label}</span>
       </Link>
     </motion.div>
   );
