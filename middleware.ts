@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSupabaseSession } from "@/lib/supabase/middleware";
 
-const protectedPrefixes = ["/dashboard", "/create", "/profile"];
+const protectedPrefixes = ["/dashboard", "/profile"];
 
 export async function middleware(request: NextRequest) {
   if (process.env.NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE === "true") return NextResponse.next();

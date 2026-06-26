@@ -42,7 +42,17 @@ export function TemplateGallery() {
 
     if (mode === "change-template" && eventSlug) {
       if (!user) {
-        router.push(`/login?next=${encodeURIComponent(`/categories?event=${eventSlug}&mode=change-template&type=${eventType}`)}`);
+        const current = await loadEventDraft();
+        const draft = {
+          ...current,
+          templateId: template.id,
+          templateName: template.name,
+          templateImage: template.previewImage,
+          eventType,
+          theme,
+        };
+        await persistEventDraft(draft);
+        router.push(`/create/step-1?template=${template.id}&type=${eventType}`);
         return;
       }
       const events = await loadOrganizerEvents();
