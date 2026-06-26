@@ -11,7 +11,7 @@ import {
   SELECTED_TEMPLATE_KEY,
   templateCategoryToEventType,
   templateMoodToTheme,
-  templates,
+  weddingTemplates,
   type EventTemplate,
 } from "@/lib/templates";
 import { getDefaultDraft, type EventDraft } from "@/lib/event-draft";
@@ -31,13 +31,16 @@ export function TemplateGallery() {
   const mode = searchParams.get("mode");
 
   const visibleTemplates = useMemo(() => {
-    return templates.filter((template) => filter === "all" || template.category === filter);
+    return weddingTemplates.filter((template) => filter === "all" || template.category === filter);
   }, [filter]);
 
   async function useTemplate(template: EventTemplate) {
     const eventType = templateCategoryToEventType(template.category);
     const theme = templateMoodToTheme(template.style.mood);
     window.localStorage.setItem(SELECTED_TEMPLATE_KEY, template.id);
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("Selected wedding templateId:", template.id);
+    }
     setSelectedId(template.id);
 
     if (mode === "change-template" && eventSlug) {

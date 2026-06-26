@@ -38,10 +38,12 @@ export function MinimalEditorialWedding({ event }: { event: WeddingEventData }) 
       </section>
       <div className="space-y-5 px-5 pb-6">
         <TemplateCountdown event={event} title="Counting down to our big day" primary={primary} />
-        <section className="grid gap-4 rounded-[1.5rem] bg-white p-4 shadow-card sm:grid-cols-2">
-          <div><p className="text-xs font-bold uppercase tracking-[0.18em]">Our Story</p><h2 className="mt-3 font-serif text-3xl font-bold">Two hearts. One beautiful journey.</h2><p className="mt-3 text-sm text-muted">From a chance meeting to a lifetime of memories, our story is just beginning.</p></div>
-          <img src={heroImage} alt="" className="h-40 w-full rounded-2xl object-cover" />
-        </section>
+        {(event.story || isUsableImage(event.coverImage)) && (
+          <section className="grid gap-4 rounded-[1.5rem] bg-white p-4 shadow-card sm:grid-cols-2">
+            <div><p className="text-xs font-bold uppercase tracking-[0.18em]">Our Story</p><h2 className="mt-3 font-serif text-3xl font-bold">Two hearts. One beautiful journey.</h2><p className="mt-3 text-sm text-muted">{event.story || "From a chance meeting to a lifetime of memories, our story is just beginning."}</p></div>
+            <img src={heroImage} alt="" className="h-40 w-full rounded-2xl object-cover" />
+          </section>
+        )}
         <TemplateTimeline event={event} title="Event Timeline" primary={primary} />
         <TemplateLocation event={event} primary={primary} imageStyle="photo" />
         {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} />}

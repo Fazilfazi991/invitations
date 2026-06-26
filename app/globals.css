@@ -66,3 +66,41 @@ textarea {
     linear-gradient(125deg, rgba(107, 114, 128, 0.12) 1px, transparent 1px);
   background-size: 34px 34px;
 }
+
+.template-page-enter {
+  animation: template-page-enter 520ms ease-out both;
+}
+
+.template-soft-float {
+  animation: template-soft-float 4.5s ease-in-out infinite;
+}
+
+@keyframes template-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes template-soft-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-page-enter,
+  .template-soft-float {
+    animation: none;
+  }
+}

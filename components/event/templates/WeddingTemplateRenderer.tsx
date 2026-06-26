@@ -15,12 +15,23 @@ export const weddingTemplateRegistry = {
   "floral-wedding-elegance": FloralWeddingElegance,
 } as const;
 
+export const weddingTemplateAuditReport = {
+  templateIds: Object.keys(weddingTemplateRegistry),
+  categories: ["wedding"],
+  components: Object.fromEntries(Object.entries(weddingTemplateRegistry).map(([id, component]) => [id, component.name])),
+  fallbackPolicy: "Fallback to Classic Floral Wedding only when templateId is missing or invalid.",
+};
+
 export function WeddingTemplateRenderer({ event }: { event: WeddingEventData }) {
-  const Template = weddingTemplateRegistry[event.templateId as keyof typeof weddingTemplateRegistry] ?? FloralWeddingElegance;
+  const Template = weddingTemplateRegistry[event.templateId as keyof typeof weddingTemplateRegistry];
 
   if (process.env.NODE_ENV !== "production") {
-    console.debug("Wedding template renderer:", event.templateId, Template.name);
+    console.debug("Wedding template renderer:", event.templateId, Template?.name ?? "fallback");
+    if (!Template) {
+      console.warn("Wedding template fallback used. Missing or invalid templateId:", event.templateId, weddingTemplateAuditReport);
+    }
   }
 
-  return <Template event={event} />;
+  const ResolvedTemplate = Template ?? FloralWeddingElegance;
+  return <ResolvedTemplate event={event} />;
 }

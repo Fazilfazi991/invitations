@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Camera, Copy, Heart, MapPin, MessageCircle, Music, Phone, Send, Utensils, Users } from "lucide-react";
+import { CalendarDays, Camera, Copy, Heart, MapPin, Menu, MessageCircle, Music, Phone, Send, Utensils, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 import {
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const icons = [Heart, Camera, Utensils, Music, Users];
 
 export function TemplateShell({ children, background = "#FFFDF9", className }: { children: React.ReactNode; background?: string; className?: string }) {
-  return <main className={cn("mx-auto min-h-screen max-w-md overflow-hidden bg-white text-foreground shadow-xl", className)} style={{ background }}>{children}</main>;
+  return <main className={cn("template-page-enter mx-auto min-h-dvh w-full max-w-3xl overflow-x-hidden bg-white text-foreground shadow-xl", className)} style={{ background }}>{children}</main>;
 }
 
 export function BrandBar({ cta, primary }: { cta?: string; primary: string }) {
@@ -27,7 +27,9 @@ export function BrandBar({ cta, primary }: { cta?: string; primary: string }) {
       <div className="font-serif text-3xl font-bold" style={{ color: primary }}>occazn<span className="align-top text-sm text-brand-violet">.</span></div>
       <div className="flex items-center gap-2">
         {cta && <Button size="sm" style={{ backgroundColor: primary }}>{cta}</Button>}
-        <span className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white/80">☰</span>
+        <span className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white/80 transition hover:-translate-y-0.5 hover:shadow-sm">
+          <Menu className="h-5 w-5" />
+        </span>
       </div>
     </div>
   );
@@ -67,8 +69,8 @@ export function TemplateTimeline({ event, title, primary, boxed = false }: { eve
         {getTemplateSchedule(event).map((item, index) => {
           const Icon = icons[index % icons.length];
           return (
-            <div key={`${item.title}-${index}`} className={cn("rounded-2xl border border-border bg-white/75 p-3 shadow-card", !boxed && "border-0 bg-transparent shadow-none")}>
-              <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-primary-soft"><Icon className="h-5 w-5" style={{ color: primary }} /></span>
+            <div key={`${item.title}-${index}`} className={cn("rounded-2xl border border-border bg-white/75 p-3 shadow-card transition hover:-translate-y-1 hover:shadow-soft", !boxed && "border-0 bg-transparent shadow-none")}>
+              <span className="template-soft-float mx-auto grid h-11 w-11 place-items-center rounded-full bg-primary-soft"><Icon className="h-5 w-5" style={{ color: primary }} /></span>
               <p className="mt-2 text-xs font-bold" style={{ color: primary }}>{item.time}</p>
               <h3 className="text-sm font-semibold">{item.title}</h3>
               <p className="text-xs text-muted">{item.note}</p>
@@ -92,7 +94,7 @@ export function TemplateLocation({ event, primary, imageStyle = "map" }: { event
         <div>
           <h3 className="font-serif text-xl font-bold" style={{ color: primary }}>{venue.venue}</h3>
           <p className="text-sm text-muted">{venue.address}</p>
-          <Button asChild variant="outline" size="sm" className="mt-3"><a href={event.mapLink || "#"}>Open in Maps</a></Button>
+          <Button asChild variant="outline" size="sm" className="mt-3"><a href={event.mapLink || "#"}><MapPin className="h-4 w-4" />Open in Maps</a></Button>
         </div>
       </div>
     </section>
@@ -101,15 +103,15 @@ export function TemplateLocation({ event, primary, imageStyle = "map" }: { event
 
 export function TemplateGallery({ event, title, primary }: { event: WeddingEventData; title: string; primary: string }) {
   const gallery = getTemplateGallery(event);
+  if (!gallery.length) return null;
+
   return (
     <section>
       <h2 className="text-center font-serif text-2xl font-bold">{title}</h2>
       <div className="mt-4 grid grid-cols-4 gap-2">
-        {Array.from({ length: 4 }).map((_, index) => (
-          gallery[index] ? <img key={gallery[index]} src={gallery[index]} alt="" className="h-20 rounded-xl object-cover" /> : <div key={index} className="h-20 rounded-xl bg-gradient-to-br from-rose-100 via-white to-amber-50" />
-        ))}
+        {gallery.slice(0, 4).map((src) => <img key={src} src={src} alt="" className="h-20 rounded-xl object-cover" />)}
       </div>
-      <Button variant="outline" size="sm" className="mx-auto mt-4 flex" style={{ color: primary }}>View All Photos</Button>
+      <Button variant="outline" size="sm" className="mx-auto mt-4 flex" style={{ color: primary }}><Camera className="h-4 w-4" />View All Photos</Button>
     </section>
   );
 }

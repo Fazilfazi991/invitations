@@ -32,9 +32,9 @@ export const SELECTED_TEMPLATE_KEY = "jashnly_selected_template";
 export const weddingTemplates: EventTemplate[] = [
   {
     id: "floral-wedding-elegance",
-    name: "Floral Wedding Elegance",
+    name: "Classic Floral Wedding",
     category: "wedding",
-    description: "A romantic floral wedding page with soft rose accents and graceful family sections.",
+    description: "An ivory floral wedding template with soft blush corners, elegant serif type, countdown, story, gallery, RSVP and location sections.",
     previewImage: "/templates/previews/floral_wedding_elegance_preview.png",
     isPremium: false,
     style: { primary: "#D94F70", secondary: "#D6A84F", background: "#FFFDF9", mood: "romantic" },
@@ -50,32 +50,36 @@ export const weddingTemplates: EventTemplate[] = [
   },
   {
     id: "minimal-editorial-wedding",
-    name: "Minimal Editorial Wedding",
+    name: "Luxury Minimal Wedding",
     category: "wedding",
-    description: "A clean photo-led wedding page with elegant editorial typography and lots of whitespace.",
+    description: "A premium editorial wedding template with generous white space, charcoal typography, thin dividers and restrained lavender accents.",
     previewImage: "/templates/previews/minimal_editorial_wedding_preview.png",
     isPremium: true,
     style: { primary: "#C24D6A", secondary: "#1F2937", background: "#FFFDF9", mood: "minimal" },
   },
   {
     id: "soft-traditional-wedding",
-    name: "Soft Traditional Wedding",
+    name: "Pastel Garden Wedding",
     category: "wedding",
-    description: "A sweet traditional wedding layout with pastel motifs, family contacts, blessings and WhatsApp sharing.",
+    description: "A light garden wedding template with pastel lavender and pink styling, rounded cards, gentle florals, schedule, RSVP and gallery.",
     previewImage: "/templates/previews/soft_traditional_wedding_preview.png",
     isPremium: false,
     style: { primary: "#D94F70", secondary: "#E6B8A2", background: "#FFF7F6", mood: "traditional" },
   },
   {
     id: "contemporary-luxe-wedding",
-    name: "Contemporary Luxe Wedding",
+    name: "Modern Photo Wedding",
     category: "wedding",
-    description: "A modern photo-forward wedding page with deep rose accents, RSVP insights and live stream blocks.",
+    description: "A modern photo-forward wedding template with a large couple image hero, story-first flow, gallery, countdown, RSVP and location.",
     previewImage: "/templates/previews/contemporary_luxe_wedding_preview.png",
     isPremium: true,
     style: { primary: "#B93558", secondary: "#D6A84F", background: "#FFF8F8", mood: "luxury" },
   },
 ];
+
+export const weddingTemplateMetadataRegistry = Object.fromEntries(
+  weddingTemplates.map((template) => [template.id, template]),
+) as Record<(typeof weddingTemplates)[number]["id"], EventTemplate>;
 
 export const birthdayTemplates: EventTemplate[] = [
   {

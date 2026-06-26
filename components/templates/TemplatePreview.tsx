@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { TemplateFullPagePreview } from "@/components/templates/TemplateFullPagePreview";
 import type { EventTemplate } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +11,11 @@ export function TemplatePreview({ template, className, compact = false }: { temp
 
   return (
     <div className={cn("relative overflow-hidden rounded-[1.5rem] border border-brand-light bg-white", compact ? "h-32" : "aspect-[4/3]", className)} style={{ background }}>
-      {!failed && template.previewImage ? (
+      {template.category === "wedding" ? (
+        <div className="pointer-events-none absolute left-1/2 top-0 w-[390px] origin-top -translate-x-1/2 scale-[0.42] compact-template-preview sm:scale-[0.5]">
+          <TemplateFullPagePreview template={template} />
+        </div>
+      ) : !failed && template.previewImage ? (
         <img
           src={template.previewImage}
           alt={`${template.name} template preview`}

@@ -5,13 +5,6 @@ import { cn } from "@/lib/utils";
 export const templateFilterOptions = [
   { label: "All", value: "all" },
   { label: "Wedding", value: "wedding" },
-  { label: "Birthday", value: "birthday" },
-  { label: "Engagement", value: "engagement" },
-  { label: "Housewarming", value: "housewarming" },
-  { label: "Naming", value: "naming" },
-  { label: "Religious", value: "religious" },
-  { label: "Business", value: "business" },
-  { label: "Custom", value: "custom" },
 ] as const;
 
 export type TemplateFilterValue = (typeof templateFilterOptions)[number]["value"];

@@ -131,7 +131,7 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
 
           <CountdownPanel values={countdown} />
           <SchedulePanel schedule={schedule} />
-          <StoryPanel event={event} image={storyImage} />
+          {(event.story || storyImage) && <StoryPanel event={event} image={storyImage} />}
           <VenuePanel event={event} venue={venue} />
           <RsvpPanel enabled={event.rsvpEnabled} />
           <FooterNote />

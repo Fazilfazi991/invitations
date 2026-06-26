@@ -1,4 +1,8 @@
 import { CalendarDays, MapPin } from "lucide-react";
+import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/BirthdayTemplateRenderer";
+import type { BirthdayEventData } from "@/components/event/templates/birthday/birthday-template-utils";
+import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
+import type { WeddingEventData } from "@/components/event/templates/template-utils";
 import { Card } from "@/components/ui/card";
 import { formatEventDate } from "@/lib/date-utils";
 import type { EventDraft } from "@/lib/event-draft";
@@ -19,6 +23,33 @@ function previewTitle(draft: EventDraft) {
 }
 
 export function LiveTemplatePreview({ draft, template }: { draft: EventDraft; template: EventTemplate }) {
+  const previewDraft = {
+    ...draft,
+    templateId: template.id,
+    templateName: template.name,
+    templateImage: template.previewImage,
+  };
+
+  if (["wedding", "engagement", "reception"].includes(previewDraft.eventType)) {
+    return (
+      <Card className="overflow-hidden p-0">
+        <div className="h-[520px] overflow-y-auto bg-[#fbf0f6]">
+          <WeddingTemplateRenderer event={previewDraft as WeddingEventData} />
+        </div>
+      </Card>
+    );
+  }
+
+  if (previewDraft.eventType === "birthday") {
+    return (
+      <Card className="overflow-hidden p-0">
+        <div className="h-[520px] overflow-y-auto bg-white">
+          <BirthdayTemplateRenderer event={previewDraft as BirthdayEventData} />
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="overflow-hidden p-4" style={{ background: `linear-gradient(135deg, ${template.style.background}, #fff)` }}>
       <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: template.style.secondary }}>{getEventHeroLabel(draft.eventType)}</p>

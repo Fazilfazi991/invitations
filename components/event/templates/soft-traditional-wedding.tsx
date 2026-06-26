@@ -35,10 +35,12 @@ export function SoftTraditionalWedding({ event }: { event: WeddingEventData }) {
           <Button className="mt-5" style={{ backgroundColor: primary }}>RSVP with Love <Heart className="h-4 w-4" /></Button>
         </section>
         <TemplateCountdown event={event} title="Counting down to the celebration" primary={primary} />
-        <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card">
-          <h2 className="font-serif text-2xl font-bold">Our Love Story</h2>
-          <p className="mt-2 text-sm leading-6 text-muted">A journey held by family, faith, laughter and the promise of a beautiful tomorrow.</p>
-        </section>
+        {event.story && (
+          <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card">
+            <h2 className="font-serif text-2xl font-bold">Our Love Story</h2>
+            <p className="mt-2 text-sm leading-6 text-muted">{event.story}</p>
+          </section>
+        )}
         <TemplateTimeline event={event} title="Wedding Schedule" primary={primary} boxed />
         <TemplateLocation event={event} primary={primary} />
         {event.familyContactsEnabled !== false && <TemplateContacts event={event} primary={primary} />}
