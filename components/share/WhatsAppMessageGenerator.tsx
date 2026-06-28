@@ -21,7 +21,7 @@ type MessageEvent = {
 };
 
 export function getMalayalamEventLabel(eventType: EventType) {
-  const labels: Record<EventType, string> = {
+  const labels: Partial<Record<EventType, string>> = {
     wedding: "വിവാഹ ചടങ്ങിലേക്ക്",
     engagement: "നിശ്ചയ ചടങ്ങിലേക്ക്",
     birthday: "ജന്മദിന ആഘോഷത്തിലേക്ക്",
@@ -32,7 +32,7 @@ export function getMalayalamEventLabel(eventType: EventType) {
     business: "ഉദ്ഘാടന ചടങ്ങിലേക്ക്",
     custom: "ചടങ്ങിലേക്ക്",
   };
-  return labels[eventType];
+  return labels[eventType] ?? "celebration";
 }
 
 export function getMalayalamClosing(eventType: EventType) {

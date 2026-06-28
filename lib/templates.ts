@@ -4,7 +4,12 @@ export type TemplateCategory =
   | "wedding"
   | "engagement"
   | "birthday"
+  | "anniversary"
+  | "baby-shower"
   | "housewarming"
+  | "corporate"
+  | "graduation"
+  | "farewell"
   | "naming"
   | "religious"
   | "reception"
@@ -178,6 +183,15 @@ export const templates: EventTemplate[] = [
     style: { primary: "#B98A2D", secondary: "#EFE0B8", background: "#FFFDF5", mood: "spiritual" },
   },
   {
+    id: "other-celebration-elegance",
+    name: "Celebration Elegance",
+    category: "custom",
+    description: "A polished celebration template for anniversaries, graduations, farewells and custom events.",
+    previewImage: "/templates/previews/minimal_editorial_wedding_preview.png",
+    isPremium: false,
+    style: { primary: "#6C1785", secondary: "#D0B8D8", background: "#FDFBFE", mood: "modern" },
+  },
+  {
     id: "business-opening-modern",
     name: "Business Opening Modern",
     category: "business",
@@ -193,12 +207,14 @@ export function getTemplateById(id?: string | null) {
 }
 
 export function getDefaultTemplateForType(eventType: EventType) {
-  return templates.find((template) => template.category === eventType) ?? templates[0];
+  return templates.find((template) => template.category === eventType)
+    ?? templates.find((template) => template.category === "custom")
+    ?? templates[0];
 }
 
 export function templateCategoryToEventType(category: TemplateCategory): EventType {
   if (category === "engagement" || category === "reception") return category;
-  if (category === "birthday" || category === "housewarming" || category === "naming" || category === "religious" || category === "business" || category === "custom") return category;
+  if (category === "birthday" || category === "anniversary" || category === "baby-shower" || category === "housewarming" || category === "corporate" || category === "graduation" || category === "farewell" || category === "naming" || category === "religious" || category === "business" || category === "custom") return category;
   return "wedding";
 }
 

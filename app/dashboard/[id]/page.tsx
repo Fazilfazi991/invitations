@@ -52,7 +52,7 @@ export default function DashboardDetailPage() {
   const eventDate = localEvent ? formatEventDate(localEvent.date) : sampleEvent.date;
   const eventTime = localEvent ? formatEventTime(localEvent.time) : sampleEvent.time;
   const eventLocation = localEvent ? `${localEvent.venueName}, ${localEvent.city}` : sampleEvent.location;
-  const template = getTemplateById(localEvent?.templateId) ?? getDefaultTemplateForType(localEvent?.eventType ?? "wedding");
+  const template = getTemplateById(localEvent?.templateId) ?? getDefaultTemplateForType(localEvent?.eventType ?? "custom");
   const theme = getThemeStyles(localEvent?.theme);
   const currentEventUrl = localEvent ? getEventUrl(localEvent.slug) : eventUrl;
 

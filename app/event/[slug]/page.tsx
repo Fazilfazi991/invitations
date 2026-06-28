@@ -50,7 +50,7 @@ export default function GuestEventPage() {
   }, [params.slug, user]);
 
   const eventTitle = localEvent?.title ?? sampleEvent.couple;
-  const eventType = localEvent?.eventType ?? "wedding";
+  const eventType = localEvent?.eventType ?? "custom";
   const eventDate = localEvent?.date ?? "2025-05-24";
   const eventTime = localEvent?.time ?? "18:00";
   const venue = localEvent ? `${localEvent.venueName}, ${localEvent.city}` : sampleEvent.location;
@@ -68,7 +68,7 @@ export default function GuestEventPage() {
   const savedTheme = getThemeStyles(localEvent?.theme);
   const visualStyle = localEvent ? savedTheme : { ...template.style, accent: template.style.secondary };
   const accentStyle = { "--template-primary": visualStyle.primary, "--template-secondary": visualStyle.accent } as CSSProperties;
-  const fallbackEventType = params.slug.includes("birthday") ? "birthday" : "wedding";
+  const fallbackEventType = params.slug.includes("birthday") ? "birthday" : "custom";
   const renderedEvent: EventDraft = localEvent ?? {
     ...getDefaultDraft(fallbackEventType),
     slug: params.slug,
@@ -85,13 +85,11 @@ export default function GuestEventPage() {
           address: "Bangalore",
           city: "Bangalore",
         }
-      : {
-          templateId: "floral-wedding-elegance",
-          title: sampleEvent.couple,
-          primaryName: "Afsal",
-          secondaryName: "Fathima",
-          groomName: "Afsal",
-          brideName: "Fathima",
+        : {
+          templateId: "other-celebration-elegance",
+          title: "Family Celebration",
+          primaryName: "Rahman Family",
+          hostName: "Rahman Family",
           venueName: "Grand Seasons",
           address: "Kozhikode, Kerala",
           city: "Kozhikode, Kerala",
@@ -99,12 +97,17 @@ export default function GuestEventPage() {
   };
   const isWeddingLike = ["wedding", "engagement", "reception"].includes(renderedEvent.eventType);
   const celebrationCopy = {
+    anniversary: { heading: "A Beautiful Milestone", description: `Celebrate ${renderedEvent.primaryName || renderedEvent.hostName || "this special couple"} and a journey filled with love, memories and togetherness.` },
+    "baby-shower": { heading: "A Little Blessing", description: `Join us as we celebrate ${renderedEvent.childName || "a little one"} and shower the family with love and blessings.` },
     housewarming: { heading: "Our New Beginning", description: `Join ${renderedEvent.primaryName || renderedEvent.hostName || "our family"} as we celebrate a new home filled with warmth, happiness and beautiful memories.` },
+    corporate: { heading: "A Special Gathering", description: `Join ${renderedEvent.businessName || renderedEvent.hostName || "our team"} for a polished celebration with colleagues, partners and friends.` },
+    graduation: { heading: "A Proud Celebration", description: `Celebrate ${renderedEvent.primaryName || renderedEvent.hostName || "this achievement"} and the beginning of an exciting new chapter.` },
+    farewell: { heading: "A Warm Farewell", description: `Join us as we gather with gratitude, memories and warm wishes for ${renderedEvent.primaryName || renderedEvent.hostName || "someone special"}.` },
     naming: { heading: "A Beautiful Beginning", description: `Join us as we welcome ${renderedEvent.childName || "our little one"} and celebrate this cherished family moment.` },
     religious: { heading: "Together in Blessing", description: "We warmly invite you to join our family for this meaningful gathering and share your blessings." },
     business: { heading: "A New Chapter", description: `Celebrate the opening of ${renderedEvent.businessName || renderedEvent.title} with us. Your presence will make the occasion even more special.` },
     custom: { heading: "Our Celebration", description: "We would love for you to join us and make this special occasion one to remember." },
-  }[renderedEvent.eventType as "housewarming" | "naming" | "religious" | "business" | "custom"];
+  }[renderedEvent.eventType as "anniversary" | "baby-shower" | "housewarming" | "corporate" | "graduation" | "farewell" | "naming" | "religious" | "business" | "custom"];
   const heroImage = renderedEvent.coverImage || renderedEvent.templateImage || sampleEvent.coupleImage;
   const publicUrl = getEventUrl(renderedEvent.slug);
 

@@ -70,7 +70,12 @@ const defaultsByType: Record<EventType, Partial<EventDraft>> = {
   wedding: { title: "Afsal & Fathima Wedding", primaryName: "Afsal", secondaryName: "Fathima" },
   engagement: { title: "Afsal & Fathima Engagement", primaryName: "Afsal", secondaryName: "Fathima" },
   birthday: { title: "Ava's 5th Birthday", primaryName: "Ava", childName: "Ava", hostName: "Rahman Family" },
+  anniversary: { title: "Afsal & Fathima Anniversary", primaryName: "Afsal", secondaryName: "Fathima" },
+  "baby-shower": { title: "Baby Shower", childName: "Baby", hostName: "Rahman Family" },
   housewarming: { title: "Rahman Family Housewarming", primaryName: "Rahman Family" },
+  corporate: { title: "Corporate Celebration", businessName: "Occazn Studio", hostName: "Occazn Team" },
+  graduation: { title: "Graduation Celebration", primaryName: "Ava Rahman", hostName: "Rahman Family" },
+  farewell: { title: "Farewell Celebration", primaryName: "Afsal Rahman", hostName: "Friends and Family" },
   naming: { title: "Baby Naming Ceremony", childName: "Baby", hostName: "Rahman Family" },
   religious: { title: "Family Dua Gathering", hostName: "Rahman Family" },
   reception: { title: "Afsal & Fathima Reception", primaryName: "Afsal", secondaryName: "Fathima" },
@@ -86,7 +91,7 @@ export function generateSlug(title: string) {
     .replace(/^-+|-+$/g, "") || "jashnly-event";
 }
 
-export function getDefaultDraft(eventType: EventType = "wedding"): EventDraft {
+export function getDefaultDraft(eventType: EventType = "custom"): EventDraft {
   const typedDefaults = defaultsByType[eventType];
   const title = typedDefaults.title ?? "occazn Event";
   const template = getDefaultTemplateForType(eventType);
@@ -142,7 +147,8 @@ export function withTemplateMetadata(draft: EventDraft, templateId?: string | nu
   const selected = getTemplateById(templateId);
   const selectedType = selected ? templateCategoryToEventType(selected.category) : null;
   const isCompatible = selectedType === draft.eventType
-    || (["wedding", "engagement", "reception"].includes(draft.eventType) && selectedType === "wedding");
+    || (["wedding", "engagement", "reception"].includes(draft.eventType) && selectedType === "wedding")
+    || (["anniversary", "baby-shower", "corporate", "graduation", "farewell", "custom"].includes(draft.eventType) && selectedType === "custom");
   const template = selected && isCompatible
     ? selected
     : getDefaultTemplateForType(draft.eventType);
@@ -161,7 +167,7 @@ export function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
     ? normalizeEventType(value.eventType)
     : storedTemplate
       ? templateCategoryToEventType(storedTemplate.category)
-      : "wedding";
+      : "custom";
   const defaults = getDefaultDraft(eventType);
   const normalized = { ...defaults, ...value, eventType } as EventDraft;
   return withTemplateMetadata({ ...normalized, music: normalizeMusic(value.music, eventType) }, value.templateId);
@@ -170,7 +176,7 @@ export function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
 export function loadDraft() {
   if (typeof window === "undefined") return getDefaultDraft();
   const raw = window.localStorage.getItem(DRAFT_KEY);
-  if (!raw) return getDefaultDraft((window.localStorage.getItem(EVENT_TYPE_KEY) as EventType) || "wedding");
+  if (!raw) return getDefaultDraft(normalizeEventType(window.localStorage.getItem(EVENT_TYPE_KEY)));
   try {
     return normalizeStoredEvent(JSON.parse(raw));
   } catch {

@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Cake, CalendarDays, Check, ChevronRight, Clock, Gift, Gem, Heart, HeartHandshake, Image as ImageIcon, Link as LinkIcon, Loader2, MapPin, Music2, PlayCircle, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Baby, BriefcaseBusiness, Cake, CalendarDays, Check, ChevronRight, Clock, Gift, Gem, GraduationCap, Heart, HeartHandshake, Home, Image as ImageIcon, Link as LinkIcon, Loader2, MapPin, Music2, PartyPopper, PlayCircle, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { GuestAuthModal } from "@/components/auth/GuestAuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
-import { generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
+import { DRAFT_KEY, EVENT_TYPE_KEY, generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
 import type { EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/date-utils";
 import { publishEvent } from "@/lib/event-repository";
@@ -25,6 +25,7 @@ const brand = {
 };
 
 type OccasionValue = "wedding" | "birthday" | "other";
+type OtherEventType = Exclude<EventType, "wedding" | "birthday" | "business" | "religious" | "reception">;
 type StyleValue = "royal" | "floral" | "minimal";
 type FeatureSheet = "photos" | "video" | "music" | "location" | null;
 
@@ -36,6 +37,22 @@ const occasionCards: Array<{
   { value: "wedding", title: "Wedding", icon: Gem },
   { value: "birthday", title: "Birthday", icon: Cake },
   { value: "other", title: "Other", icon: Gift },
+];
+
+const otherEventCards: Array<{
+  value: OtherEventType;
+  title: string;
+  icon: React.ElementType;
+}> = [
+  { value: "engagement", title: "Engagement", icon: Gem },
+  { value: "anniversary", title: "Anniversary", icon: Heart },
+  { value: "baby-shower", title: "Baby Shower", icon: Baby },
+  { value: "housewarming", title: "Housewarming", icon: Home },
+  { value: "corporate", title: "Corporate Event", icon: BriefcaseBusiness },
+  { value: "graduation", title: "Graduation", icon: GraduationCap },
+  { value: "farewell", title: "Farewell", icon: Send },
+  { value: "naming", title: "Naming Ceremony", icon: HeartHandshake },
+  { value: "custom", title: "Custom Event", icon: PartyPopper },
 ];
 
 const styleCards: Array<{
@@ -53,11 +70,6 @@ function eventTypeToOccasion(eventType: EventType): OccasionValue {
   if (eventType === "wedding") return "wedding";
   if (eventType === "birthday") return "birthday";
   return "other";
-}
-
-function occasionToEventType(value: OccasionValue): EventType {
-  if (value === "wedding" || value === "birthday") return value;
-  return "custom";
 }
 
 function inferStyleFromTemplate(templateId?: string): StyleValue {
@@ -83,7 +95,10 @@ export function GuidedInvitationBuilder() {
   const { user } = useAuth();
   const { draft, setDraft, loaded } = useEventDraft();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
-  const [occasion, setOccasion] = useState<OccasionValue>("wedding");
+  const [occasion, setOccasion] = useState<OccasionValue | null>(null);
+  const [showOtherTypes, setShowOtherTypes] = useState(false);
+  const [otherEventType, setOtherEventType] = useState<OtherEventType | null>(null);
+  const [eventTypeError, setEventTypeError] = useState("");
   const [style, setStyle] = useState<StyleValue>("royal");
   const [confettiKey, setConfettiKey] = useState(0);
   const [focusedField, setFocusedField] = useState("");
@@ -94,14 +109,26 @@ export function GuidedInvitationBuilder() {
 
   useEffect(() => {
     if (!loaded) return;
+    const hasStoredEventChoice = typeof window !== "undefined" && Boolean(window.localStorage.getItem(DRAFT_KEY) || window.localStorage.getItem(EVENT_TYPE_KEY));
+    if (!hasStoredEventChoice && draft.eventType === "custom") {
+      setOccasion(null);
+      setOtherEventType(null);
+      setStyle(inferStyleFromTemplate(draft.templateId));
+      return;
+    }
     setOccasion(eventTypeToOccasion(draft.eventType));
+    setOtherEventType(draft.eventType === "wedding" || draft.eventType === "birthday" ? null : draft.eventType as OtherEventType);
     setStyle(inferStyleFromTemplate(draft.templateId));
   }, [draft.eventType, draft.templateId, loaded]);
 
-  const heading = step === 1 ? "What are you celebrating?" : step === 2 ? "Choose your style" : step === 3 ? "Add event details" : step === 4 ? "Bring your invite to life" : "You're all set!";
-  const subheading = step === 1 ? "Choose one to get started." : step === 2 ? "Pick the feeling for your invitation." : step === 3 ? "Just the basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
+  const heading = step === 1 ? showOtherTypes ? "Choose your event type" : "What are you celebrating?" : step === 2 ? "Choose your style" : step === 3 ? "Add event details" : step === 4 ? "Bring your invite to life" : "You're all set!";
+  const subheading = step === 1 ? showOtherTypes ? "Select one so your invite matches the celebration." : "Choose one to get started." : step === 2 ? "Pick the feeling for your invitation." : step === 3 ? "Just the basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
 
-  const selectedEventType = useMemo(() => occasionToEventType(occasion), [occasion]);
+  const selectedEventType = useMemo<EventType | null>(() => {
+    if (occasion === "wedding" || occasion === "birthday") return occasion;
+    if (occasion === "other") return otherEventType;
+    return null;
+  }, [occasion, otherEventType]);
   const coupleNames = [draft.primaryName, draft.secondaryName].filter(Boolean).join(" & ") || draft.hostName || "";
   const completedDetailCount = [
     coupleNames.trim(),
@@ -116,11 +143,9 @@ export function GuidedInvitationBuilder() {
     location: Boolean(draft.venueName.trim() || draft.mapLink.trim()),
   };
 
-  function selectOccasion(nextOccasion: OccasionValue) {
-    const eventType = occasionToEventType(nextOccasion);
+  function applyEventType(eventType: EventType) {
     const nextDefaults = getDefaultDraft(eventType);
     const template = templateForStyle(eventType, style);
-    setOccasion(nextOccasion);
     setDraft((current) => ({
       ...nextDefaults,
       date: current.date,
@@ -137,7 +162,26 @@ export function GuidedInvitationBuilder() {
     }));
   }
 
+  function selectOccasion(nextOccasion: OccasionValue) {
+    setOccasion(nextOccasion);
+    setEventTypeError("");
+    if (nextOccasion === "other") {
+      setOtherEventType(null);
+      return;
+    }
+    setShowOtherTypes(false);
+    setOtherEventType(null);
+    applyEventType(nextOccasion);
+  }
+
+  function selectOtherEventType(eventType: OtherEventType) {
+    setOtherEventType(eventType);
+    setEventTypeError("");
+    applyEventType(eventType);
+  }
+
   function selectStyle(nextStyle: StyleValue) {
+    if (!selectedEventType) return;
     const template = templateForStyle(selectedEventType, nextStyle);
     setStyle(nextStyle);
     setDraft((current) => ({
@@ -150,6 +194,21 @@ export function GuidedInvitationBuilder() {
   }
 
   function burstAndContinue() {
+    if (step === 1) {
+      if (showOtherTypes) {
+        if (!otherEventType) {
+          setEventTypeError("Please choose an event type to continue.");
+          return;
+        }
+      } else if (occasion === "other") {
+        setShowOtherTypes(true);
+        setEventTypeError("");
+        return;
+      } else if (!selectedEventType) {
+        setEventTypeError("Please choose an event type to continue.");
+        return;
+      }
+    }
     setConfettiKey((current) => current + 1);
     window.setTimeout(() => {
       if (step === 1) setStep(2);
@@ -200,6 +259,16 @@ export function GuidedInvitationBuilder() {
     window.setTimeout(() => setDraftSaved(false), 1800);
   }
 
+  function goBack() {
+    if (step === 1 && showOtherTypes) {
+      setShowOtherTypes(false);
+      setOtherEventType(null);
+      setEventTypeError("");
+      return;
+    }
+    setStep((current) => current === 5 ? 4 : current === 4 ? 3 : current === 3 ? 2 : 1);
+  }
+
   function updateCoupleNames(value: string) {
     const [first, ...rest] = value.split("&").map((item) => item.trim());
     setDraft((current) => ({
@@ -220,18 +289,18 @@ export function GuidedInvitationBuilder() {
   }
 
   return (
-    <BuilderOnboardingShell step={step} onBack={() => setStep((current) => current === 5 ? 4 : current === 4 ? 3 : current === 3 ? 2 : 1)}>
+    <BuilderOnboardingShell step={step} onBack={goBack}>
       <FloatingSparkles />
       <TinyConfetti burstKey={confettiKey} />
       <BottomWave show={step >= 4} />
-      <div className="relative z-10 flex min-h-[calc(100vh-2rem)] flex-col px-5 pb-32 pt-8 sm:min-h-[820px] sm:px-7">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col px-5 pt-[clamp(1rem,2.4dvh,2rem)] sm:px-7">
         <header className="text-center">
-          <div className={cn("mx-auto flex items-center justify-center gap-3", step === 3 ? "mb-7" : "mb-8")}>
-            {step > 1 && (
+          <div className="mx-auto mb-[clamp(0.65rem,1.7dvh,1.5rem)] flex items-center justify-center gap-3">
+            {(step > 1 || showOtherTypes) && (
               <button
                 type="button"
-                onClick={() => setStep((current) => current === 5 ? 4 : current === 4 ? 3 : current === 3 ? 2 : 1)}
-                className={cn("absolute left-5 top-8 grid h-12 w-12 place-items-center rounded-full shadow-[0_8px_22px_rgba(80,13,104,0.12)] focus:outline-none focus:ring-2 focus:ring-[#6C1785]", step === 4 ? "bg-[#6C1785] text-white" : "bg-white text-[#500D68]")}
+                onClick={goBack}
+                className={cn("absolute left-5 top-[clamp(1rem,2.4dvh,2rem)] grid h-11 w-11 place-items-center rounded-full shadow-[0_8px_22px_rgba(80,13,104,0.12)] focus:outline-none focus:ring-2 focus:ring-[#6C1785]", step === 4 ? "bg-[#6C1785] text-white" : "bg-white text-[#500D68]")}
                 aria-label="Go back"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -239,15 +308,15 @@ export function GuidedInvitationBuilder() {
             )}
             {step >= 3 ? (
               <div>
-                <div className="font-serif text-4xl font-bold text-[#500D68]">Occazn<span className="align-top text-xl text-[#A477B4]">*</span></div>
+                <div className="font-serif text-[clamp(2rem,5dvh,2.7rem)] font-bold leading-none text-[#500D68]">Occazn<span className="align-top text-xl text-[#A477B4]">*</span></div>
                 {step === 3 && <p className="mt-1 text-sm font-semibold text-[#686078]">Make every invite magical</p>}
               </div>
             ) : (
               <>
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#6C1785] text-white shadow-[0_12px_28px_rgba(108,23,133,0.22)]">
+                <span className="grid h-[clamp(2.3rem,5.2dvh,2.75rem)] w-[clamp(2.3rem,5.2dvh,2.75rem)] place-items-center rounded-2xl bg-[#6C1785] text-white shadow-[0_12px_28px_rgba(108,23,133,0.22)]">
                   <Sparkles className="h-5 w-5" />
                 </span>
-                <span className="font-serif text-4xl font-bold text-[#500D68]">Occazn</span>
+                <span className="font-serif text-[clamp(2rem,5dvh,2.7rem)] font-bold leading-none text-[#500D68]">Occazn</span>
               </>
             )}
           </div>
@@ -259,14 +328,14 @@ export function GuidedInvitationBuilder() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.22 }}
-              className={cn(step === 3 ? "mt-9" : step >= 4 ? "mt-8" : "mt-16")}
+              className={cn(step === 3 ? "mt-[clamp(0.9rem,2dvh,1.6rem)]" : step >= 4 ? "mt-[clamp(0.65rem,1.4dvh,1.2rem)]" : "mt-[clamp(1.2rem,3dvh,3.5rem)]")}
             >
               {step === 4 && <FeatureIllustration />}
               {step === 5 && <FinalInviteIllustration draft={draft} />}
-              <h1 className={cn("font-bold leading-tight text-[#171717]", step === 1 ? "font-serif text-[2.65rem] text-[#2D0C48]" : step === 2 ? "font-serif text-[2.75rem] text-[#2D0C48]" : step >= 4 ? "mt-7 text-3xl" : "text-[2.75rem]")}>
+              <h1 className={cn("font-bold leading-tight text-[#171717]", step === 1 ? "font-serif text-[clamp(2rem,5.4dvh,2.65rem)] text-[#2D0C48]" : step === 2 ? "font-serif text-[clamp(2.1rem,5.4dvh,2.75rem)] text-[#2D0C48]" : step >= 4 ? "mt-[clamp(0.7rem,1.5dvh,1.6rem)] text-[clamp(1.65rem,4dvh,2.1rem)]" : "text-[clamp(2rem,5.4dvh,2.75rem)]")}>
                 {step === 2 ? <>Step 2 <Sparkles className="inline h-8 w-8 fill-[#6C1785] text-[#6C1785]" /></> : <>{heading}{step >= 3 && <Sparkles className="ml-2 inline h-7 w-7 fill-[#A477B4] text-[#A477B4]" />}</>}
               </h1>
-              {step >= 3 ? <p className={cn("mx-auto mt-4 font-medium leading-8 text-[#686078]", step >= 4 ? "max-w-[330px] text-xl" : "max-w-[310px] text-xl")}>{subheading}</p> : step === 2 ? <p className="mt-3 text-2xl font-medium text-[#686078]">{subheading}</p> : <p className="mt-5 text-2xl font-medium text-[#686078]">{subheading}</p>}
+              {step >= 3 ? <p className={cn("mx-auto mt-[clamp(0.4rem,1dvh,1rem)] font-medium leading-[1.35] text-[#686078]", step >= 4 ? "max-w-[330px] text-[clamp(1rem,2.5dvh,1.25rem)]" : "max-w-[310px] text-[clamp(1.05rem,2.6dvh,1.25rem)]")}>{subheading}</p> : step === 2 ? <p className="mt-2 text-[clamp(1.2rem,3dvh,1.5rem)] font-medium text-[#686078]">{subheading}</p> : <p className="mt-3 text-[clamp(1.2rem,3dvh,1.5rem)] font-medium text-[#686078]">{subheading}</p>}
               {step === 1 && <DecorativeSwoosh />}
             </motion.div>
           </AnimatePresence>
@@ -274,16 +343,22 @@ export function GuidedInvitationBuilder() {
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
-            <motion.div key="occasion" className="mt-14 space-y-5" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
-              {occasionCards.map((card) => (
+            <motion.div key={showOtherTypes ? "other-event-types" : "occasion"} className={cn("mt-[clamp(1rem,2.8dvh,2.6rem)]", showOtherTypes ? "grid grid-cols-1 gap-[clamp(0.55rem,1.4dvh,0.9rem)]" : "space-y-[clamp(0.65rem,1.6dvh,1.25rem)]")} initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
+              {(showOtherTypes ? otherEventCards : occasionCards).map((card) => (
                 <OptionCard
                   key={card.value}
-                  selected={occasion === card.value}
+                  selected={showOtherTypes ? otherEventType === card.value : occasion === card.value}
                   title={card.title}
                   icon={card.icon}
-                  onClick={() => selectOccasion(card.value)}
+                  compact={showOtherTypes}
+                  onClick={() => showOtherTypes ? selectOtherEventType(card.value as OtherEventType) : selectOccasion(card.value as OccasionValue)}
                 />
               ))}
+              {eventTypeError && (
+                <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl bg-[#F6F0F8] px-4 py-3 text-center text-sm font-bold text-[#6C1785]">
+                  {eventTypeError}
+                </motion.p>
+              )}
             </motion.div>
           ) : step === 2 ? (
             <motion.div key="style" className="mt-12 space-y-5" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
@@ -365,7 +440,7 @@ export function GuidedInvitationBuilder() {
               <HelperProgressCard completed={completedDetailCount} />
             </motion.div>
           ) : step === 4 ? (
-            <motion.div key="features" className="mt-8 space-y-4" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
+            <motion.div key="features" className="mt-[clamp(0.75rem,1.8dvh,1.4rem)] space-y-[clamp(0.5rem,1.3dvh,0.95rem)]" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
               <FeatureCard title="Add Photos" description="Create a photo gallery" icon={ImageIcon} complete={featureStatus.photos} onClick={() => setActiveSheet("photos")} />
               <FeatureCard title="Add Video" description="Add YouTube or video link" icon={PlayCircle} complete={featureStatus.video} onClick={() => setActiveSheet("video")} />
               <FeatureCard title="Add Music" description="Set the mood with music" icon={Music2} complete={featureStatus.music} onClick={() => setActiveSheet("music")} />
@@ -377,13 +452,13 @@ export function GuidedInvitationBuilder() {
         </AnimatePresence>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-[2rem] bg-white/92 px-5 pb-6 pt-5 shadow-[0_-18px_42px_rgba(80,13,104,0.08)] backdrop-blur sm:px-7">
-        <ContinueButton disabled={step === 1 ? !occasion : step === 2 ? !style : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
+      <div className="relative z-20 mt-auto shrink-0 rounded-t-[1.5rem] bg-white/92 px-5 pb-[clamp(0.7rem,1.8dvh,1.5rem)] pt-[clamp(0.65rem,1.6dvh,1.2rem)] shadow-[0_-18px_42px_rgba(80,13,104,0.08)] backdrop-blur sm:px-7">
+        <ContinueButton disabled={step === 1 ? (showOtherTypes ? false : !occasion) : step === 2 ? !style : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
         {step === 2 && (
           <button
             type="button"
             onClick={() => setStep(3)}
-            className="mt-5 h-11 w-full text-center text-lg font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+            className="mt-[clamp(0.45rem,1.2dvh,1rem)] h-[clamp(2.3rem,5dvh,2.75rem)] w-full text-center text-[clamp(1rem,2.5dvh,1.125rem)] font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
           >
             Skip this step
           </button>
@@ -392,7 +467,7 @@ export function GuidedInvitationBuilder() {
           <button
             type="button"
             onClick={skipDetails}
-            className="mt-5 h-11 w-full text-center text-lg font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+            className="mt-[clamp(0.45rem,1.2dvh,1rem)] h-[clamp(2.3rem,5dvh,2.75rem)] w-full text-center text-[clamp(1rem,2.5dvh,1.125rem)] font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
           >
             Skip details for now
           </button>
@@ -401,7 +476,7 @@ export function GuidedInvitationBuilder() {
           <button
             type="button"
             onClick={skipExtras}
-            className="mt-5 h-11 w-full text-center text-lg font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+            className="mt-[clamp(0.45rem,1.2dvh,1rem)] h-[clamp(2.3rem,5dvh,2.75rem)] w-full text-center text-[clamp(1rem,2.5dvh,1.125rem)] font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
           >
             Skip for now
           </button>
@@ -410,7 +485,7 @@ export function GuidedInvitationBuilder() {
           <button
             type="button"
             onClick={saveAsDraft}
-            className="mt-5 h-11 w-full text-center text-lg font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+            className="mt-[clamp(0.45rem,1.2dvh,1rem)] h-[clamp(2.3rem,5dvh,2.75rem)] w-full text-center text-[clamp(1rem,2.5dvh,1.125rem)] font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
           >
             {draftSaved ? "Draft saved" : "Save as Draft"}
           </button>
@@ -424,8 +499,8 @@ export function GuidedInvitationBuilder() {
 
 function BuilderOnboardingShell({ children, step, onBack }: { children: React.ReactNode; step: 1 | 2 | 3 | 4 | 5; onBack: () => void }) {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,#F8F3FA_0,#FFFFFF_46%,#F4ECF7_100%)] text-[#2D0C48] sm:grid sm:place-items-center sm:p-6">
-      <section className="relative mx-auto min-h-screen w-full max-w-[430px] overflow-x-hidden bg-white/82 shadow-[0_28px_90px_rgba(80,13,104,0.13)] sm:min-h-[860px] sm:rounded-[3.5rem] sm:border sm:border-white/80">
+    <main className="min-h-dvh overflow-x-hidden bg-[radial-gradient(circle_at_top,#F8F3FA_0,#FFFFFF_46%,#F4ECF7_100%)] text-[#2D0C48] sm:grid sm:place-items-center sm:p-6">
+      <section className="relative mx-auto flex min-h-dvh w-full max-w-[430px] flex-col overflow-x-hidden bg-white/82 shadow-[0_28px_90px_rgba(80,13,104,0.13)] sm:min-h-[min(860px,calc(100dvh-3rem))] sm:rounded-[3.5rem] sm:border sm:border-white/80">
         {step > 1 && <span className="sr-only"><button type="button" onClick={onBack}>Back</button></span>}
         {children}
       </section>
@@ -436,7 +511,7 @@ function BuilderOnboardingShell({ children, step, onBack }: { children: React.Re
 function BuilderProgress({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   if (step >= 3) {
     return (
-      <div aria-label={`Step ${step} of 5`} className="mx-auto w-full max-w-[265px]">
+      <div aria-label={`Step ${step} of 5`} className="mx-auto w-full max-w-[240px]">
         <div className="relative flex items-center justify-between">
           <motion.span
             className="absolute left-5 right-5 top-1/2 h-0.5 -translate-y-1/2 bg-[#E9DDF0]"
@@ -455,7 +530,7 @@ function BuilderProgress({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.06, duration: 0.24 }}
                 className={cn(
-                  "relative z-10 grid h-10 w-10 place-items-center rounded-full text-sm font-bold shadow-[0_5px_15px_rgba(80,13,104,0.12)]",
+                  "relative z-10 grid h-[clamp(2rem,4.8dvh,2.5rem)] w-[clamp(2rem,4.8dvh,2.5rem)] place-items-center rounded-full text-sm font-bold shadow-[0_5px_15px_rgba(80,13,104,0.12)]",
                   complete && "bg-[#6C1785] text-white",
                   active && "border-4 border-[#D0B8D8] bg-[#6C1785] text-white",
                   !complete && !active && "bg-white text-[#686078]",
@@ -466,14 +541,14 @@ function BuilderProgress({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
             );
           })}
         </div>
-        <p className="mt-4 text-lg font-bold text-[#6C1785]">Step {step} of 5</p>
+        <p className="mt-[clamp(0.45rem,1.1dvh,1rem)] text-[clamp(0.95rem,2.2dvh,1.125rem)] font-bold text-[#6C1785]">Step {step} of 5</p>
       </div>
     );
   }
 
   return (
-    <div aria-label={`Step ${step} of 5`} className="mx-auto w-full max-w-[190px]">
-      <p className="mb-5 text-lg font-semibold text-[#686078]">Step {step} of 5</p>
+      <div aria-label={`Step ${step} of 5`} className="mx-auto w-full max-w-[175px]">
+      <p className="mb-[clamp(0.55rem,1.4dvh,1.25rem)] text-[clamp(0.95rem,2.2dvh,1.125rem)] font-semibold text-[#686078]">Step {step} of 5</p>
       <div className="flex items-center justify-center gap-2">
         {Array.from({ length: 5 }).map((_, index) => {
           const active = index === step - 1;
@@ -505,7 +580,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-function OptionCard({ selected, title, icon: Icon, onClick }: { selected: boolean; title: string; icon: React.ElementType; onClick: () => void }) {
+function OptionCard({ selected, title, icon: Icon, compact = false, onClick }: { selected: boolean; title: string; icon: React.ElementType; compact?: boolean; onClick: () => void }) {
   return (
     <motion.button
       type="button"
@@ -515,17 +590,17 @@ function OptionCard({ selected, title, icon: Icon, onClick }: { selected: boolea
       transition={{ duration: 0.16 }}
       onClick={onClick}
       aria-pressed={selected}
-      className={cn("flex min-h-[112px] w-full items-center gap-8 rounded-[1.45rem] border bg-white px-8 text-left shadow-[0_15px_34px_rgba(80,13,104,0.08)] transition focus:outline-none focus:ring-2 focus:ring-[#6C1785]", selected && "bg-[#F8F3FA] shadow-[0_18px_38px_rgba(108,23,133,0.12)]")}
+      className={cn("flex w-full items-center rounded-[1.25rem] border bg-white text-left shadow-[0_12px_28px_rgba(80,13,104,0.08)] transition focus:outline-none focus:ring-2 focus:ring-[#6C1785]", compact ? "min-h-[clamp(4.05rem,8.2dvh,4.8rem)] gap-3 px-4" : "min-h-[clamp(5.5rem,12dvh,7rem)] gap-[clamp(1rem,4vw,2rem)] px-[clamp(1.1rem,5vw,2rem)]", selected && "bg-[#F8F3FA] shadow-[0_16px_32px_rgba(108,23,133,0.12)]")}
       style={{ borderColor: selected ? brand.primary : "rgba(208,184,216,0.38)" }}
     >
-      <span className="relative grid h-16 w-16 shrink-0 place-items-center text-[#7B19C9]">
-        <Icon className="h-14 w-14 stroke-[1.6]" />
+      <span className={cn("relative grid shrink-0 place-items-center text-[#7B19C9]", compact ? "h-11 w-11" : "h-[clamp(3rem,7dvh,4rem)] w-[clamp(3rem,7dvh,4rem)]")}>
+        <Icon className={cn("stroke-[1.6]", compact ? "h-8 w-8" : "h-[clamp(2.5rem,6dvh,3.5rem)] w-[clamp(2.5rem,6dvh,3.5rem)]")} />
         <Sparkles className="absolute -right-2 -top-2 h-4 w-4 fill-[#CFA7F0] text-[#CFA7F0]" />
       </span>
-      <span className="min-w-0 flex-1 font-serif text-3xl font-bold text-[#2D0C48]">{title}</span>
+      <span className={cn("min-w-0 flex-1 font-serif font-bold text-[#2D0C48]", compact ? "text-[clamp(1.2rem,2.6dvh,1.45rem)]" : "text-[clamp(1.65rem,4dvh,2rem)]")}>{title}</span>
       <AnimatePresence>
         {selected && (
-          <motion.span initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} className="grid h-11 w-11 place-items-center rounded-full bg-[#7B19C9] text-white">
+          <motion.span initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} className="grid h-10 w-10 place-items-center rounded-full bg-[#7B19C9] text-white">
             <Check className="h-6 w-6" />
           </motion.span>
         )}
@@ -693,25 +768,24 @@ function HelperProgressCard({ completed }: { completed: number }) {
 
 function FeatureIllustration() {
   return (
-    <div className="relative mx-auto h-40 w-full max-w-[330px]" aria-hidden="true">
-      <span className="occazn-feature-float absolute left-8 top-5 z-10 grid h-24 w-20 -rotate-12 place-items-center rounded-xl bg-white shadow-[0_14px_28px_rgba(80,13,104,0.12)]">
-        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#F6F0F8] text-[#6C1785]"><ImageIcon className="h-8 w-8" /></span>
+    <div className="relative mx-auto h-[clamp(7.6rem,18dvh,10rem)] w-full max-w-[300px]" aria-hidden="true">
+      <span className="occazn-feature-float absolute left-[12%] top-[24%] z-10 grid h-[clamp(3.8rem,8dvh,5rem)] w-[clamp(3.4rem,7dvh,4.3rem)] -rotate-6 place-items-center rounded-xl bg-white shadow-[0_12px_24px_rgba(80,13,104,0.12)]">
+        <span className="grid h-[clamp(2.7rem,5.6dvh,3.5rem)] w-[clamp(2.7rem,5.6dvh,3.5rem)] place-items-center rounded-2xl bg-[#F6F0F8] text-[#6C1785]"><ImageIcon className="h-7 w-7" /></span>
       </span>
-      <span className="occazn-feature-float absolute left-[37%] top-3 z-10 grid h-20 w-16 -rotate-6 place-items-center rounded-xl bg-white shadow-[0_14px_28px_rgba(80,13,104,0.12)]" style={{ animationDelay: "0.15s" }}>
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#F6F0F8] text-[#7B3892]"><Music2 className="h-7 w-7" /></span>
+      <span className="occazn-feature-float absolute left-[34%] top-[6%] z-10 grid h-[clamp(3.4rem,7dvh,4.4rem)] w-[clamp(3rem,6dvh,3.8rem)] -rotate-3 place-items-center rounded-xl bg-white shadow-[0_12px_24px_rgba(80,13,104,0.12)]" style={{ animationDelay: "0.15s" }}>
+        <span className="grid h-[clamp(2.4rem,5dvh,3.1rem)] w-[clamp(2.4rem,5dvh,3.1rem)] place-items-center rounded-2xl bg-[#F6F0F8] text-[#7B3892]"><Music2 className="h-6 w-6" /></span>
       </span>
-      <span className="occazn-feature-float absolute right-[28%] top-5 z-10 grid h-20 w-16 rotate-8 place-items-center rounded-xl bg-white shadow-[0_14px_28px_rgba(80,13,104,0.12)]" style={{ animationDelay: "0.25s" }}>
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[#F6F0F8] text-[#6C1785]"><PlayCircle className="h-7 w-7" /></span>
+      <span className="occazn-feature-float absolute right-[34%] top-[6%] z-10 grid h-[clamp(3.4rem,7dvh,4.4rem)] w-[clamp(3rem,6dvh,3.8rem)] rotate-3 place-items-center rounded-xl bg-white shadow-[0_12px_24px_rgba(80,13,104,0.12)]" style={{ animationDelay: "0.25s" }}>
+        <span className="grid h-[clamp(2.4rem,5dvh,3.1rem)] w-[clamp(2.4rem,5dvh,3.1rem)] place-items-center rounded-2xl bg-[#F6F0F8] text-[#6C1785]"><PlayCircle className="h-6 w-6" /></span>
       </span>
-      <span className="occazn-feature-float absolute right-6 top-7 z-10 grid h-24 w-20 rotate-12 place-items-center rounded-xl bg-white shadow-[0_14px_28px_rgba(80,13,104,0.12)]" style={{ animationDelay: "0.35s" }}>
-        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#F6F0F8] text-[#500D68]"><MapPin className="h-8 w-8" /></span>
+      <span className="occazn-feature-float absolute right-[12%] top-[24%] z-10 grid h-[clamp(3.8rem,8dvh,5rem)] w-[clamp(3.4rem,7dvh,4.3rem)] rotate-6 place-items-center rounded-xl bg-white shadow-[0_12px_24px_rgba(80,13,104,0.12)]" style={{ animationDelay: "0.35s" }}>
+        <span className="grid h-[clamp(2.7rem,5.6dvh,3.5rem)] w-[clamp(2.7rem,5.6dvh,3.5rem)] place-items-center rounded-2xl bg-[#F6F0F8] text-[#500D68]"><MapPin className="h-7 w-7" /></span>
       </span>
-      <span className="absolute bottom-6 left-1/2 h-20 w-44 -translate-x-1/2 rounded-b-2xl bg-[#A477B4] shadow-[0_16px_34px_rgba(80,13,104,0.18)]" />
-      <span className="absolute bottom-[72px] left-1/2 h-14 w-48 -translate-x-1/2 skew-x-[-18deg] rounded bg-[#D0B8D8]" />
-      <span className="absolute bottom-[72px] left-[51%] h-14 w-48 -translate-x-1/2 skew-x-[18deg] rounded bg-[#A477B4]" />
-      <Sparkles className="occazn-twinkle absolute left-2 top-20 h-5 w-5 fill-[#A477B4] text-[#A477B4]" />
-      <Sparkles className="occazn-twinkle absolute right-2 top-12 h-5 w-5 fill-[#7B3892] text-[#7B3892]" />
-      <Sparkles className="occazn-twinkle absolute right-20 bottom-4 h-4 w-4 fill-[#A477B4] text-[#A477B4]" />
+      <span className="absolute bottom-[10%] left-1/2 h-[clamp(3.2rem,7dvh,4.3rem)] w-[clamp(9.5rem,36vw,12rem)] -translate-x-1/2 rounded-b-2xl bg-[#A477B4] shadow-[0_14px_30px_rgba(80,13,104,0.18)]" />
+      <span className="absolute bottom-[44%] left-[46%] h-[clamp(2.2rem,5dvh,3.2rem)] w-[clamp(5.8rem,22vw,7.5rem)] -translate-x-1/2 skew-x-[-18deg] rounded bg-[#D0B8D8]" />
+      <span className="absolute bottom-[44%] left-[54%] h-[clamp(2.2rem,5dvh,3.2rem)] w-[clamp(5.8rem,22vw,7.5rem)] -translate-x-1/2 skew-x-[18deg] rounded bg-[#A477B4]" />
+      <Sparkles className="occazn-twinkle absolute left-[4%] top-[58%] h-4 w-4 fill-[#A477B4] text-[#A477B4]" />
+      <Sparkles className="occazn-twinkle absolute right-[5%] top-[48%] h-4 w-4 fill-[#7B3892] text-[#7B3892]" />
     </div>
   );
 }
@@ -723,15 +797,15 @@ function FeatureCard({ title, description, icon: Icon, complete, onClick }: { ti
       variants={cardVariants}
       whileTap={{ scale: 0.985 }}
       onClick={onClick}
-      className="group relative flex min-h-[82px] w-full items-center gap-4 rounded-[1.25rem] border bg-white px-4 py-3 text-left shadow-[0_12px_28px_rgba(80,13,104,0.08)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+      className="group relative flex min-h-[clamp(4.35rem,9dvh,5.1rem)] w-full items-center gap-3 rounded-[1.1rem] border bg-white px-4 py-2.5 text-left shadow-[0_10px_24px_rgba(80,13,104,0.08)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
       style={{ borderColor: complete ? brand.primary : "rgba(208,184,216,0.35)" }}
     >
-      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#F6F0F8] text-[#6C1785]">
-        <Icon className="h-8 w-8 stroke-[1.8]" />
+      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#F6F0F8] text-[#6C1785]">
+        <Icon className="h-7 w-7 stroke-[1.8]" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-xl font-bold text-[#171717]">{title}</span>
-        <span className="mt-1 block text-base font-medium text-[#686078]">{description}</span>
+        <span className="block text-[clamp(1rem,2.5dvh,1.2rem)] font-bold text-[#171717]">{title}</span>
+        <span className="mt-0.5 block text-[clamp(0.85rem,2dvh,1rem)] font-medium text-[#686078]">{description}</span>
       </span>
       <AnimatePresence>
         {complete && (
@@ -750,23 +824,23 @@ function FinalInviteIllustration({ draft }: { draft: EventDraft }) {
   const dateLabel = draft.date ? formatEventDate(draft.date) : "Event Date";
 
   return (
-    <div className="relative mx-auto h-56 w-full max-w-[360px]" aria-hidden="true">
+    <div className="relative mx-auto h-[clamp(9.4rem,23dvh,14rem)] w-full max-w-[330px]" aria-hidden="true">
       <span className="occazn-float-sparkle absolute left-2 top-12 text-[#A477B4]">*</span>
       <span className="occazn-float-sparkle absolute right-6 top-8 text-[#7B3892]" style={{ animationDelay: "0.4s" }}>*</span>
       <span className="occazn-float-sparkle absolute left-9 bottom-12 text-[#D0B8D8]" style={{ animationDelay: "0.9s" }}>*</span>
       <span className="occazn-float-sparkle absolute right-12 bottom-8 text-[#A477B4]" style={{ animationDelay: "1.2s" }}>*</span>
       <motion.span
-        className="occazn-envelope-float absolute left-1/2 top-7 z-10 flex h-28 w-32 -translate-x-1/2 flex-col items-center rounded-lg bg-white px-3 py-5 text-center shadow-[0_16px_38px_rgba(80,13,104,0.13)]"
+        className="occazn-envelope-float absolute left-1/2 top-[10%] z-10 flex h-[clamp(5.5rem,12dvh,7rem)] w-[clamp(6.7rem,26vw,8rem)] -translate-x-1/2 flex-col items-center rounded-lg bg-white px-3 py-[clamp(0.8rem,2dvh,1.25rem)] text-center shadow-[0_16px_38px_rgba(80,13,104,0.13)]"
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.42 }}
       >
-        <span className="line-clamp-1 font-serif text-lg font-bold text-[#6C1785]">{names}</span>
-        <span className="mt-3 h-px w-16 bg-[#D0B8D8]" />
-        <span className="mt-3 text-sm font-bold text-[#686078]">{dateLabel}</span>
-        <Heart className="mt-3 h-5 w-5 fill-[#A477B4] text-[#A477B4]" />
+        <span className="line-clamp-1 font-serif text-[clamp(0.9rem,2.2dvh,1.125rem)] font-bold text-[#6C1785]">{names}</span>
+        <span className="mt-[clamp(0.35rem,1dvh,0.75rem)] h-px w-14 bg-[#D0B8D8]" />
+        <span className="mt-[clamp(0.35rem,1dvh,0.75rem)] text-xs font-bold text-[#686078]">{dateLabel}</span>
+        <Heart className="mt-[clamp(0.35rem,1dvh,0.75rem)] h-4 w-4 fill-[#A477B4] text-[#A477B4]" />
       </motion.span>
-      <span className="absolute bottom-7 left-1/2 h-28 w-56 -translate-x-1/2 overflow-hidden rounded-b-2xl bg-[#7B3892] shadow-[0_22px_48px_rgba(80,13,104,0.2)]">
+      <span className="absolute bottom-[8%] left-1/2 h-[clamp(5.5rem,12dvh,7rem)] w-[clamp(11rem,48vw,14rem)] -translate-x-1/2 overflow-hidden rounded-b-2xl bg-[#7B3892] shadow-[0_22px_48px_rgba(80,13,104,0.2)]">
         <span className="absolute inset-x-0 top-0 h-0 w-0 border-l-[112px] border-r-[112px] border-t-[72px] border-l-transparent border-r-transparent border-t-[#D0B8D8]" />
         <span className="absolute bottom-0 left-0 h-0 w-0 border-b-[86px] border-r-[112px] border-b-[#6C1785] border-r-transparent" />
         <span className="absolute bottom-0 right-0 h-0 w-0 border-b-[86px] border-l-[112px] border-b-[#500D68] border-l-transparent" />
@@ -784,20 +858,20 @@ function FinalActionCard() {
   ];
 
   return (
-    <motion.div key="final" className="mt-8 overflow-hidden rounded-[1.4rem] border bg-white shadow-[0_16px_38px_rgba(80,13,104,0.09)]" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants} style={{ borderColor: "rgba(208,184,216,0.34)" }}>
+    <motion.div key="final" className="mt-[clamp(0.8rem,1.8dvh,1.5rem)] overflow-hidden rounded-[1.25rem] border bg-white shadow-[0_14px_32px_rgba(80,13,104,0.09)]" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants} style={{ borderColor: "rgba(208,184,216,0.34)" }}>
       {rows.map(({ title, description, icon: Icon }, index) => (
         <motion.button
           key={title}
           type="button"
           variants={cardVariants}
-          className={cn("group flex min-h-[92px] w-full items-center gap-4 bg-white px-5 py-4 text-left transition hover:bg-[#F6F0F8]/45 focus:outline-none focus:ring-2 focus:ring-[#6C1785]", index > 0 && "border-t border-[#D0B8D8]/35")}
+          className={cn("group flex min-h-[clamp(4.5rem,9dvh,5.5rem)] w-full items-center gap-3 bg-white px-4 py-3 text-left transition hover:bg-[#F6F0F8]/45 focus:outline-none focus:ring-2 focus:ring-[#6C1785]", index > 0 && "border-t border-[#D0B8D8]/35")}
         >
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-[#F6F0F8] text-[#6C1785]">
-            <Icon className="h-8 w-8 stroke-[1.8]" />
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#F6F0F8] text-[#6C1785]">
+            <Icon className="h-7 w-7 stroke-[1.8]" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-xl font-bold text-[#171717]">{title}</span>
-            <span className="mt-1 block text-lg font-medium leading-6 text-[#686078]">{description}</span>
+            <span className="block text-[clamp(1rem,2.4dvh,1.2rem)] font-bold text-[#171717]">{title}</span>
+            <span className="mt-0.5 block text-[clamp(0.9rem,2.1dvh,1.05rem)] font-medium leading-snug text-[#686078]">{description}</span>
           </span>
           <ChevronRight className="h-7 w-7 text-[#7B3892] transition group-hover:translate-x-1" />
         </motion.button>
@@ -941,7 +1015,7 @@ function ContinueButton({ disabled, onClick, label = "Continue", loading = false
       disabled={disabled || loading}
       onClick={onClick}
       whileTap={{ scale: 0.985 }}
-      className="occazn-shimmer relative flex h-16 w-full items-center justify-center overflow-hidden rounded-[1.15rem] bg-[#6C1785] text-xl font-bold text-white shadow-[0_14px_28px_rgba(108,23,133,0.24)] focus:outline-none focus:ring-2 focus:ring-[#500D68] disabled:opacity-50"
+      className="occazn-shimmer relative flex h-[clamp(3.25rem,7dvh,4rem)] w-full items-center justify-center overflow-hidden rounded-[1.15rem] bg-[#6C1785] text-[clamp(1.1rem,2.8dvh,1.25rem)] font-bold text-white shadow-[0_14px_28px_rgba(108,23,133,0.24)] focus:outline-none focus:ring-2 focus:ring-[#500D68] disabled:opacity-50"
       aria-busy={loading}
     >
       {loading && <Loader2 className="mr-3 h-5 w-5 animate-spin" />}
@@ -953,7 +1027,7 @@ function ContinueButton({ disabled, onClick, label = "Continue", loading = false
 
 function DecorativeSwoosh() {
   return (
-    <div className="mt-8 flex items-center justify-center gap-3 text-[#A477B4]">
+    <div className="mt-[clamp(0.9rem,2dvh,2rem)] flex items-center justify-center gap-3 text-[#A477B4]">
       <Sparkles className="h-4 w-4 fill-[#A477B4]" />
       <svg width="86" height="16" viewBox="0 0 86 16" fill="none" aria-hidden="true">
         <path d="M2 12C22 1 36 14 52 9C62 6 70 3 84 6" stroke="#A477B4" strokeWidth="2" strokeLinecap="round" />

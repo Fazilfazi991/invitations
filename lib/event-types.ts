@@ -2,7 +2,12 @@ export type EventType =
   | "wedding"
   | "engagement"
   | "birthday"
+  | "anniversary"
+  | "baby-shower"
   | "housewarming"
+  | "corporate"
+  | "graduation"
+  | "farewell"
   | "naming"
   | "religious"
   | "reception"
@@ -16,7 +21,12 @@ export const eventTypeOptions: { value: EventType; label: string }[] = [
   { value: "wedding", label: "Wedding" },
   { value: "engagement", label: "Engagement" },
   { value: "birthday", label: "Birthday" },
+  { value: "anniversary", label: "Anniversary" },
+  { value: "baby-shower", label: "Baby Shower" },
   { value: "housewarming", label: "Housewarming" },
+  { value: "corporate", label: "Corporate Event" },
+  { value: "graduation", label: "Graduation" },
+  { value: "farewell", label: "Farewell" },
   { value: "naming", label: "Naming Ceremony" },
   { value: "religious", label: "Religious Event" },
   { value: "reception", label: "Reception" },
@@ -26,7 +36,7 @@ export const eventTypeOptions: { value: EventType; label: string }[] = [
 
 export function normalizeEventType(value?: string | null): EventType {
   const found = eventTypeOptions.find((option) => option.value === value);
-  return found?.value ?? "wedding";
+  return found?.value ?? "custom";
 }
 
 export function getEventTypeLabel(eventType: EventType) {
@@ -38,7 +48,12 @@ export function getEventHeroLabel(eventType: EventType) {
     wedding: "The Wedding of",
     engagement: "The Engagement of",
     birthday: "You're invited to",
+    anniversary: "Anniversary celebration",
+    "baby-shower": "Baby shower for",
     housewarming: "Housewarming celebration",
+    corporate: "Corporate event",
+    graduation: "Graduation celebration",
+    farewell: "Farewell celebration",
     naming: "Naming ceremony",
     religious: "You're invited to",
     reception: "Reception of",
