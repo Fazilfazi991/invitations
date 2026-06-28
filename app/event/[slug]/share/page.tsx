@@ -12,7 +12,7 @@ import { EventQRCode } from "@/components/share/EventQRCode";
 import { ShareActions } from "@/components/share/ShareActions";
 import { WhatsAppMessageGenerator } from "@/components/share/WhatsAppMessageGenerator";
 import { Section } from "@/components/shared";
-import { eventUrl, sampleEvent } from "@/lib/mock-data";
+import { sampleEvent } from "@/lib/mock-data";
 import type { EventDraft } from "@/lib/event-draft";
 import { loadPublicEvent } from "@/lib/event-repository";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
@@ -22,12 +22,35 @@ import { getEventUrl } from "@/lib/event-url";
 export default function SharePage() {
   const params = useParams<{ slug: string }>();
   const [event, setEvent] = useState<EventDraft | null>(null);
-  useEffect(() => { loadPublicEvent(params.slug).then(setEvent); }, [params.slug]);
-  const title = event?.title ?? sampleEvent.title;
-  const date = event ? formatEventDate(event.date) : sampleEvent.date;
-  const time = event ? formatEventTime(event.time) : sampleEvent.time;
-  const location = event ? `${event.venueName}, ${event.city}` : sampleEvent.location;
-  const url = event?.publicUrl || (typeof window === "undefined" ? eventUrl : getEventUrl(params.slug));
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    setLoaded(false);
+    loadPublicEvent(params.slug).then((nextEvent) => {
+      setEvent(nextEvent);
+      setLoaded(true);
+    });
+  }, [params.slug]);
+
+  if (!loaded) {
+    return <main className="phone-shell grid min-h-screen place-items-center bg-background px-5 text-center text-sm font-semibold text-primary">Loading share details...</main>;
+  }
+
+  if (!event) {
+    return (
+      <main className="phone-shell grid min-h-screen place-items-center bg-background px-5 text-center">
+        <Card className="max-w-sm p-6">
+          <h1 className="font-serif text-3xl font-bold">Invite not found</h1>
+          <p className="mt-2 text-sm leading-6 text-muted">Create or save the invite again to generate a fresh share link.</p>
+        </Card>
+      </main>
+    );
+  }
+
+  const title = event.title;
+  const date = formatEventDate(event.date);
+  const time = formatEventTime(event.time);
+  const location = `${event.venueName}${event.city ? `, ${event.city}` : ""}`;
+  const url = event.publicUrl || getEventUrl(params.slug);
   const image = event?.coverImage || event?.templateImage || sampleEvent.coupleImage;
   const theme = getThemeStyles(event?.theme);
   return (

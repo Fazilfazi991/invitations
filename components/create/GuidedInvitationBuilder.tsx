@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Baby, BriefcaseBusiness, Cake, CalendarDays, Check, ChevronRight, Clock, Eye, Gift, Gem, GraduationCap, Heart, HeartHandshake, Home, Image as ImageIcon, Link as LinkIcon, Loader2, MapPin, Music2, PartyPopper, PlayCircle, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
@@ -144,6 +144,7 @@ export function GuidedInvitationBuilder() {
     draft.venueName.trim(),
   ].filter(Boolean).length;
   const detailsComplete = completedDetailCount === 3;
+  const isCoupleEvent = ["wedding", "engagement", "reception"].includes(draft.eventType);
   const featureStatus = {
     photos: draft.gallery.length > 0,
     video: Boolean(draft.youtubeLink.trim()),
@@ -268,11 +269,23 @@ export function GuidedInvitationBuilder() {
     setCreating(true);
     setConfettiKey((current) => current + 1);
     try {
+      const trimmedPrimary = draft.primaryName.trim();
+      const trimmedSecondary = (draft.secondaryName || "").trim();
+      const normalizedTitle = titleForDraft(draft, trimmedPrimary, trimmedSecondary);
       const published = await publishEvent({
         ...draft,
+        title: normalizedTitle,
+        primaryName: trimmedPrimary,
+        secondaryName: trimmedSecondary,
+        groomName: trimmedPrimary,
+        brideName: trimmedSecondary,
+        venueName: draft.venueName.trim(),
+        address: draft.address.trim(),
+        city: draft.city.trim(),
+        mapLink: draft.mapLink.trim(),
         ownerId: user?.id,
         status: "published",
-        slug: generateSlug(draft.title),
+        slug: generateSlug(normalizedTitle),
       });
       setDraft(published);
       window.setTimeout(() => router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard"), 420);
@@ -297,14 +310,33 @@ export function GuidedInvitationBuilder() {
     setStep((current) => current === 5 ? 4 : current === 4 ? 3 : current === 3 ? 2 : 1);
   }
 
-  function updateCoupleNames(value: string) {
-    const [first, ...rest] = value.split("&").map((item) => item.trim());
+  function titleForDraft(current: EventDraft, primaryName: string, secondaryName = current.secondaryName || "") {
+    if (["wedding", "engagement", "reception"].includes(current.eventType)) {
+      const names = [primaryName, secondaryName].filter(Boolean).join(" & ");
+      return names ? `${names} ${current.eventType === "engagement" ? "Engagement" : "Wedding"}` : current.title;
+    }
+    if (current.eventType === "birthday") return primaryName ? `${primaryName} Birthday` : current.title;
+    return primaryName ? `${primaryName} Celebration` : current.title;
+  }
+
+  function updatePrimaryName(value: string) {
     setDraft((current) => ({
       ...current,
-      primaryName: first,
-      secondaryName: rest.join(" & "),
+      primaryName: value,
+      groomName: value,
+      birthdayPersonName: current.eventType === "birthday" ? value : current.birthdayPersonName,
+      childName: current.eventType === "birthday" ? value : current.childName,
       hostName: current.eventType === "custom" ? value : current.hostName,
-      title: value ? `${value} ${current.eventType === "birthday" ? "Birthday" : "Celebration"}` : current.title,
+      title: titleForDraft(current, value),
+    }));
+  }
+
+  function updateSecondaryName(value: string) {
+    setDraft((current) => ({
+      ...current,
+      secondaryName: value,
+      brideName: value,
+      title: titleForDraft(current, current.primaryName, value),
     }));
   }
 
@@ -414,17 +446,44 @@ export function GuidedInvitationBuilder() {
             </motion.div>
           ) : step === 3 ? (
             <motion.div key="details" className="mt-8 space-y-4" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
-              <DetailFieldCard
-                id="coupleNames"
-                label="Couple names"
-                value={coupleNames}
-                placeholder="Aarav & Meera"
-                icon={HeartHandshake}
-                focused={focusedField === "coupleNames"}
-                onFocus={() => setFocusedField("coupleNames")}
-                onBlur={() => setFocusedField("")}
-                onChange={updateCoupleNames}
-              />
+              {isCoupleEvent ? (
+                <>
+                  <DetailFieldCard
+                    id="partnerOneName"
+                    label="Partner 1 name"
+                    value={draft.primaryName}
+                    placeholder="Afsal"
+                    icon={HeartHandshake}
+                    focused={focusedField === "partnerOneName"}
+                    onFocus={() => setFocusedField("partnerOneName")}
+                    onBlur={() => setFocusedField("")}
+                    onChange={updatePrimaryName}
+                  />
+                  <DetailFieldCard
+                    id="partnerTwoName"
+                    label="Partner 2 name"
+                    value={draft.secondaryName || ""}
+                    placeholder="Fathima"
+                    icon={Heart}
+                    focused={focusedField === "partnerTwoName"}
+                    onFocus={() => setFocusedField("partnerTwoName")}
+                    onBlur={() => setFocusedField("")}
+                    onChange={updateSecondaryName}
+                  />
+                </>
+              ) : (
+                <DetailFieldCard
+                  id="primaryEventName"
+                  label={draft.eventType === "birthday" ? "Celebrant name" : draft.eventType === "baby-shower" || draft.eventType === "naming" ? "Baby or family name" : draft.eventType === "corporate" || draft.eventType === "business" ? "Event or company name" : "Event title"}
+                  value={draft.primaryName || draft.hostName || draft.title}
+                  placeholder={draft.eventType === "birthday" ? "Ava" : "Ayisha Celebration"}
+                  icon={HeartHandshake}
+                  focused={focusedField === "primaryEventName"}
+                  onFocus={() => setFocusedField("primaryEventName")}
+                  onBlur={() => setFocusedField("")}
+                  onChange={updatePrimaryName}
+                />
+              )}
               <DetailFieldCard
                 id="eventDate"
                 label="Event date"
@@ -531,8 +590,38 @@ export function GuidedInvitationBuilder() {
       </div>
       <TemplatePreviewModal template={previewTemplate} onClose={() => setPreviewTemplate(null)} onUse={(template) => { selectTemplate(template); setPreviewTemplate(null); }} />
       <FeatureBottomSheet sheet={activeSheet} draft={draft} setDraft={setDraft} onClose={() => setActiveSheet(null)} />
+      <DemoDebugPanel draft={draft} />
       {!BYPASS_AUTH_FOR_DEMO && <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create-event" />}
     </BuilderOnboardingShell>
+  );
+}
+
+function DemoDebugPanel({ draft }: { draft: EventDraft }) {
+  if (process.env.NODE_ENV === "production" || !BYPASS_AUTH_FOR_DEMO) return null;
+  const rows = [
+    ["inviteId", draft.slug || "(pending)"],
+    ["eventType", draft.eventType],
+    ["selectedTemplateId", draft.templateId || "(none)"],
+    ["primaryName", draft.primaryName || "(empty)"],
+    ["secondaryName", draft.secondaryName || "(empty)"],
+    ["eventTitle", draft.title || "(empty)"],
+    ["date", draft.date || "(empty)"],
+    ["time", draft.time || "(empty)"],
+    ["venueName", draft.venueName || "(empty)"],
+  ];
+
+  return (
+    <details className="absolute bottom-24 left-3 z-40 max-h-52 max-w-[calc(100%-1.5rem)] overflow-auto rounded-xl border border-[#D0B8D8] bg-white/95 p-2 text-[10px] text-[#500D68] shadow-[0_12px_28px_rgba(80,13,104,0.12)]">
+      <summary className="cursor-pointer font-bold">Demo draft debug</summary>
+      <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+        {rows.map(([label, value]) => (
+          <Fragment key={label}>
+            <dt className="font-bold">{label}</dt>
+            <dd className="break-all">{value}</dd>
+          </Fragment>
+        ))}
+      </dl>
+    </details>
   );
 }
 

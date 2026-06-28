@@ -20,7 +20,7 @@ import { getThemeStyles } from "@/lib/themes";
 
 export function MinimalEditorialWedding({ event }: { event: WeddingEventData }) {
   const primary = getThemeStyles(event.theme).primary;
-  const { groom, bride } = getCoupleNames(event);
+  const { groom, bride, coupleName } = getCoupleNames(event);
   const heroImage = isUsableImage(event.coverImage) ? event.coverImage : sampleEvent.coupleImage;
 
   return (
@@ -29,7 +29,7 @@ export function MinimalEditorialWedding({ event }: { event: WeddingEventData }) 
       <section className="grid gap-4 px-5 pb-5 sm:grid-cols-2">
         <div className="pt-8">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted">Together with their families</p>
-          <h1 className="mt-5 font-serif text-6xl font-bold leading-none text-[#1F2937]">{groom} <span style={{ color: primary }}>&</span><br />{bride}</h1>
+          <h1 className="mt-5 font-serif text-[clamp(3rem,13vw,4.5rem)] font-bold leading-none text-[#1F2937] [overflow-wrap:anywhere]">{bride ? <>{groom} <span style={{ color: primary }}>&</span><br />{bride}</> : coupleName}</h1>
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-muted">Invite you to celebrate their wedding</p>
           <div className="mt-5"><DetailPills event={event} primary={primary} /></div>
           <Button className="mt-5" style={{ backgroundColor: primary }}>Save the Date <Heart className="h-4 w-4" /></Button>

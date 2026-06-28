@@ -31,7 +31,7 @@ export function ContemporaryLuxeWedding({ event }: { event: WeddingEventData }) 
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
         <div className="absolute inset-x-0 bottom-10 px-6 text-center text-white">
           <p className="text-xs font-bold uppercase tracking-[0.3em]">Together with our families</p>
-          <h1 className="mt-3 font-serif text-6xl font-bold leading-none">{coupleName}</h1>
+          <h1 className="mt-3 font-serif text-[clamp(3rem,13vw,4.5rem)] font-bold leading-none [overflow-wrap:anywhere]">{coupleName}</h1>
           <p className="mt-2 text-sm">A celebration of love</p>
         </div>
       </section>

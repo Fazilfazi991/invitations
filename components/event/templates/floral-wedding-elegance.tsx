@@ -22,7 +22,7 @@ import { getThemeStyles } from "@/lib/themes";
 export function FloralWeddingElegance({ event }: { event: WeddingEventData }) {
   const primary = getThemeStyles(event.theme).primary;
   const secondary = "#D6A84F";
-  const { groom, bride } = getCoupleNames(event);
+  const { groom, bride, coupleName } = getCoupleNames(event);
 
   return (
     <TemplateShell background="#FFFDF9">
@@ -32,7 +32,7 @@ export function FloralWeddingElegance({ event }: { event: WeddingEventData }) {
           <div className="absolute -left-8 top-6 h-32 w-24 rounded-full bg-rose-100/70 blur-xl" />
           <div className="absolute -right-8 top-10 h-32 w-24 rounded-full bg-rose-100/70 blur-xl" />
           <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: secondary }}>Together with their families</p>
-          <h1 className="mt-4 font-serif text-6xl font-bold leading-none" style={{ color: primary }}>{groom}<span className="block text-3xl" style={{ color: secondary }}>&</span>{bride}</h1>
+          <h1 className="mt-4 font-serif text-[clamp(3rem,13vw,4.5rem)] font-bold leading-none [overflow-wrap:anywhere]" style={{ color: primary }}>{bride ? <>{groom}<span className="block text-3xl" style={{ color: secondary }}>&</span>{bride}</> : coupleName}</h1>
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-muted">Invite you to celebrate their wedding</p>
           <div className="mt-5"><DetailPills event={event} primary={primary} /></div>
           <Button className="mt-5" style={{ backgroundColor: primary }}>RSVP Now <Heart className="h-4 w-4" /></Button>

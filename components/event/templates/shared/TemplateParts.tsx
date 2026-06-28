@@ -38,10 +38,10 @@ export function BrandBar({ cta, primary }: { cta?: string; primary: string }) {
 export function DetailPills({ event, primary }: { event: WeddingEventData; primary: string }) {
   const venue = getVenueText(event);
   return (
-    <div className="grid grid-cols-3 gap-2 text-xs">
-      <div><CalendarDays className="mb-1 h-4 w-4" style={{ color: primary }} /><b>{formatEventDate(event.date)}</b><span className="block text-muted">Date</span></div>
-      <div><Heart className="mb-1 h-4 w-4" style={{ color: primary }} /><b>{formatEventTime(event.time)}</b><span className="block text-muted">Onwards</span></div>
-      <div><MapPin className="mb-1 h-4 w-4" style={{ color: primary }} /><b>{venue.venue}</b><span className="block text-muted">{venue.city}</span></div>
+    <div className="grid grid-cols-1 gap-3 text-left text-xs sm:grid-cols-3 sm:gap-2">
+      <div className="min-w-0 rounded-2xl bg-white/55 p-3 sm:bg-transparent sm:p-0"><CalendarDays className="mb-1 h-4 w-4" style={{ color: primary }} /><b className="block break-words">{formatEventDate(event.date)}</b><span className="block text-muted">Date</span></div>
+      <div className="min-w-0 rounded-2xl bg-white/55 p-3 sm:bg-transparent sm:p-0"><Heart className="mb-1 h-4 w-4" style={{ color: primary }} /><b className="block break-words">{formatEventTime(event.time)}</b><span className="block text-muted">Onwards</span></div>
+      <div className="min-w-0 rounded-2xl bg-white/55 p-3 sm:bg-transparent sm:p-0"><MapPin className="mb-1 h-4 w-4" style={{ color: primary }} /><b className="block break-words">{venue.venue}</b><span className="block break-words text-muted">{venue.city}</span></div>
     </div>
   );
 }
@@ -65,7 +65,7 @@ export function TemplateTimeline({ event, title, primary, boxed = false }: { eve
   return (
     <section className="text-center">
       <h2 className="font-serif text-2xl font-bold">{title}</h2>
-      <div className={cn("mt-4 grid gap-3", boxed ? "grid-cols-2" : "grid-cols-4")}>
+      <div className={cn("mt-4 grid gap-3", boxed ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4")}>
         {getTemplateSchedule(event).map((item, index) => {
           const Icon = icons[index % icons.length];
           return (
@@ -108,8 +108,8 @@ export function TemplateGallery({ event, title, primary }: { event: WeddingEvent
   return (
     <section>
       <h2 className="text-center font-serif text-2xl font-bold">{title}</h2>
-      <div className="mt-4 grid grid-cols-4 gap-2">
-        {gallery.slice(0, 4).map((src) => <img key={src} src={src} alt="" className="h-20 rounded-xl object-cover" />)}
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {gallery.slice(0, 4).map((src) => <img key={src} src={src} alt="" className="h-24 w-full rounded-xl object-cover sm:h-20" />)}
       </div>
       <Button variant="outline" size="sm" className="mx-auto mt-4 flex" style={{ color: primary }}><Camera className="h-4 w-4" />View All Photos</Button>
     </section>

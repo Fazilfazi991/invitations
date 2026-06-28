@@ -19,9 +19,10 @@ export function formatEventTime(time?: string) {
 }
 
 export function getCoupleNames(event: Partial<WeddingEventData>) {
-  const groom = event.groomName || event.primaryName || "Afsal";
-  const bride = event.brideName || event.secondaryName || "Fathima";
-  return { groom, bride, coupleName: `${groom} & ${bride}` };
+  const hasUserPrimary = Boolean(event.primaryName?.trim());
+  const groom = event.primaryName?.trim() || event.groomName?.trim() || "Afsal";
+  const bride = event.secondaryName?.trim() || (!hasUserPrimary ? event.brideName?.trim() : "") || "";
+  return { groom, bride, coupleName: bride ? `${groom} & ${bride}` : groom };
 }
 
 export function getVenueText(event: Partial<WeddingEventData>) {

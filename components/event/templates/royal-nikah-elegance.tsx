@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
-  const { groom, bride } = getCoupleNames(event);
+  const { groom, bride, coupleName } = getCoupleNames(event);
   const venue = getVenueText(event);
   const schedule = getTemplateSchedule(event);
   const countdown = getCountdownValues(event.date);
@@ -74,10 +74,14 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
               <p className="mt-3 font-serif text-xl leading-relaxed text-[#D7A95A]" dir="rtl">
                 {event.invitationOpening || "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u064e\u0651\u0670\u0647\u0650 \u0671\u0644\u0631\u064e\u0651\u062d\u0652\u0645\u064e\u0640\u0670\u0646\u0650 \u0671\u0644\u0631\u064e\u0651\u062d\u0650\u064a\u0645\u0650"}
               </p>
-              <h1 className="mt-3 font-serif text-[clamp(2.45rem,8.5vw,3.65rem)] leading-[0.95] text-[#D84B73]">
-                {groom}
-                <span className="my-2 block text-[0.72rem] font-bold uppercase tracking-[0.28em] text-[#8C7B86]">and</span>
-                {bride}
+              <h1 className="mt-3 font-serif text-[clamp(2.45rem,8.5vw,3.65rem)] leading-[0.95] text-[#D84B73] [overflow-wrap:anywhere]">
+                {bride ? (
+                  <>
+                    {groom}
+                    <span className="my-2 block text-[0.72rem] font-bold uppercase tracking-[0.28em] text-[#8C7B86]">and</span>
+                    {bride}
+                  </>
+                ) : coupleName}
               </h1>
               <p className="mt-3 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-[#4D4650]">
                 Invite you to celebrate their Nikah

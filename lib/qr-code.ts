@@ -6,7 +6,7 @@ export async function createQrCodeSvg(publicUrl: string) {
       type: "svg",
       errorCorrectionLevel: "M",
       margin: 2,
-      width: 512,
+      width: 280,
       color: {
         dark: "#6C1785",
         light: "#FFFFFF",
