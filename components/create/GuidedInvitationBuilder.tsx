@@ -3,17 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Baby, BriefcaseBusiness, Cake, CalendarDays, Check, ChevronRight, Clock, Gift, Gem, GraduationCap, Heart, HeartHandshake, Home, Image as ImageIcon, Link as LinkIcon, Loader2, MapPin, Music2, PartyPopper, PlayCircle, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Baby, BriefcaseBusiness, Cake, CalendarDays, Check, ChevronRight, Clock, Eye, Gift, Gem, GraduationCap, Heart, HeartHandshake, Home, Image as ImageIcon, Link as LinkIcon, Loader2, MapPin, Music2, PartyPopper, PlayCircle, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { GuestAuthModal } from "@/components/auth/GuestAuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
+import { TemplateFullPagePreview } from "@/components/templates/TemplateFullPagePreview";
+import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { DRAFT_KEY, EVENT_TYPE_KEY, generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
-import type { EventType } from "@/lib/event-types";
+import { getEventTypeLabel, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/date-utils";
 import { publishEvent } from "@/lib/event-repository";
-import { getDefaultTemplateForType, getTemplateById, templates, templateMoodToTheme } from "@/lib/templates";
+import { getDefaultTemplateForType, getTemplateById, templates, templateMoodToTheme, type EventTemplate } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 
 const brand = {
@@ -101,6 +103,9 @@ export function GuidedInvitationBuilder() {
   const [otherEventType, setOtherEventType] = useState<OtherEventType | null>(null);
   const [eventTypeError, setEventTypeError] = useState("");
   const [style, setStyle] = useState<StyleValue>("royal");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [showAllTemplates, setShowAllTemplates] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<EventTemplate | null>(null);
   const [confettiKey, setConfettiKey] = useState(0);
   const [focusedField, setFocusedField] = useState("");
   const [activeSheet, setActiveSheet] = useState<FeatureSheet>(null);
@@ -115,15 +120,17 @@ export function GuidedInvitationBuilder() {
       setOccasion(null);
       setOtherEventType(null);
       setStyle(inferStyleFromTemplate(draft.templateId));
+      setSelectedTemplateId(null);
       return;
     }
     setOccasion(eventTypeToOccasion(draft.eventType));
     setOtherEventType(draft.eventType === "wedding" || draft.eventType === "birthday" ? null : draft.eventType as OtherEventType);
     setStyle(inferStyleFromTemplate(draft.templateId));
+    setSelectedTemplateId(draft.templateId || null);
   }, [draft.eventType, draft.templateId, loaded]);
 
-  const heading = step === 1 ? showOtherTypes ? "Choose your event type" : "What are you celebrating?" : step === 2 ? "Choose your style" : step === 3 ? "Add event details" : step === 4 ? "Bring your invite to life" : "You're all set!";
-  const subheading = step === 1 ? showOtherTypes ? "Select one so your invite matches the celebration." : "Choose one to get started." : step === 2 ? "Pick the feeling for your invitation." : step === 3 ? "Just the basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
+  const heading = step === 1 ? showOtherTypes ? "Choose your event type" : "What are you celebrating?" : step === 2 ? "Choose Your Template" : step === 3 ? "Add event details" : step === 4 ? "Bring your invite to life" : "You're all set!";
+  const subheading = step === 1 ? showOtherTypes ? "Select one so your invite matches the celebration." : "Choose one to get started." : step === 2 ? "Pick a design you love. You can customize everything next." : step === 3 ? "Just the basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
 
   const selectedEventType = useMemo<EventType | null>(() => {
     if (occasion === "wedding" || occasion === "birthday") return occasion;
@@ -143,10 +150,17 @@ export function GuidedInvitationBuilder() {
     music: draft.music.enabled,
     location: Boolean(draft.venueName.trim() || draft.mapLink.trim()),
   };
+  const availableTemplates = useMemo(() => {
+    if (!selectedEventType) return [];
+    const exactMatches = templates.filter((template) => template.category === selectedEventType);
+    return exactMatches.length ? exactMatches : templates.filter((template) => template.category === "custom");
+  }, [selectedEventType]);
+  const visibleTemplates = showAllTemplates ? availableTemplates : availableTemplates.slice(0, 3);
 
   function applyEventType(eventType: EventType) {
     const nextDefaults = getDefaultDraft(eventType);
-    const template = templateForStyle(eventType, style);
+    setSelectedTemplateId(null);
+    setShowAllTemplates(false);
     setDraft((current) => ({
       ...nextDefaults,
       date: current.date,
@@ -156,10 +170,9 @@ export function GuidedInvitationBuilder() {
       city: current.city,
       mapLink: current.mapLink,
       eventType,
-      templateId: template.id,
-      templateName: template.name,
-      templateImage: template.previewImage,
-      theme: templateMoodToTheme(template.style.mood),
+      templateId: "",
+      templateName: "",
+      templateImage: "",
     }));
   }
 
@@ -194,6 +207,18 @@ export function GuidedInvitationBuilder() {
     }));
   }
 
+  function selectTemplate(template: EventTemplate) {
+    setSelectedTemplateId(template.id);
+    setDraft((current) => ({
+      ...current,
+      eventType: selectedEventType ?? current.eventType,
+      templateId: template.id,
+      templateName: template.name,
+      templateImage: template.previewImage,
+      theme: templateMoodToTheme(template.style.mood),
+    }));
+  }
+
   function burstAndContinue() {
     if (step === 1) {
       if (showOtherTypes) {
@@ -210,6 +235,7 @@ export function GuidedInvitationBuilder() {
         return;
       }
     }
+    if (step === 2 && !selectedTemplateId) return;
     setConfettiKey((current) => current + 1);
     window.setTimeout(() => {
       if (step === 1) setStep(2);
@@ -335,7 +361,7 @@ export function GuidedInvitationBuilder() {
               {step === 4 && <FeatureIllustration />}
               {step === 5 && <FinalInviteIllustration draft={draft} />}
               <h1 className={cn("font-bold leading-tight text-[#171717]", step === 1 ? "font-serif text-[clamp(2rem,5.4dvh,2.65rem)] text-[#2D0C48]" : step === 2 ? "font-serif text-[clamp(2.1rem,5.4dvh,2.75rem)] text-[#2D0C48]" : step >= 4 ? "mt-[clamp(0.7rem,1.5dvh,1.6rem)] text-[clamp(1.65rem,4dvh,2.1rem)]" : "text-[clamp(2rem,5.4dvh,2.75rem)]")}>
-                {step === 2 ? <>Step 2 <Sparkles className="inline h-8 w-8 fill-[#6C1785] text-[#6C1785]" /></> : <>{heading}{step >= 3 && <Sparkles className="ml-2 inline h-7 w-7 fill-[#A477B4] text-[#A477B4]" />}</>}
+                <>{heading}{step >= 2 && <Sparkles className="ml-2 inline h-7 w-7 fill-[#A477B4] text-[#A477B4]" />}</>
               </h1>
               {step >= 3 ? <p className={cn("mx-auto mt-[clamp(0.4rem,1dvh,1rem)] font-medium leading-[1.35] text-[#686078]", step >= 4 ? "max-w-[330px] text-[clamp(1rem,2.5dvh,1.25rem)]" : "max-w-[310px] text-[clamp(1.05rem,2.6dvh,1.25rem)]")}>{subheading}</p> : step === 2 ? <p className="mt-2 text-[clamp(1.2rem,3dvh,1.5rem)] font-medium text-[#686078]">{subheading}</p> : <p className="mt-3 text-[clamp(1.2rem,3dvh,1.5rem)] font-medium text-[#686078]">{subheading}</p>}
               {step === 1 && <DecorativeSwoosh />}
@@ -363,18 +389,28 @@ export function GuidedInvitationBuilder() {
               )}
             </motion.div>
           ) : step === 2 ? (
-            <motion.div key="style" className="mt-12 space-y-5" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
-              {styleCards.map((card) => (
-                <StyleCard
-                  key={card.value}
-                  selected={style === card.value}
-                  title={card.title}
-                  description={card.description}
-                  dots={card.dots}
-                  value={card.value}
-                  onClick={() => selectStyle(card.value)}
+            <motion.div key="templates" className="mt-[clamp(1rem,2dvh,1.5rem)] space-y-4 overflow-y-auto pb-3 pr-1" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
+              {visibleTemplates.map((template) => (
+                <TemplateSelectionCard
+                  key={template.id}
+                  template={template}
+                  selected={selectedTemplateId === template.id}
+                  onPreview={() => setPreviewTemplate(template)}
+                  onSelect={() => selectTemplate(template)}
                 />
               ))}
+              {availableTemplates.length > visibleTemplates.length && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllTemplates(true)}
+                  className="h-12 w-full rounded-2xl border border-[#D0B8D8] bg-white text-sm font-bold text-[#6C1785] shadow-[0_10px_24px_rgba(80,13,104,0.06)] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+                >
+                  View More Templates
+                </button>
+              )}
+              {!availableTemplates.length && (
+                <p className="rounded-2xl bg-[#F6F0F8] px-4 py-3 text-center text-sm font-bold text-[#6C1785]">Choose an event type first.</p>
+              )}
             </motion.div>
           ) : step === 3 ? (
             <motion.div key="details" className="mt-8 space-y-4" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
@@ -455,7 +491,7 @@ export function GuidedInvitationBuilder() {
       </div>
 
       <div className="relative z-20 mt-auto shrink-0 rounded-t-[1.5rem] bg-white/92 px-5 pb-[clamp(0.7rem,1.8dvh,1.5rem)] pt-[clamp(0.65rem,1.6dvh,1.2rem)] shadow-[0_-18px_42px_rgba(80,13,104,0.08)] backdrop-blur sm:px-7">
-        <ContinueButton disabled={step === 1 ? (showOtherTypes ? false : !occasion) : step === 2 ? !style : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
+        <ContinueButton disabled={step === 1 ? (showOtherTypes ? false : !occasion) : step === 2 ? !selectedTemplateId : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
         {step === 2 && (
           <button
             type="button"
@@ -493,6 +529,7 @@ export function GuidedInvitationBuilder() {
           </button>
         )}
       </div>
+      <TemplatePreviewModal template={previewTemplate} onClose={() => setPreviewTemplate(null)} onUse={(template) => { selectTemplate(template); setPreviewTemplate(null); }} />
       <FeatureBottomSheet sheet={activeSheet} draft={draft} setDraft={setDraft} onClose={() => setActiveSheet(null)} />
       {!BYPASS_AUTH_FOR_DEMO && <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create-event" />}
     </BuilderOnboardingShell>
@@ -608,6 +645,92 @@ function OptionCard({ selected, title, icon: Icon, compact = false, onClick }: {
         )}
       </AnimatePresence>
     </motion.button>
+  );
+}
+
+function TemplateSelectionCard({ template, selected, onPreview, onSelect }: { template: EventTemplate; selected: boolean; onPreview: () => void; onSelect: () => void }) {
+  return (
+    <motion.article
+      variants={cardVariants}
+      className={cn(
+        "overflow-hidden rounded-[1.35rem] border bg-white text-left shadow-[0_14px_30px_rgba(80,13,104,0.08)] transition",
+        selected && "shadow-[0_18px_36px_rgba(108,23,133,0.14)]",
+      )}
+      style={{ borderColor: selected ? brand.primary : "rgba(208,184,216,0.42)" }}
+    >
+      <div className="relative">
+        <TemplatePreview template={template} className="h-[clamp(9.5rem,24dvh,12rem)] rounded-none border-0" />
+        {selected && (
+          <span className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-[#6C1785] text-white shadow-[0_10px_24px_rgba(80,13,104,0.22)]">
+            <Check className="h-5 w-5" />
+          </span>
+        )}
+      </div>
+      <div className="space-y-3 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#7B3892]">{template.style.mood.replace("-", " ")}</p>
+            <h2 className="mt-1 font-serif text-[clamp(1.45rem,3dvh,1.8rem)] font-bold leading-tight text-[#2D0C48]">{template.name}</h2>
+          </div>
+          <span className="shrink-0 rounded-full bg-[#F6F0F8] px-3 py-1 text-xs font-bold text-[#6C1785]">{getEventTypeLabel(template.category)}</span>
+        </div>
+        <p className="line-clamp-2 text-sm font-medium leading-5 text-[#686078]">{template.description}</p>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onPreview}
+            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-[#D0B8D8] bg-white text-sm font-bold text-[#500D68] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={onSelect}
+            className={cn(
+              "inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#500D68]",
+              selected ? "bg-[#F6F0F8] text-[#6C1785]" : "bg-[#6C1785] text-white",
+            )}
+          >
+            {selected && <Check className="h-4 w-4" />}
+            {selected ? "Selected" : "Select"}
+          </button>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+function TemplatePreviewModal({ template, onClose, onUse }: { template: EventTemplate | null; onClose: () => void; onUse: (template: EventTemplate) => void }) {
+  if (!template) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div className="absolute inset-0 z-50 flex flex-col bg-white" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-label={`${template.name} template preview`}>
+        <div className="flex shrink-0 items-center justify-between border-b border-[#D0B8D8]/50 bg-white/95 px-4 py-4">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7B3892]">Template Preview</p>
+            <h2 className="truncate font-serif text-2xl font-bold text-[#2D0C48]">{template.name}</h2>
+          </div>
+          <button type="button" onClick={onClose} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#F6F0F8] text-[#500D68] focus:outline-none focus:ring-2 focus:ring-[#6C1785]" aria-label="Back to templates">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto bg-[#F6F0F8]">
+          <TemplateFullPagePreview template={template} />
+        </div>
+        <div className="shrink-0 border-t border-[#D0B8D8]/50 bg-white/95 p-4 backdrop-blur">
+          <div className="flex gap-3">
+            <button type="button" onClick={onClose} className="h-12 flex-1 rounded-xl border border-[#D0B8D8] bg-white text-sm font-bold text-[#500D68] focus:outline-none focus:ring-2 focus:ring-[#6C1785]">
+              Back to Templates
+            </button>
+            <button type="button" onClick={() => onUse(template)} className="h-12 flex-1 rounded-xl bg-[#6C1785] text-sm font-bold text-white shadow-[0_12px_26px_rgba(108,23,133,0.22)] focus:outline-none focus:ring-2 focus:ring-[#500D68]">
+              Use This Template
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
