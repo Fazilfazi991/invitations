@@ -21,6 +21,7 @@ import { openingAnimations } from "@/lib/opening-animations";
 import { getMusicTrack, musicTracks, noMusicTrack } from "@/lib/event-music";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { cn } from "@/lib/utils";
+import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 
 const themes = Object.entries(themeStyles);
 
@@ -37,7 +38,8 @@ export default function StepFourPage() {
   const [previewingTrack, setPreviewingTrack] = useState("");
 
   async function publish() {
-    if (!user) {
+    // Temporary demo bypass - remove before production.
+    if (!user && !BYPASS_AUTH_FOR_DEMO) {
       setAuthOpen(true);
       return;
     }
@@ -59,7 +61,7 @@ export default function StepFourPage() {
     try {
       const published = await publishEvent(candidate);
       setDraft(published);
-      router.push("/dashboard");
+      router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard");
     } catch (publishError) {
       setError(publishError instanceof Error ? publishError.message : "Unable to publish this event.");
     }
@@ -199,11 +201,11 @@ export default function StepFourPage() {
             <Button asChild className="mt-4 w-full" style={{ backgroundColor: selectedTheme.primary }}><Link href={`/event/${previewSlug}?preview=draft`}>Preview event page<ArrowRight className="h-4 w-4" /></Link></Button>
           </Card>
           {error && <p className="rounded-xl bg-primary-soft px-4 py-3 text-sm font-semibold text-primary">{error}</p>}
-          {!user && <p className="rounded-xl bg-primary-soft px-4 py-3 text-sm font-medium text-muted">Your progress is kept on this device until you save it. Create an account when you&apos;re ready to publish and share.</p>}
+          {!user && !BYPASS_AUTH_FOR_DEMO && <p className="rounded-xl bg-primary-soft px-4 py-3 text-sm font-medium text-muted">Your progress is kept on this device until you save it. Create an account when you&apos;re ready to publish and share.</p>}
         </div>
       </div>
       <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={publish} className="w-full">Publish Event</Button></div>
-      <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create/step-4" />
+      {!BYPASS_AUTH_FOR_DEMO && <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create/step-4" />}
     </main>
   );
 }

@@ -11,6 +11,7 @@ import { GuestAuthModal } from "@/components/auth/GuestAuthModal";
 import { StepProgress } from "@/components/shared";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
+import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 
 export default function StepThreePage() {
   const router = useRouter();
@@ -83,7 +84,8 @@ export default function StepThreePage() {
                   checked={Boolean(draft[key as "rsvpEnabled"])}
                   onChange={(event) => {
                     const protectedToggle = key === "rsvpEnabled" || key === "qrEnabled";
-                    if (protectedToggle && event.target.checked && !user) {
+                    // Temporary demo bypass - remove before production.
+                    if (protectedToggle && event.target.checked && !user && !BYPASS_AUTH_FOR_DEMO) {
                       setAuthOpen(true);
                       return;
                     }
@@ -92,7 +94,7 @@ export default function StepThreePage() {
                 />
               </label>
             ))}
-            {!user && <p className="rounded-xl bg-primary-soft px-4 py-3 text-xs font-medium text-muted">Your design is ready. Create an account when you&apos;re ready to save and share.</p>}
+            {!user && !BYPASS_AUTH_FOR_DEMO && <p className="rounded-xl bg-primary-soft px-4 py-3 text-xs font-medium text-muted">Your design is ready. Create an account when you&apos;re ready to save and share.</p>}
             {draft.familyContactsEnabled && (
               <div className="space-y-3">
                 <Button variant="ghost" size="sm" onClick={() => setDraft((current) => ({ ...current, contacts: [...current.contacts, { id: crypto.randomUUID(), name: "", role: "", phone: "" }] }))}><Plus className="h-4 w-4" />Add contact</Button>
@@ -110,7 +112,7 @@ export default function StepThreePage() {
         </div>
       </div>
       <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md bg-white/90 p-5 backdrop-blur"><Button onClick={continueNext} className="w-full">Continue to Preview</Button></div>
-      <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create/step-3" />
+      {!BYPASS_AUTH_FOR_DEMO && <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create/step-3" />}
     </main>
   );
 }

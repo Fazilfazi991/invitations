@@ -65,6 +65,7 @@ export type EventDraft = {
 export const DRAFT_KEY = "jashnly_event_draft";
 export const EVENT_TYPE_KEY = "jashnly_event_type";
 export const PUBLISHED_EVENTS_KEY = "jashnly_published_events";
+export const TEMP_INVITE_KEY_PREFIX = "occazn_invite_";
 
 const defaultsByType: Record<EventType, Partial<EventDraft>> = {
   wedding: { title: "Afsal & Fathima Wedding", primaryName: "Afsal", secondaryName: "Fathima" },
@@ -219,4 +220,20 @@ export function savePublishedEvent(event: EventDraft) {
   const normalized = withTemplateMetadata(event, event.templateId);
   const current = loadPublishedEvents().filter((item) => item.slug !== normalized.slug);
   window.localStorage.setItem(PUBLISHED_EVENTS_KEY, JSON.stringify([normalized, ...current]));
+}
+
+export function loadTemporaryInvite(inviteId: string) {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(`${TEMP_INVITE_KEY_PREFIX}${inviteId}`);
+    return raw ? normalizeStoredEvent(JSON.parse(raw)) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveTemporaryInvite(inviteId: string, event: EventDraft) {
+  if (typeof window === "undefined") return;
+  const normalized = withTemplateMetadata(event, event.templateId);
+  window.localStorage.setItem(`${TEMP_INVITE_KEY_PREFIX}${inviteId}`, JSON.stringify(normalized));
 }

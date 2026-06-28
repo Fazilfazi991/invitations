@@ -17,6 +17,7 @@ import type { EventDraft } from "@/lib/event-draft";
 import { loadPublicEvent } from "@/lib/event-repository";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getThemeStyles } from "@/lib/themes";
+import { getEventUrl } from "@/lib/event-url";
 
 export default function SharePage() {
   const params = useParams<{ slug: string }>();
@@ -26,7 +27,7 @@ export default function SharePage() {
   const date = event ? formatEventDate(event.date) : sampleEvent.date;
   const time = event ? formatEventTime(event.time) : sampleEvent.time;
   const location = event ? `${event.venueName}, ${event.city}` : sampleEvent.location;
-  const url = typeof window === "undefined" ? eventUrl : `${window.location.origin}/event/${params.slug}`;
+  const url = event?.publicUrl || (typeof window === "undefined" ? eventUrl : getEventUrl(params.slug));
   const image = event?.coverImage || event?.templateImage || sampleEvent.coupleImage;
   const theme = getThemeStyles(event?.theme);
   return (

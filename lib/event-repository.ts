@@ -1,16 +1,19 @@
 import {
   loadDraft,
   loadPublishedEvents,
+  loadTemporaryInvite,
   normalizeStoredEvent,
   saveDraft,
   savePublishedEvent,
+  saveTemporaryInvite,
   type EventDraft,
 } from "@/lib/event-draft";
+import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 import { ensureUniqueSlug, getEventUrl } from "@/lib/event-url";
 import { createQrCodeSvg } from "@/lib/qr-code";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const localTestMode = process.env.NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE === "true";
+const localTestMode = process.env.NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE === "true" || BYPASS_AUTH_FOR_DEMO;
 let draftWriteQueue: Promise<void> = Promise.resolve();
 
 function fallback<T>(message: string, value: T, error?: unknown) {
@@ -19,6 +22,8 @@ function fallback<T>(message: string, value: T, error?: unknown) {
 }
 
 export async function getCurrentAuthUser() {
+  // Temporary demo bypass - remove before production.
+  if (BYPASS_AUTH_FOR_DEMO) return null;
   if (localTestMode) return null;
   const { data } = await createSupabaseBrowserClient().auth.getUser();
   return data.user;
@@ -89,7 +94,7 @@ export async function loadOrganizerEvents() {
 }
 
 export async function loadPublicEvent(slug: string) {
-  const cached = loadPublishedEvents().find((event) => event.slug === slug) ?? null;
+  const cached = loadTemporaryInvite(slug) ?? loadPublishedEvents().find((event) => event.slug === slug) ?? null;
   if (localTestMode) return cached;
   try {
     const { data, error } = await createSupabaseBrowserClient()
@@ -118,10 +123,13 @@ export async function publishEvent(event: EventDraft) {
   }
 
   if (localTestMode) {
-    const slug = ensureUniqueSlug(event.slug || event.title, loadPublishedEvents());
+    // Temporary demo bypass - remove before production.
+    const inviteId = globalThis.crypto?.randomUUID?.() || Date.now().toString();
+    const slug = inviteId;
     const publicUrl = getEventUrl(slug);
     const qrCodeData = await createQrCodeSvg(publicUrl);
     const published = { ...event, slug, publicUrl, qrCodeData, status: "published" as const };
+    saveTemporaryInvite(inviteId, published);
     savePublishedEvent(published);
     return published;
   }

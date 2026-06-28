@@ -9,6 +9,7 @@ import { GuestAuthModal } from "@/components/auth/GuestAuthModal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { DRAFT_KEY, EVENT_TYPE_KEY, generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
+import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 import type { EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/date-utils";
 import { publishEvent } from "@/lib/event-repository";
@@ -228,7 +229,8 @@ export function GuidedInvitationBuilder() {
 
   async function createInvite() {
     if (creating) return;
-    if (!user) {
+    // Temporary demo bypass - remove before production.
+    if (!user && !BYPASS_AUTH_FOR_DEMO) {
       setAuthOpen(true);
       return;
     }
@@ -242,12 +244,12 @@ export function GuidedInvitationBuilder() {
     try {
       const published = await publishEvent({
         ...draft,
-        ownerId: user.id,
+        ownerId: user?.id,
         status: "published",
         slug: generateSlug(draft.title),
       });
       setDraft(published);
-      window.setTimeout(() => router.push("/dashboard"), 420);
+      window.setTimeout(() => router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard"), 420);
     } catch {
       setCreating(false);
     }
@@ -492,7 +494,7 @@ export function GuidedInvitationBuilder() {
         )}
       </div>
       <FeatureBottomSheet sheet={activeSheet} draft={draft} setDraft={setDraft} onClose={() => setActiveSheet(null)} />
-      <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create-event" />
+      {!BYPASS_AUTH_FOR_DEMO && <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create-event" />}
     </BuilderOnboardingShell>
   );
 }

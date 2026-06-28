@@ -26,6 +26,7 @@ import { getThemeStyles } from "@/lib/themes";
 import { getEventUrl } from "@/lib/event-url";
 import { loadPublicEvent } from "@/lib/event-repository";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 
 export default function GuestEventPage() {
   const params = useParams<{ slug: string }>();
@@ -37,7 +38,8 @@ export default function GuestEventPage() {
   useEffect(() => {
     const search = new URLSearchParams(window.location.search);
     setIsMemoryMode(search.get("mode") === "memory");
-    const previewDraft = search.get("preview") === "draft" && user ? loadDraft() : null;
+    // Temporary demo bypass - remove before production.
+    const previewDraft = search.get("preview") === "draft" && (user || BYPASS_AUTH_FOR_DEMO) ? loadDraft() : null;
     if (previewDraft) {
       setLocalEvent(previewDraft);
       setLoaded(true);
