@@ -3,11 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Cake, CalendarDays, Check, ChevronRight, Clock, Gift, Gem, HeartHandshake, Image as ImageIcon, Link as LinkIcon, MapPin, Music2, PlayCircle, Sparkles, Trash2, Wand2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Cake, CalendarDays, Check, ChevronRight, Clock, Gift, Gem, Heart, HeartHandshake, Image as ImageIcon, Link as LinkIcon, Loader2, MapPin, Music2, PlayCircle, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { GuestAuthModal } from "@/components/auth/GuestAuthModal";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
-import { getDefaultDraft, type EventDraft } from "@/lib/event-draft";
+import { generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
 import type { EventType } from "@/lib/event-types";
+import { formatEventDate } from "@/lib/date-utils";
+import { publishEvent } from "@/lib/event-repository";
 import { getDefaultTemplateForType, getTemplateById, templates, templateMoodToTheme } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 
@@ -76,13 +80,17 @@ function templateForStyle(eventType: EventType, style: StyleValue) {
 
 export function GuidedInvitationBuilder() {
   const router = useRouter();
+  const { user } = useAuth();
   const { draft, setDraft, loaded } = useEventDraft();
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [occasion, setOccasion] = useState<OccasionValue>("wedding");
   const [style, setStyle] = useState<StyleValue>("royal");
   const [confettiKey, setConfettiKey] = useState(0);
   const [focusedField, setFocusedField] = useState("");
   const [activeSheet, setActiveSheet] = useState<FeatureSheet>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
 
   useEffect(() => {
     if (!loaded) return;
@@ -90,8 +98,8 @@ export function GuidedInvitationBuilder() {
     setStyle(inferStyleFromTemplate(draft.templateId));
   }, [draft.eventType, draft.templateId, loaded]);
 
-  const heading = step === 1 ? "What are you celebrating?" : step === 2 ? "Choose your style" : step === 3 ? "Add event details" : "Bring your invite to life";
-  const subheading = step === 1 ? "Choose one to get started." : step === 2 ? "Pick the feeling for your invitation." : step === 3 ? "Just the basics. You can edit everything later." : "Add the things you want to include.";
+  const heading = step === 1 ? "What are you celebrating?" : step === 2 ? "Choose your style" : step === 3 ? "Add event details" : step === 4 ? "Bring your invite to life" : "You're all set!";
+  const subheading = step === 1 ? "Choose one to get started." : step === 2 ? "Pick the feeling for your invitation." : step === 3 ? "Just the basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
 
   const selectedEventType = useMemo(() => occasionToEventType(occasion), [occasion]);
   const coupleNames = [draft.primaryName, draft.secondaryName].filter(Boolean).join(" & ") || draft.hostName || "";
@@ -147,7 +155,7 @@ export function GuidedInvitationBuilder() {
       if (step === 1) setStep(2);
       else if (step === 2) setStep(3);
       else if (step === 3) setStep(4);
-      else router.push("/create/step-4");
+      else if (step === 4) setStep(5);
     }, 260);
   }
 
@@ -156,7 +164,40 @@ export function GuidedInvitationBuilder() {
   }
 
   function skipExtras() {
-    router.push("/create/step-4");
+    setStep(5);
+  }
+
+  async function createInvite() {
+    if (creating) return;
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
+    if (!draft.title || !draft.date || !draft.venueName || !draft.templateId) {
+      setStep(3);
+      return;
+    }
+
+    setCreating(true);
+    setConfettiKey((current) => current + 1);
+    try {
+      const published = await publishEvent({
+        ...draft,
+        ownerId: user.id,
+        status: "published",
+        slug: generateSlug(draft.title),
+      });
+      setDraft(published);
+      window.setTimeout(() => router.push("/dashboard"), 420);
+    } catch {
+      setCreating(false);
+    }
+  }
+
+  function saveAsDraft() {
+    setDraft((current) => ({ ...current, status: "draft" }));
+    setDraftSaved(true);
+    window.setTimeout(() => setDraftSaved(false), 1800);
   }
 
   function updateCoupleNames(value: string) {
@@ -179,17 +220,17 @@ export function GuidedInvitationBuilder() {
   }
 
   return (
-    <BuilderOnboardingShell step={step} onBack={() => setStep((current) => current === 4 ? 3 : current === 3 ? 2 : 1)}>
+    <BuilderOnboardingShell step={step} onBack={() => setStep((current) => current === 5 ? 4 : current === 4 ? 3 : current === 3 ? 2 : 1)}>
       <FloatingSparkles />
       <TinyConfetti burstKey={confettiKey} />
-      <BottomWave show={step === 4} />
+      <BottomWave show={step >= 4} />
       <div className="relative z-10 flex min-h-[calc(100vh-2rem)] flex-col px-5 pb-32 pt-8 sm:min-h-[820px] sm:px-7">
         <header className="text-center">
           <div className={cn("mx-auto flex items-center justify-center gap-3", step === 3 ? "mb-7" : "mb-8")}>
             {step > 1 && (
               <button
                 type="button"
-                onClick={() => setStep((current) => current === 4 ? 3 : current === 3 ? 2 : 1)}
+                onClick={() => setStep((current) => current === 5 ? 4 : current === 4 ? 3 : current === 3 ? 2 : 1)}
                 className={cn("absolute left-5 top-8 grid h-12 w-12 place-items-center rounded-full shadow-[0_8px_22px_rgba(80,13,104,0.12)] focus:outline-none focus:ring-2 focus:ring-[#6C1785]", step === 4 ? "bg-[#6C1785] text-white" : "bg-white text-[#500D68]")}
                 aria-label="Go back"
               >
@@ -218,13 +259,14 @@ export function GuidedInvitationBuilder() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.22 }}
-              className={cn(step === 3 ? "mt-9" : step === 4 ? "mt-8" : "mt-16")}
+              className={cn(step === 3 ? "mt-9" : step >= 4 ? "mt-8" : "mt-16")}
             >
               {step === 4 && <FeatureIllustration />}
-              <h1 className={cn("font-bold leading-tight text-[#171717]", step === 1 ? "font-serif text-[2.65rem] text-[#2D0C48]" : step === 2 ? "font-serif text-[2.75rem] text-[#2D0C48]" : step === 4 ? "mt-7 text-3xl" : "text-[2.75rem]")}>
+              {step === 5 && <FinalInviteIllustration draft={draft} />}
+              <h1 className={cn("font-bold leading-tight text-[#171717]", step === 1 ? "font-serif text-[2.65rem] text-[#2D0C48]" : step === 2 ? "font-serif text-[2.75rem] text-[#2D0C48]" : step >= 4 ? "mt-7 text-3xl" : "text-[2.75rem]")}>
                 {step === 2 ? <>Step 2 <Sparkles className="inline h-8 w-8 fill-[#6C1785] text-[#6C1785]" /></> : <>{heading}{step >= 3 && <Sparkles className="ml-2 inline h-7 w-7 fill-[#A477B4] text-[#A477B4]" />}</>}
               </h1>
-              {step >= 3 ? <p className={cn("mx-auto mt-4 font-medium leading-8 text-[#686078]", step === 4 ? "max-w-[330px] text-xl" : "max-w-[310px] text-xl")}>{subheading}</p> : step === 2 ? <p className="mt-3 text-2xl font-medium text-[#686078]">{subheading}</p> : <p className="mt-5 text-2xl font-medium text-[#686078]">{subheading}</p>}
+              {step >= 3 ? <p className={cn("mx-auto mt-4 font-medium leading-8 text-[#686078]", step >= 4 ? "max-w-[330px] text-xl" : "max-w-[310px] text-xl")}>{subheading}</p> : step === 2 ? <p className="mt-3 text-2xl font-medium text-[#686078]">{subheading}</p> : <p className="mt-5 text-2xl font-medium text-[#686078]">{subheading}</p>}
               {step === 1 && <DecorativeSwoosh />}
             </motion.div>
           </AnimatePresence>
@@ -322,19 +364,21 @@ export function GuidedInvitationBuilder() {
               />
               <HelperProgressCard completed={completedDetailCount} />
             </motion.div>
-          ) : (
+          ) : step === 4 ? (
             <motion.div key="features" className="mt-8 space-y-4" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
               <FeatureCard title="Add Photos" description="Create a photo gallery" icon={ImageIcon} complete={featureStatus.photos} onClick={() => setActiveSheet("photos")} />
               <FeatureCard title="Add Video" description="Add YouTube or video link" icon={PlayCircle} complete={featureStatus.video} onClick={() => setActiveSheet("video")} />
               <FeatureCard title="Add Music" description="Set the mood with music" icon={Music2} complete={featureStatus.music} onClick={() => setActiveSheet("music")} />
               <FeatureCard title="Add Location" description="Share your venue location" icon={MapPin} complete={featureStatus.location} onClick={() => setActiveSheet("location")} />
             </motion.div>
+          ) : (
+            <FinalActionCard />
           )}
         </AnimatePresence>
       </div>
 
       <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-[2rem] bg-white/92 px-5 pb-6 pt-5 shadow-[0_-18px_42px_rgba(80,13,104,0.08)] backdrop-blur sm:px-7">
-        <ContinueButton disabled={step === 1 ? !occasion : step === 2 ? !style : step === 3 ? !detailsComplete : false} onClick={burstAndContinue} />
+        <ContinueButton disabled={step === 1 ? !occasion : step === 2 ? !style : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
         {step === 2 && (
           <button
             type="button"
@@ -362,16 +406,26 @@ export function GuidedInvitationBuilder() {
             Skip for now
           </button>
         )}
+        {step === 5 && (
+          <button
+            type="button"
+            onClick={saveAsDraft}
+            className="mt-5 h-11 w-full text-center text-lg font-bold text-[#7B3892] focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
+          >
+            {draftSaved ? "Draft saved" : "Save as Draft"}
+          </button>
+        )}
       </div>
       <FeatureBottomSheet sheet={activeSheet} draft={draft} setDraft={setDraft} onClose={() => setActiveSheet(null)} />
+      <GuestAuthModal open={authOpen} onClose={() => setAuthOpen(false)} nextPath="/create-event" />
     </BuilderOnboardingShell>
   );
 }
 
-function BuilderOnboardingShell({ children, step, onBack }: { children: React.ReactNode; step: 1 | 2 | 3 | 4; onBack: () => void }) {
+function BuilderOnboardingShell({ children, step, onBack }: { children: React.ReactNode; step: 1 | 2 | 3 | 4 | 5; onBack: () => void }) {
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,#F8F3FA_0,#FFFFFF_46%,#F4ECF7_100%)] text-[#2D0C48] sm:grid sm:place-items-center sm:p-6">
-      <section className="relative mx-auto min-h-screen w-full max-w-[430px] overflow-hidden bg-white/82 shadow-[0_28px_90px_rgba(80,13,104,0.13)] sm:min-h-[860px] sm:rounded-[3.5rem] sm:border sm:border-white/80">
+    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,#F8F3FA_0,#FFFFFF_46%,#F4ECF7_100%)] text-[#2D0C48] sm:grid sm:place-items-center sm:p-6">
+      <section className="relative mx-auto min-h-screen w-full max-w-[430px] overflow-x-hidden bg-white/82 shadow-[0_28px_90px_rgba(80,13,104,0.13)] sm:min-h-[860px] sm:rounded-[3.5rem] sm:border sm:border-white/80">
         {step > 1 && <span className="sr-only"><button type="button" onClick={onBack}>Back</button></span>}
         {children}
       </section>
@@ -379,7 +433,7 @@ function BuilderOnboardingShell({ children, step, onBack }: { children: React.Re
   );
 }
 
-function BuilderProgress({ step }: { step: 1 | 2 | 3 | 4 }) {
+function BuilderProgress({ step }: { step: 1 | 2 | 3 | 4 | 5 }) {
   if (step >= 3) {
     return (
       <div aria-label={`Step ${step} of 5`} className="mx-auto w-full max-w-[265px]">
@@ -691,6 +745,67 @@ function FeatureCard({ title, description, icon: Icon, complete, onClick }: { ti
   );
 }
 
+function FinalInviteIllustration({ draft }: { draft: EventDraft }) {
+  const names = [draft.primaryName, draft.secondaryName].filter(Boolean).join(" & ") || draft.title || "Your Invite";
+  const dateLabel = draft.date ? formatEventDate(draft.date) : "Event Date";
+
+  return (
+    <div className="relative mx-auto h-56 w-full max-w-[360px]" aria-hidden="true">
+      <span className="occazn-float-sparkle absolute left-2 top-12 text-[#A477B4]">*</span>
+      <span className="occazn-float-sparkle absolute right-6 top-8 text-[#7B3892]" style={{ animationDelay: "0.4s" }}>*</span>
+      <span className="occazn-float-sparkle absolute left-9 bottom-12 text-[#D0B8D8]" style={{ animationDelay: "0.9s" }}>*</span>
+      <span className="occazn-float-sparkle absolute right-12 bottom-8 text-[#A477B4]" style={{ animationDelay: "1.2s" }}>*</span>
+      <motion.span
+        className="occazn-envelope-float absolute left-1/2 top-7 z-10 flex h-28 w-32 -translate-x-1/2 flex-col items-center rounded-lg bg-white px-3 py-5 text-center shadow-[0_16px_38px_rgba(80,13,104,0.13)]"
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.42 }}
+      >
+        <span className="line-clamp-1 font-serif text-lg font-bold text-[#6C1785]">{names}</span>
+        <span className="mt-3 h-px w-16 bg-[#D0B8D8]" />
+        <span className="mt-3 text-sm font-bold text-[#686078]">{dateLabel}</span>
+        <Heart className="mt-3 h-5 w-5 fill-[#A477B4] text-[#A477B4]" />
+      </motion.span>
+      <span className="absolute bottom-7 left-1/2 h-28 w-56 -translate-x-1/2 overflow-hidden rounded-b-2xl bg-[#7B3892] shadow-[0_22px_48px_rgba(80,13,104,0.2)]">
+        <span className="absolute inset-x-0 top-0 h-0 w-0 border-l-[112px] border-r-[112px] border-t-[72px] border-l-transparent border-r-transparent border-t-[#D0B8D8]" />
+        <span className="absolute bottom-0 left-0 h-0 w-0 border-b-[86px] border-r-[112px] border-b-[#6C1785] border-r-transparent" />
+        <span className="absolute bottom-0 right-0 h-0 w-0 border-b-[86px] border-l-[112px] border-b-[#500D68] border-l-transparent" />
+      </span>
+      <span className="absolute bottom-6 left-1/2 h-4 w-64 -translate-x-1/2 rounded-full bg-[#D0B8D8]/35 blur-md" />
+    </div>
+  );
+}
+
+function FinalActionCard() {
+  const rows = [
+    { title: "We'll create your invite", description: "Sit back, we're adding the magic.", icon: Wand2 },
+    { title: "Preview & customize", description: "Review and make it perfect.", icon: Heart },
+    { title: "Share with your guests", description: "Send and start the celebrations!", icon: Send },
+  ];
+
+  return (
+    <motion.div key="final" className="mt-8 overflow-hidden rounded-[1.4rem] border bg-white shadow-[0_16px_38px_rgba(80,13,104,0.09)]" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants} style={{ borderColor: "rgba(208,184,216,0.34)" }}>
+      {rows.map(({ title, description, icon: Icon }, index) => (
+        <motion.button
+          key={title}
+          type="button"
+          variants={cardVariants}
+          className={cn("group flex min-h-[92px] w-full items-center gap-4 bg-white px-5 py-4 text-left transition hover:bg-[#F6F0F8]/45 focus:outline-none focus:ring-2 focus:ring-[#6C1785]", index > 0 && "border-t border-[#D0B8D8]/35")}
+        >
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-[#F6F0F8] text-[#6C1785]">
+            <Icon className="h-8 w-8 stroke-[1.8]" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xl font-bold text-[#171717]">{title}</span>
+            <span className="mt-1 block text-lg font-medium leading-6 text-[#686078]">{description}</span>
+          </span>
+          <ChevronRight className="h-7 w-7 text-[#7B3892] transition group-hover:translate-x-1" />
+        </motion.button>
+      ))}
+    </motion.div>
+  );
+}
+
 function FeatureBottomSheet({
   sheet,
   draft,
@@ -819,17 +934,19 @@ function BottomWave({ show }: { show: boolean }) {
   );
 }
 
-function ContinueButton({ disabled, onClick }: { disabled: boolean; onClick: () => void }) {
+function ContinueButton({ disabled, onClick, label = "Continue", loading = false }: { disabled: boolean; onClick: () => void; label?: string; loading?: boolean }) {
   return (
     <motion.button
       type="button"
-      disabled={disabled}
+      disabled={disabled || loading}
       onClick={onClick}
       whileTap={{ scale: 0.985 }}
       className="occazn-shimmer relative flex h-16 w-full items-center justify-center overflow-hidden rounded-[1.15rem] bg-[#6C1785] text-xl font-bold text-white shadow-[0_14px_28px_rgba(108,23,133,0.24)] focus:outline-none focus:ring-2 focus:ring-[#500D68] disabled:opacity-50"
+      aria-busy={loading}
     >
-      Continue
-      <ArrowRight className="absolute right-8 h-8 w-8" />
+      {loading && <Loader2 className="mr-3 h-5 w-5 animate-spin" />}
+      {loading ? "Creating..." : label}
+      {!loading && <ArrowRight className="absolute right-8 h-8 w-8" />}
     </motion.button>
   );
 }

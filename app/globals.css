@@ -22,16 +22,21 @@
 }
 
 html {
+  min-height: 100%;
+  height: auto;
   scroll-behavior: smooth;
   overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-gutter: stable;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100%;
+  height: auto;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
   -webkit-font-smoothing: antialiased;
   background:
     radial-gradient(circle at top right, rgba(208, 184, 216, 0.55), transparent 34rem),
@@ -94,6 +99,10 @@ textarea {
 
 .occazn-feature-float {
   animation: occazn-feature-float 3.8s ease-in-out infinite;
+}
+
+.occazn-envelope-float {
+  animation: occazn-envelope-float 3.4s ease-in-out 0.45s 1;
 }
 
 @keyframes template-page-enter {
@@ -166,13 +175,25 @@ textarea {
   }
 }
 
+@keyframes occazn-envelope-float {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-8px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .template-page-enter,
   .template-soft-float,
   .occazn-float-sparkle,
   .occazn-shimmer::after,
   .occazn-twinkle,
-  .occazn-feature-float {
+  .occazn-feature-float,
+  .occazn-envelope-float {
     animation: none;
   }
 }
