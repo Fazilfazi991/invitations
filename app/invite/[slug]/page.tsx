@@ -3,7 +3,7 @@ import { InviteRouteClient } from "./InviteRouteClient";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 
 const invitationSlug = "muhammed-suhaib-fathima-gafoor";
-const publicInviteUrl = `https://occazn.com/invite/${invitationSlug}`;
+const publicInviteUrl = `https://occazn.com/i/${invitationSlug}`;
 
 type InvitePageProps = {
   params: Promise<{
@@ -26,12 +26,12 @@ export async function generateMetadata({ params }: InvitePageProps): Promise<Met
     title: "Muhammed Suhaib & Fathima Gafoor | Wedding Invitation",
     description: "Wedding invitation for Muhammed Suhaib and Fathima Gafoor at T. M. Mahal Auditorium, Thiruvathra.",
     alternates: {
-      canonical: `/invite/${invitationSlug}`,
+      canonical: `/i/${invitationSlug}`,
     },
     openGraph: {
       title: "Muhammed Suhaib & Fathima Gafoor",
       description: "With full hearts, joyfully invite you to their wedding.",
-      url: `/invite/${invitationSlug}`,
+      url: `/i/${invitationSlug}`,
       type: "website",
     },
   };

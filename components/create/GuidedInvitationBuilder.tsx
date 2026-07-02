@@ -443,6 +443,11 @@ export function GuidedInvitationBuilder() {
               {!availableTemplates.length && (
                 <p className="rounded-2xl bg-[#F6F0F8] px-4 py-3 text-center text-sm font-bold text-[#6C1785]">Choose an event type first.</p>
               )}
+              {availableTemplates.length > 0 && availableTemplates.length <= 2 && (
+                <p className="rounded-2xl bg-[#F6F0F8] px-4 py-3 text-center text-sm font-semibold leading-5 text-[#6C1785]">
+                  More designs are being added. You can customize this fully in the next step.
+                </p>
+              )}
             </motion.div>
           ) : step === 3 ? (
             <motion.div key="details" className="mt-8 space-y-4" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>

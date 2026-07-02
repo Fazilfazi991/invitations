@@ -19,18 +19,18 @@ export function ShareActions({ includeOpenSharePage = false, title = sampleEvent
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <Button asChild>
+    <div className="grid grid-cols-2 gap-3 max-[360px]:grid-cols-1 lg:grid-cols-5">
+      <Button asChild className="h-12 justify-center text-center">
         <a href={`https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`} target="_blank" rel="noreferrer">
           <MessageCircle className="h-4 w-4" />WhatsApp
         </a>
       </Button>
-      <Button variant="outline"><ExternalLink className="h-4 w-4" />Instagram</Button>
-      <Button variant="outline"><Facebook className="h-4 w-4" />Facebook</Button>
-      <Button variant="outline" onClick={shareEvent}><Share2 className="h-4 w-4" />More</Button>
-      <Button variant="outline" onClick={copyLink}><Copy className="h-4 w-4" />Copy Link</Button>
+      <Button variant="outline" className="h-12 justify-center text-center"><ExternalLink className="h-4 w-4" />Instagram</Button>
+      <Button variant="outline" className="h-12 justify-center text-center"><Facebook className="h-4 w-4" />Facebook</Button>
+      <Button variant="outline" onClick={shareEvent} className="h-12 justify-center text-center"><Share2 className="h-4 w-4" />More</Button>
+      <Button variant="outline" onClick={copyLink} className="h-12 justify-center text-center"><Copy className="h-4 w-4" />Copy Link</Button>
       {includeOpenSharePage && (
-        <Button asChild variant="soft" className="sm:col-span-3">
+        <Button asChild variant="soft" className="h-12 justify-center text-center lg:col-span-5">
           <Link href={`/event/${slug}/share`}><Send className="h-4 w-4" />Open share page</Link>
         </Button>
       )}

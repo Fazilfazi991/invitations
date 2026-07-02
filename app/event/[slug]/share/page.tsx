@@ -50,13 +50,13 @@ export default function SharePage() {
   const date = formatEventDate(event.date);
   const time = formatEventTime(event.time);
   const location = `${event.venueName}${event.city ? `, ${event.city}` : ""}`;
-  const url = event.publicUrl || getEventUrl(params.slug);
+  const url = getEventUrl(params.slug);
   const image = event?.coverImage || event?.templateImage || sampleEvent.coupleImage;
   const theme = getThemeStyles(event?.theme);
   return (
     <main className="phone-shell min-h-screen pb-20">
       <MobileHeader action="search" />
-      <Section className="space-y-5">
+      <Section className="mx-auto max-w-[640px] space-y-5">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="icon" aria-label="Back to event">
             <Link href={`/event/${params.slug}`}><ArrowLeft className="h-5 w-5" /></Link>
