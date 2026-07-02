@@ -9,9 +9,15 @@ export function TemplatePreview({ template, className, compact = false }: { temp
 
   return (
     <div className={cn("relative overflow-hidden rounded-[1.5rem] border border-brand-light bg-white", compact ? "h-32" : "aspect-[4/3]", className)} style={{ background }}>
-      <div className="pointer-events-none absolute left-1/2 top-0 w-[430px] origin-top -translate-x-1/2 scale-[0.82] compact-template-preview">
-        <TemplateFullPagePreview template={template} />
-      </div>
+      {template.previewImage ? (
+        <img src={template.previewImage} alt="" className="h-full w-full object-cover object-top" />
+      ) : (
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-0 w-full min-w-[360px] origin-top -translate-x-1/2 scale-[0.78] compact-template-preview">
+            <TemplateFullPagePreview template={template} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

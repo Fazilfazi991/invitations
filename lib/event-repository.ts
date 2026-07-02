@@ -16,6 +16,26 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 const localTestMode = process.env.NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE === "true" || BYPASS_AUTH_FOR_DEMO;
 let draftWriteQueue: Promise<void> = Promise.resolve();
 
+function getInvitePathMatches(inviteId: string) {
+  return [`/i/${inviteId}`, `/invite/${inviteId}`];
+}
+
+function getStableInviteId(event: Partial<EventDraft>) {
+  if (event.status === "published" && event.slug) return event.slug;
+  const fromPublicUrl = event.publicUrl?.match(/\/(?:i|invite)\/([^/?#]+)/)?.[1];
+  return fromPublicUrl || globalThis.crypto?.randomUUID?.() || Date.now().toString();
+}
+
+function matchesPublicInvite(event: EventDraft, inviteId: string) {
+  if (event.slug === inviteId) return true;
+  const paths = getInvitePathMatches(inviteId);
+  return paths.some((path) => event.publicUrl?.includes(path) || event.qrCodeData?.includes(path));
+}
+
+function loadCachedPublicEvent(inviteId: string) {
+  return loadTemporaryInvite(inviteId) ?? loadPublishedEvents().find((event) => matchesPublicInvite(event, inviteId)) ?? null;
+}
+
 function fallback<T>(message: string, value: T, error?: unknown) {
   console.warn(`[occazn storage fallback] ${message}`, error);
   return value;
@@ -94,8 +114,16 @@ export async function loadOrganizerEvents() {
 }
 
 export async function loadPublicEvent(slug: string) {
-  const cached = loadTemporaryInvite(slug) ?? loadPublishedEvents().find((event) => event.slug === slug) ?? null;
-  if (localTestMode) return cached;
+  const cached = loadCachedPublicEvent(slug);
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("Public invite lookup:", {
+      routeParamId: slug,
+      fetchResult: cached ? "local-cache" : "local-miss",
+      inviteId: cached?.slug,
+      generatedInviteUrl: cached?.publicUrl,
+    });
+  }
+  if (cached) return cached;
   try {
     const { data, error } = await createSupabaseBrowserClient()
       .from("events")
@@ -107,6 +135,14 @@ export async function loadPublicEvent(slug: string) {
     if (!data?.data) return cached;
     const event = normalizeStoredEvent(data.data as Partial<EventDraft>);
     savePublishedEvent(event);
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("Public invite lookup:", {
+        routeParamId: slug,
+        fetchResult: "supabase",
+        inviteId: event.slug,
+        generatedInviteUrl: event.publicUrl,
+      });
+    }
     return event;
   } catch (error) {
     return fallback(`Could not load public event ${slug} from Supabase.`, cached, error);
@@ -124,11 +160,19 @@ export async function publishEvent(event: EventDraft) {
 
   if (localTestMode) {
     // Temporary demo bypass - remove before production.
-    const inviteId = globalThis.crypto?.randomUUID?.() || Date.now().toString();
+    const inviteId = getStableInviteId(event);
     const slug = inviteId;
     const publicUrl = getEventUrl(slug);
     const qrCodeData = await createQrCodeSvg(publicUrl);
     const published = { ...event, slug, publicUrl, qrCodeData, status: "published" as const };
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("Published local public invite:", {
+        eventId: event.slug,
+        inviteId,
+        publicInviteId: slug,
+        generatedInviteUrl: publicUrl,
+      });
+    }
     saveTemporaryInvite(inviteId, published);
     savePublishedEvent(published);
     return published;
@@ -139,13 +183,17 @@ export async function publishEvent(event: EventDraft) {
   const supabase = createSupabaseBrowserClient();
   const { data: existing, error: existingError } = await supabase.from("events").select("slug").ilike("slug", `${event.slug || event.title}%`);
   if (existingError) throw existingError;
-  const slug = ensureUniqueSlug(event.slug || event.title || event.eventType, (existing || []) as Partial<EventDraft>[]);
+  const inviteId = getStableInviteId(event);
+  const slug = event.status === "published" && event.slug ? event.slug : ensureUniqueSlug(inviteId, (existing || []) as Partial<EventDraft>[]);
   const publicUrl = getEventUrl(slug);
   const qrCodeData = await createQrCodeSvg(publicUrl);
   const published = { ...event, ownerId: user.id, slug, publicUrl, qrCodeData, status: "published" as const };
   if (process.env.NODE_ENV !== "production") {
     console.debug("Published event template:", {
+      eventId: event.slug,
       slug: published.slug,
+      inviteId,
+      publicInviteId: published.slug,
       templateId: published.templateId,
       publicUrl: published.publicUrl,
     });

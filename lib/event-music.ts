@@ -22,6 +22,7 @@ export const noMusicTrack: MusicTrack = {
 };
 
 export const musicTracks: MusicTrack[] = [
+  { id: "leberch-wedding-romantic-262606", label: "Leberch wedding romantic", eventLabel: "Wedding", url: "/audio/leberch-wedding-romantic-262606.mp3" },
   { id: "wedding-romantic", label: "Romantic instrumental", eventLabel: "Wedding", url: "/audio/wedding-romantic.wav" },
   { id: "birthday-cheerful", label: "Cheerful celebration", eventLabel: "Birthday", url: "/audio/birthday-cheerful.wav" },
   { id: "baby-shower-soft", label: "Soft lullaby piano", eventLabel: "Baby Shower", url: "/audio/baby-shower-soft.wav" },
@@ -34,7 +35,7 @@ export const musicTracks: MusicTrack[] = [
 ];
 
 const defaultTrackByType: Record<EventType, string> = {
-  wedding: "wedding-romantic",
+  wedding: "leberch-wedding-romantic-262606",
   engagement: "engagement-romantic",
   birthday: "birthday-cheerful",
   anniversary: "anniversary-romantic",
@@ -45,7 +46,7 @@ const defaultTrackByType: Record<EventType, string> = {
   farewell: "anniversary-romantic",
   naming: "naming-gentle",
   religious: "baptism-peaceful",
-  reception: "wedding-romantic",
+  reception: "leberch-wedding-romantic-262606",
   business: "housewarming-cozy",
   custom: "anniversary-romantic",
 };

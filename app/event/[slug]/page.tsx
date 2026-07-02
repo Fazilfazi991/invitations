@@ -24,6 +24,7 @@ import { getEventHeroLabel } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 import { getThemeStyles } from "@/lib/themes";
 import { getEventUrl } from "@/lib/event-url";
+import { getDefaultMusicForType } from "@/lib/event-music";
 import { loadPublicEvent } from "@/lib/event-repository";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
@@ -112,6 +113,7 @@ export default function GuestEventPage() {
   }[renderedEvent.eventType as "anniversary" | "baby-shower" | "housewarming" | "corporate" | "graduation" | "farewell" | "naming" | "religious" | "business" | "custom"];
   const heroImage = renderedEvent.coverImage || renderedEvent.templateImage || sampleEvent.coupleImage;
   const publicUrl = getEventUrl(renderedEvent.slug);
+  const musicEvent = isWeddingLike ? { ...renderedEvent, music: getDefaultMusicForType(renderedEvent.eventType) } : renderedEvent;
 
   if (!loaded) return <main className="phone-shell min-h-screen bg-background" aria-busy="true" />;
 
@@ -141,9 +143,9 @@ export default function GuestEventPage() {
 
   if (!isMemoryMode && isWeddingLike) {
     return (
-      <EventOpening event={renderedEvent}>
-        <WeddingTemplateRenderer event={renderedEvent} />
-        <EventMusicControl music={renderedEvent.music} eventSlug={renderedEvent.slug} />
+      <EventOpening event={musicEvent}>
+        <WeddingTemplateRenderer event={musicEvent} />
+        <EventMusicControl music={musicEvent.music} eventSlug={musicEvent.slug} />
       </EventOpening>
     );
   }

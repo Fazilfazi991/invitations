@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/BirthdayTemplateRenderer";
 import type { BirthdayEventData } from "@/components/event/templates/birthday/birthday-template-utils";
+import { EventMusicControl } from "@/components/event/EventMusicControl";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 import { normalizeStoredEvent, type EventDraft } from "@/lib/event-draft";
 import { loadPublicEvent } from "@/lib/event-repository";
+import { getDefaultMusicForType } from "@/lib/event-music";
 
 export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallbackEvent?: WeddingEventData }) {
   const [event, setEvent] = useState<EventDraft | WeddingEventData | null>(fallbackEvent ?? null);
@@ -16,7 +18,7 @@ export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallb
     let active = true;
     loadPublicEvent(slug).then((storedEvent) => {
       if (!active) return;
-      const nextEvent = storedEvent ? normalizeStoredEvent(storedEvent) : fallbackEvent ?? null;
+      const nextEvent = storedEvent ? normalizeStoredEvent(storedEvent) : fallbackEvent ? normalizeStoredEvent(fallbackEvent) : null;
       if (process.env.NODE_ENV !== "production") {
         console.debug("Public invite loaded:", {
           slug,
@@ -66,5 +68,15 @@ export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallb
     );
   }
 
-  return <WeddingTemplateRenderer event={event as WeddingEventData} />;
+  const weddingEvent = {
+    ...(event as WeddingEventData),
+    music: getDefaultMusicForType(event.eventType),
+  };
+
+  return (
+    <>
+      <WeddingTemplateRenderer event={weddingEvent} />
+      <EventMusicControl music={weddingEvent.music} eventSlug={weddingEvent.slug || slug} />
+    </>
+  );
 }

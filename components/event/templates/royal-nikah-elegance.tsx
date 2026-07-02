@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   CalendarDays,
   Camera,
@@ -21,13 +22,14 @@ import {
   getVenueText,
   type WeddingEventData,
 } from "@/components/event/templates/template-utils";
+import { getEventDateTime } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
 export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
   const { groom, bride, coupleName } = getCoupleNames(event);
   const venue = getVenueText(event);
   const schedule = getTemplateSchedule(event);
-  const countdown = getCountdownValues(event.date);
+  const countdown = useRoyalCountdown(event.date, event.time);
   const storyImage = getStoryImage(event);
   const calendarHref = buildCalendarDataUri(event, venue.full);
   const date = getDateParts(event.date);
@@ -171,14 +173,15 @@ function DateCell({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CountdownPanel({ values }: { values: string[] }) {
+function CountdownPanel({ values }: { values: string[] | null }) {
+  const displayValues = values ?? ["--", "--", "--", "--"];
   return (
     <section className="mt-5 rounded-xl border border-[#F0B6C8]/80 bg-white/72 p-4 shadow-[0_14px_42px_rgba(146,91,61,0.08)]">
       <div className="grid grid-cols-4 divide-x divide-[#F0B6C8]/70 text-center">
         {["Days", "Hours", "Mins", "Secs"].map((label, index) => (
           <div key={label} className="px-2">
             <Clock className="mx-auto mb-1 h-4 w-4 text-[#D84B73]" />
-            <b className="block font-serif text-2xl text-[#D84B73]">{values[index]}</b>
+            <b className="block font-serif text-2xl text-[#D84B73]">{displayValues[index]}</b>
             <span className="text-[0.62rem] font-bold uppercase tracking-[0.12em] text-[#8C7B86]">{label}</span>
           </div>
         ))}
@@ -331,15 +334,30 @@ function FloralVase({ className }: { className?: string }) {
   );
 }
 
-function getCountdownValues(date?: string) {
-  if (!date) return ["120", "05", "45", "30"];
-  const target = new Date(`${date}T23:59:59`).getTime();
-  const diff = Math.max(0, target - Date.now());
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff / 3600000) % 24);
-  const minutes = Math.floor((diff / 60000) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
-  return [days, hours, minutes, seconds].map((value) => String(value).padStart(2, "0"));
+function useRoyalCountdown(date: string, time: string) {
+  const [values, setValues] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    function calculate() {
+      const target = getEventDateTime(date, time);
+      if (!target) {
+        setValues(["00", "00", "00", "00"]);
+        return;
+      }
+      const diff = Math.max(0, target.getTime() - Date.now());
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setValues([days, hours, minutes, seconds].map((value) => String(value).padStart(2, "0")));
+    }
+
+    calculate();
+    const timer = window.setInterval(calculate, 1000);
+    return () => window.clearInterval(timer);
+  }, [date, time]);
+
+  return values;
 }
 
 function getDateParts(date?: string) {

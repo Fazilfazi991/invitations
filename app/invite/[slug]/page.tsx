@@ -78,7 +78,7 @@ const suhaibFathimaInvitation: WeddingEventData = {
   templateImage: "/templates/previews/royal_nikah_elegance_preview.png",
   theme: "classic",
   openingAnimation: "minimal",
-  music: { enabled: false, trackId: "none", url: "", autoplay: false },
+  music: { enabled: true, trackId: "leberch-wedding-romantic-262606", url: "/audio/leberch-wedding-romantic-262606.mp3", autoplay: false },
   status: "published",
   slug: invitationSlug,
   publicUrl: publicInviteUrl,

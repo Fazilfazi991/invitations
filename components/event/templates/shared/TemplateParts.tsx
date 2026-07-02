@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { CalendarDays, Camera, Copy, Heart, MapPin, Menu, MessageCircle, Music, Phone, Send, Utensils, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
@@ -7,12 +8,13 @@ import {
   buildShareText,
   formatEventDate,
   formatEventTime,
-  getCountdownCopy,
   getTemplateContacts,
   getTemplateGallery,
   getTemplateSchedule,
   getVenueText,
 } from "@/components/event/templates/template-utils";
+import { getEventDateTime } from "@/lib/date-utils";
+import { getEventUrl } from "@/lib/event-url";
 import { cn } from "@/lib/utils";
 
 const icons = [Heart, Camera, Utensils, Music, Users];
@@ -47,14 +49,19 @@ export function DetailPills({ event, primary }: { event: WeddingEventData; prima
 }
 
 export function TemplateCountdown({ event, title, primary }: { event: WeddingEventData; title: string; primary: string }) {
-  const values = getCountdownCopy(event.date);
-  const started = values[0] === "The";
+  const countdown = useLiveCountdown(event.date, event.time);
+
   return (
     <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 text-center shadow-card">
       <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: primary }}>{title}</p>
-      {started ? <p className="mt-3 font-serif text-2xl font-bold">{values.join(" ")}</p> : (
+      {!countdown ? <p className="mt-3 text-sm text-muted">Loading countdown...</p> : countdown.passed ? <p className="mt-3 font-serif text-2xl font-bold">The celebration has begun</p> : (
         <div className="mt-3 grid grid-cols-4 divide-x divide-border">
-          {["Days", "Hours", "Minutes", "Seconds"].map((label, index) => <div key={label}><b className="block font-serif text-3xl" style={{ color: primary }}>{values[index]}</b><span className="text-[10px] uppercase">{label}</span></div>)}
+          {[
+            ["Days", countdown.days],
+            ["Hours", countdown.hours],
+            ["Minutes", countdown.minutes],
+            ["Seconds", countdown.seconds],
+          ].map(([label, value]) => <div key={label} className="min-w-0 px-1"><b className="block font-serif text-2xl sm:text-3xl" style={{ color: primary }}>{String(value).padStart(2, "0")}</b><span className="text-[9px] uppercase sm:text-[10px]">{label}</span></div>)}
         </div>
       )}
     </section>
@@ -84,17 +91,21 @@ export function TemplateTimeline({ event, title, primary, boxed = false }: { eve
 
 export function TemplateLocation({ event, primary, imageStyle = "map" }: { event: WeddingEventData; primary: string; imageStyle?: "map" | "photo" }) {
   const venue = getVenueText(event);
+  const hasMap = Boolean(event.mapLink);
   return (
     <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card">
       <h2 className="font-serif text-2xl font-bold">Location</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <div className={cn("grid h-32 place-items-center rounded-2xl", imageStyle === "map" ? "map-bg" : "bg-gradient-to-br from-rose-100 to-amber-50")}>
-          <MapPin className="h-10 w-10" style={{ color: primary }} />
+        <div className={cn("grid min-h-32 place-items-center rounded-2xl border border-border/70 p-4 text-center", imageStyle === "map" ? "map-bg" : "bg-gradient-to-br from-rose-100 to-amber-50")}>
+          <div>
+            <MapPin className="mx-auto h-10 w-10" style={{ color: primary }} />
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em]" style={{ color: primary }}>{venue.city}</p>
+          </div>
         </div>
         <div>
           <h3 className="font-serif text-xl font-bold" style={{ color: primary }}>{venue.venue}</h3>
           <p className="text-sm text-muted">{venue.address}</p>
-          <Button asChild variant="outline" size="sm" className="mt-3"><a href={event.mapLink || "#"}><MapPin className="h-4 w-4" />Open in Maps</a></Button>
+          {hasMap && <Button asChild variant="outline" size="sm" className="mt-3"><a href={event.mapLink} target="_blank" rel="noreferrer"><MapPin className="h-4 w-4" />Open in Maps</a></Button>}
         </div>
       </div>
     </section>
@@ -117,15 +128,30 @@ export function TemplateGallery({ event, title, primary }: { event: WeddingEvent
 }
 
 export function TemplateRSVP({ primary }: { primary: string }) {
+  const [name, setName] = useState("");
+  const [response, setResponse] = useState<"yes" | "no" | null>(null);
+  const [error, setError] = useState("");
+
+  function submit(nextResponse: "yes" | "no") {
+    if (!name.trim()) {
+      setError("Please enter your name first.");
+      return;
+    }
+    setError("");
+    setResponse(nextResponse);
+  }
+
   return (
     <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card">
       <div>
         <h2 className="font-serif text-2xl font-bold">RSVP</h2>
         <p className="text-sm text-muted">Kindly respond and make the day perfect.</p>
-        <input className="mt-3 h-11 w-full rounded-full border border-border px-4 text-sm" placeholder="Enter your name" />
+        <input value={name} onChange={(event) => setName(event.target.value)} className="mt-3 h-11 w-full rounded-full border border-border px-4 text-sm outline-none focus:border-primary" placeholder="Enter your name" />
+        {error && <p className="mt-2 text-xs font-semibold text-rose-600">{error}</p>}
+        {response && <p className="mt-2 text-xs font-semibold" style={{ color: primary }}>Thank you, {name.trim()}. Your RSVP is noted.</p>}
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button className="px-2 text-xs" style={{ backgroundColor: primary }}>Will Attend</Button>
-          <Button className="px-2 text-xs" variant="outline">Can&apos;t Attend</Button>
+          <Button type="button" onClick={() => submit("yes")} className="px-2 text-xs" style={{ backgroundColor: primary }}>Will Attend</Button>
+          <Button type="button" onClick={() => submit("no")} className="px-2 text-xs" variant="outline">Can&apos;t Attend</Button>
         </div>
       </div>
     </section>
@@ -149,12 +175,23 @@ export function TemplateContacts({ event, primary }: { event: WeddingEventData; 
 
 export function TemplateShare({ event, primary, title = "Share the Joy" }: { event: WeddingEventData; primary: string; title?: string }) {
   const share = buildShareText(event);
+  const [copied, setCopied] = useState(false);
+  const url = event.publicUrl || (event.slug ? getEventUrl(event.slug) : "");
+
+  async function copyLink() {
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }
+
   return (
     <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 text-center shadow-card">
       <h2 className="font-serif text-2xl font-bold">{title}</h2>
+      {copied && <p className="mt-2 text-sm font-semibold" style={{ color: primary }}>Invite link copied</p>}
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <Button asChild style={{ backgroundColor: "#22C55E" }}><a href={`https://wa.me/?text=${share}`}><MessageCircle className="h-4 w-4" />WhatsApp</a></Button>
-        <Button variant="outline"><Copy className="h-4 w-4" />Copy Link</Button>
+        <Button asChild style={{ backgroundColor: "#22C55E" }}><a href={`https://wa.me/?text=${share}`} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" />WhatsApp</a></Button>
+        <Button type="button" onClick={copyLink} variant="outline"><Copy className="h-4 w-4" />Copy Link</Button>
       </div>
     </section>
   );
@@ -166,4 +203,36 @@ export function TemplateFooter({ text, primary }: { text: string; primary: strin
 
 export function SendIcon() {
   return <Send className="h-4 w-4" />;
+}
+
+function useLiveCountdown(date: string, time: string) {
+  const [countdown, setCountdown] = useState<null | { days: number; hours: number; minutes: number; seconds: number; passed: boolean }>(null);
+
+  useEffect(() => {
+    function calculate() {
+      const target = getEventDateTime(date, time);
+      if (!target) {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, passed: true });
+        return;
+      }
+      const diff = target.getTime() - Date.now();
+      if (diff <= 0) {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, passed: true });
+        return;
+      }
+      setCountdown({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+        passed: false,
+      });
+    }
+
+    calculate();
+    const timer = window.setInterval(calculate, 1000);
+    return () => window.clearInterval(timer);
+  }, [date, time]);
+
+  return countdown;
 }

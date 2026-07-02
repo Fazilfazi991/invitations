@@ -81,6 +81,6 @@ export function getCountdownCopy(date?: string) {
 
 export function buildShareText(event: Partial<WeddingEventData>) {
   const { coupleName } = getCoupleNames(event);
-  const url = getEventUrl(event.slug || "afsal-fathima");
+  const url = event.publicUrl || getEventUrl(event.slug || "afsal-fathima");
   return encodeURIComponent(`Join us to celebrate ${coupleName} on occazn.\n${url}`);
 }
