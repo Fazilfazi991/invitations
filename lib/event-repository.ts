@@ -10,6 +10,7 @@ import {
 } from "@/lib/event-draft";
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 import { ensureUniqueSlug, getEventUrl } from "@/lib/event-url";
+import { isLiveEventType } from "@/lib/event-types";
 import { createQrCodeSvg } from "@/lib/qr-code";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -76,6 +77,26 @@ export async function loadEventDraft() {
 }
 
 export async function persistEventDraft(draft: EventDraft) {
+  if (!isLiveEventType(draft.eventType)) {
+    const weddingDefaults = normalizeStoredEvent({ eventType: "wedding" });
+    draft = {
+      ...weddingDefaults,
+      title: draft.title || weddingDefaults.title,
+      primaryName: draft.primaryName,
+      secondaryName: draft.secondaryName,
+      date: draft.date || weddingDefaults.date,
+      time: draft.time || weddingDefaults.time,
+      venueName: draft.venueName,
+      address: draft.address,
+      city: draft.city,
+      mapLink: draft.mapLink,
+      youtubeLink: draft.youtubeLink,
+      gallery: draft.gallery,
+      contacts: draft.contacts,
+      schedule: draft.schedule,
+      eventType: "wedding",
+    };
+  }
   saveDraft(draft);
   if (localTestMode) return;
   draftWriteQueue = draftWriteQueue.then(async () => {
@@ -150,6 +171,9 @@ export async function loadPublicEvent(slug: string) {
 }
 
 export async function publishEvent(event: EventDraft) {
+  if (!isLiveEventType(event.eventType)) {
+    throw new Error("This event type is coming soon. Wedding invitations are live now.");
+  }
   if (process.env.NODE_ENV !== "production") {
     console.debug("Publishing event template:", {
       slug: event.slug,
@@ -219,6 +243,9 @@ export async function publishEvent(event: EventDraft) {
 }
 
 export async function updatePublishedEvent(event: EventDraft) {
+  if (!isLiveEventType(event.eventType)) {
+    throw new Error("This event type is coming soon. Wedding invitations are live now.");
+  }
   savePublishedEvent(event);
   if (localTestMode) return event;
   const user = await getCurrentAuthUser();

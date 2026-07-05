@@ -12,10 +12,10 @@ import { TemplateFullPagePreview } from "@/components/templates/TemplateFullPage
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { DRAFT_KEY, EVENT_TYPE_KEY, generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
-import { getEventTypeLabel, type EventType } from "@/lib/event-types";
+import { getEventTypeLabel, isLiveEventType, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/date-utils";
 import { publishEvent } from "@/lib/event-repository";
-import { getDefaultTemplateForType, getTemplateById, templates, templateMoodToTheme, type EventTemplate } from "@/lib/templates";
+import { getDefaultTemplateForType, getTemplateById, templateMoodToTheme, weddingTemplates, type EventTemplate } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 
 const brand = {
@@ -36,43 +36,39 @@ const occasionCards: Array<{
   value: OccasionValue;
   title: string;
   icon: React.ElementType;
+  comingSoon?: boolean;
 }> = [
   { value: "wedding", title: "Wedding", icon: Gem },
-  { value: "birthday", title: "Birthday", icon: Cake },
-  { value: "other", title: "Other", icon: Gift },
+  { value: "birthday", title: "Birthday", icon: Cake, comingSoon: true },
 ];
 
 const otherEventCards: Array<{
   value: OtherEventType;
   title: string;
   icon: React.ElementType;
+  comingSoon: true;
 }> = [
-  { value: "engagement", title: "Engagement", icon: Gem },
-  { value: "anniversary", title: "Anniversary", icon: Heart },
-  { value: "baby-shower", title: "Baby Shower", icon: Baby },
-  { value: "housewarming", title: "Housewarming", icon: Home },
-  { value: "corporate", title: "Corporate Event", icon: BriefcaseBusiness },
-  { value: "graduation", title: "Graduation", icon: GraduationCap },
-  { value: "farewell", title: "Farewell", icon: Send },
-  { value: "naming", title: "Naming Ceremony", icon: HeartHandshake },
-  { value: "custom", title: "Custom Event", icon: PartyPopper },
+  { value: "engagement", title: "Engagement", icon: Gem, comingSoon: true },
+  { value: "anniversary", title: "Anniversary", icon: Heart, comingSoon: true },
+  { value: "baby-shower", title: "Baby Shower", icon: Baby, comingSoon: true },
+  { value: "housewarming", title: "Housewarming", icon: Home, comingSoon: true },
+  { value: "corporate", title: "Corporate Event", icon: BriefcaseBusiness, comingSoon: true },
+  { value: "graduation", title: "Graduation", icon: GraduationCap, comingSoon: true },
+  { value: "farewell", title: "Farewell", icon: Send, comingSoon: true },
+  { value: "naming", title: "Naming Ceremony", icon: HeartHandshake, comingSoon: true },
+  { value: "custom", title: "Custom Event", icon: PartyPopper, comingSoon: true },
 ];
 
-const styleCards: Array<{
-  value: StyleValue;
-  title: string;
-  description: string;
-  dots: string[];
-}> = [
-  { value: "royal", title: "Royal", description: "Rich, elegant and timeless", dots: [brand.primary, brand.lavender, "#2D0C48"] },
-  { value: "floral", title: "Floral", description: "Soft, natural and beautiful", dots: [brand.violet, brand.light, "#FEFDFC"] },
-  { value: "minimal", title: "Minimal", description: "Clean, simple and modern", dots: ["#171717", brand.lavender, "#FEFDFC"] },
-];
+const launchEventCards = [
+  ...occasionCards,
+  ...otherEventCards,
+  { value: "baptism", title: "Baptism", icon: HeartHandshake, comingSoon: true },
+  { value: "holy-communion", title: "Holy Communion", icon: Heart, comingSoon: true },
+] as const;
 
 function eventTypeToOccasion(eventType: EventType): OccasionValue {
   if (eventType === "wedding") return "wedding";
-  if (eventType === "birthday") return "birthday";
-  return "other";
+  return "wedding";
 }
 
 function inferStyleFromTemplate(templateId?: string): StyleValue {
@@ -83,24 +79,12 @@ function inferStyleFromTemplate(templateId?: string): StyleValue {
   return "royal";
 }
 
-function templateForStyle(eventType: EventType, style: StyleValue) {
-  const compatible = templates.filter((template) => template.category === eventType);
-  const byStyle = compatible.find((template) => {
-    if (style === "minimal") return template.style.mood === "minimal" || template.id.includes("minimal");
-    if (style === "floral") return template.id.includes("floral") || template.style.mood === "romantic" || template.style.mood === "cute";
-    return template.style.mood === "traditional" || template.style.mood === "luxury" || template.id.includes("royal");
-  });
-  return byStyle ?? getDefaultTemplateForType(eventType);
-}
-
 export function GuidedInvitationBuilder() {
   const router = useRouter();
   const { user } = useAuth();
   const { draft, setDraft, loaded } = useEventDraft();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [occasion, setOccasion] = useState<OccasionValue | null>(null);
-  const [showOtherTypes, setShowOtherTypes] = useState(false);
-  const [otherEventType, setOtherEventType] = useState<OtherEventType | null>(null);
   const [eventTypeError, setEventTypeError] = useState("");
   const [style, setStyle] = useState<StyleValue>("royal");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
@@ -118,25 +102,37 @@ export function GuidedInvitationBuilder() {
     const hasStoredEventChoice = typeof window !== "undefined" && Boolean(window.localStorage.getItem(DRAFT_KEY) || window.localStorage.getItem(EVENT_TYPE_KEY));
     if (!hasStoredEventChoice && draft.eventType === "custom") {
       setOccasion(null);
-      setOtherEventType(null);
       setStyle(inferStyleFromTemplate(draft.templateId));
       setSelectedTemplateId(null);
       return;
     }
+    if (!isLiveEventType(draft.eventType)) {
+      const weddingDraft = getDefaultDraft("wedding");
+      setDraft((current) => ({
+        ...weddingDraft,
+        date: current.date,
+        time: current.time,
+        venueName: current.venueName,
+        address: current.address,
+        city: current.city,
+        mapLink: current.mapLink,
+      }));
+      setOccasion("wedding");
+      setEventTypeError("This event type is coming soon. Wedding invitations are live now.");
+      return;
+    }
     setOccasion(eventTypeToOccasion(draft.eventType));
-    setOtherEventType(draft.eventType === "wedding" || draft.eventType === "birthday" ? null : draft.eventType as OtherEventType);
     setStyle(inferStyleFromTemplate(draft.templateId));
     setSelectedTemplateId(draft.templateId || null);
   }, [draft.eventType, draft.templateId, loaded]);
 
-  const heading = step === 1 ? showOtherTypes ? "Choose your event type" : "What are you celebrating?" : step === 2 ? "Choose Your Template" : step === 3 ? "Add event details" : step === 4 ? "Bring your invite to life" : "You're all set!";
-  const subheading = step === 1 ? showOtherTypes ? "Select one so your invite matches the celebration." : "Choose one to get started." : step === 2 ? "Pick a design you love. You can customize everything next." : step === 3 ? "Just the basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
+  const heading = step === 1 ? "What are you celebrating?" : step === 2 ? "Choose Your Wedding Template" : step === 3 ? "Add wedding details" : step === 4 ? "Bring your invite to life" : "You're all set!";
+  const subheading = step === 1 ? "Wedding is live now. Other events are coming soon." : step === 2 ? "Pick one of the live wedding designs. You can customize everything next." : step === 3 ? "Just the wedding basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
 
   const selectedEventType = useMemo<EventType | null>(() => {
-    if (occasion === "wedding" || occasion === "birthday") return occasion;
-    if (occasion === "other") return otherEventType;
+    if (occasion === "wedding") return "wedding";
     return null;
-  }, [occasion, otherEventType]);
+  }, [occasion]);
   const coupleNames = [draft.primaryName, draft.secondaryName].filter(Boolean).join(" & ") || draft.hostName || "";
   const completedDetailCount = [
     coupleNames.trim(),
@@ -152,13 +148,16 @@ export function GuidedInvitationBuilder() {
     location: Boolean(draft.venueName.trim() || draft.mapLink.trim()),
   };
   const availableTemplates = useMemo(() => {
-    if (!selectedEventType) return [];
-    const exactMatches = templates.filter((template) => template.category === selectedEventType);
-    return exactMatches.length ? exactMatches : templates.filter((template) => template.category === "custom");
+    if (selectedEventType !== "wedding") return [];
+    return weddingTemplates;
   }, [selectedEventType]);
-  const visibleTemplates = showAllTemplates ? availableTemplates : availableTemplates.slice(0, 3);
+  const visibleTemplates = showAllTemplates ? availableTemplates : availableTemplates.slice(0, 5);
 
   function applyEventType(eventType: EventType) {
+    if (!isLiveEventType(eventType)) {
+      showComingSoon();
+      return;
+    }
     const nextDefaults = getDefaultDraft(eventType);
     setSelectedTemplateId(null);
     setShowAllTemplates(false);
@@ -178,34 +177,18 @@ export function GuidedInvitationBuilder() {
   }
 
   function selectOccasion(nextOccasion: OccasionValue) {
-    setOccasion(nextOccasion);
-    setEventTypeError("");
-    if (nextOccasion === "other") {
-      setOtherEventType(null);
+    if (nextOccasion !== "wedding") {
+      showComingSoon();
       return;
     }
-    setShowOtherTypes(false);
-    setOtherEventType(null);
+    setOccasion(nextOccasion);
+    setEventTypeError("");
     applyEventType(nextOccasion);
   }
 
-  function selectOtherEventType(eventType: OtherEventType) {
-    setOtherEventType(eventType);
-    setEventTypeError("");
-    applyEventType(eventType);
-  }
-
-  function selectStyle(nextStyle: StyleValue) {
-    if (!selectedEventType) return;
-    const template = templateForStyle(selectedEventType, nextStyle);
-    setStyle(nextStyle);
-    setDraft((current) => ({
-      ...current,
-      templateId: template.id,
-      templateName: template.name,
-      templateImage: template.previewImage,
-      theme: templateMoodToTheme(template.style.mood),
-    }));
+  function showComingSoon() {
+    setEventTypeError("This event type is coming soon. Wedding invitations are live now.");
+    window.setTimeout(() => setEventTypeError((current) => current === "This event type is coming soon. Wedding invitations are live now." ? "" : current), 2400);
   }
 
   function selectTemplate(template: EventTemplate) {
@@ -222,17 +205,11 @@ export function GuidedInvitationBuilder() {
 
   function burstAndContinue() {
     if (step === 1) {
-      if (showOtherTypes) {
-        if (!otherEventType) {
-          setEventTypeError("Please choose an event type to continue.");
-          return;
-        }
-      } else if (occasion === "other") {
-        setShowOtherTypes(true);
-        setEventTypeError("");
+      if (occasion === "other") {
+        showComingSoon();
         return;
-      } else if (!selectedEventType) {
-        setEventTypeError("Please choose an event type to continue.");
+      } else if (selectedEventType !== "wedding") {
+        setEventTypeError("Please choose Wedding to continue.");
         return;
       }
     }
@@ -263,6 +240,12 @@ export function GuidedInvitationBuilder() {
     }
     if (!draft.title || !draft.date || !draft.venueName || !draft.templateId) {
       setStep(3);
+      return;
+    }
+    if (!isLiveEventType(draft.eventType)) {
+      setEventTypeError("This event type is coming soon. Wedding invitations are live now.");
+      setStep(1);
+      setCreating(false);
       return;
     }
 
@@ -301,12 +284,6 @@ export function GuidedInvitationBuilder() {
   }
 
   function goBack() {
-    if (step === 1 && showOtherTypes) {
-      setShowOtherTypes(false);
-      setOtherEventType(null);
-      setEventTypeError("");
-      return;
-    }
     setStep((current) => current === 5 ? 4 : current === 4 ? 3 : current === 3 ? 2 : 1);
   }
 
@@ -356,7 +333,7 @@ export function GuidedInvitationBuilder() {
       <div className="relative z-10 flex min-h-0 flex-1 flex-col px-5 pt-[clamp(1rem,2.4dvh,2rem)] sm:px-7">
         <header className="text-center">
           <div className="mx-auto mb-[clamp(0.65rem,1.7dvh,1.5rem)] flex items-center justify-center gap-3">
-            {(step > 1 || showOtherTypes) && (
+            {step > 1 && (
               <button
                 type="button"
                 onClick={goBack}
@@ -403,15 +380,16 @@ export function GuidedInvitationBuilder() {
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
-            <motion.div key={showOtherTypes ? "other-event-types" : "occasion"} className={cn("mt-[clamp(1rem,2.8dvh,2.6rem)]", showOtherTypes ? "grid grid-cols-1 gap-[clamp(0.55rem,1.4dvh,0.9rem)]" : "space-y-[clamp(0.65rem,1.6dvh,1.25rem)]")} initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
-              {(showOtherTypes ? otherEventCards : occasionCards).map((card) => (
+            <motion.div key="occasion" className="mt-[clamp(1rem,2.8dvh,2.6rem)] grid grid-cols-1 gap-[clamp(0.55rem,1.4dvh,0.9rem)] overflow-y-auto pb-3 pr-1" initial="hidden" animate="visible" exit={{ opacity: 0, y: -8 }} variants={listVariants}>
+              {launchEventCards.map((card) => (
                 <OptionCard
-                  key={card.value}
-                  selected={showOtherTypes ? otherEventType === card.value : occasion === card.value}
+                  key={`${card.value}-${card.title}`}
+                  selected={card.value === "wedding" && occasion === "wedding"}
                   title={card.title}
                   icon={card.icon}
-                  compact={showOtherTypes}
-                  onClick={() => showOtherTypes ? selectOtherEventType(card.value as OtherEventType) : selectOccasion(card.value as OccasionValue)}
+                  compact
+                  comingSoon={card.comingSoon}
+                  onClick={() => card.value === "wedding" ? selectOccasion("wedding") : showComingSoon()}
                 />
               ))}
               {eventTypeError && (
@@ -446,6 +424,11 @@ export function GuidedInvitationBuilder() {
               {availableTemplates.length > 0 && availableTemplates.length <= 2 && (
                 <p className="rounded-2xl bg-[#F6F0F8] px-4 py-3 text-center text-sm font-semibold leading-5 text-[#6C1785]">
                   More designs are being added. You can customize this fully in the next step.
+                </p>
+              )}
+              {availableTemplates.length > 0 && (
+                <p className="rounded-2xl bg-[#F6F0F8] px-4 py-3 text-center text-sm font-semibold leading-5 text-[#6C1785]">
+                  More templates coming soon.
                 </p>
               )}
             </motion.div>
@@ -555,7 +538,7 @@ export function GuidedInvitationBuilder() {
       </div>
 
       <div className="relative z-20 mt-auto shrink-0 rounded-t-[1.5rem] bg-white/92 px-5 pb-[clamp(0.7rem,1.8dvh,1.5rem)] pt-[clamp(0.65rem,1.6dvh,1.2rem)] shadow-[0_-18px_42px_rgba(80,13,104,0.08)] backdrop-blur sm:px-7">
-        <ContinueButton disabled={step === 1 ? (showOtherTypes ? false : !occasion) : step === 2 ? !selectedTemplateId : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
+        <ContinueButton disabled={step === 1 ? selectedEventType !== "wedding" : step === 2 ? !selectedTemplateId : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
         {step === 2 && (
           <button
             type="button"
@@ -713,7 +696,7 @@ const cardVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-function OptionCard({ selected, title, icon: Icon, compact = false, onClick }: { selected: boolean; title: string; icon: React.ElementType; compact?: boolean; onClick: () => void }) {
+function OptionCard({ selected, title, icon: Icon, compact = false, comingSoon = false, onClick }: { selected: boolean; title: string; icon: React.ElementType; compact?: boolean; comingSoon?: boolean; onClick: () => void }) {
   return (
     <motion.button
       type="button"
@@ -723,16 +706,22 @@ function OptionCard({ selected, title, icon: Icon, compact = false, onClick }: {
       transition={{ duration: 0.16 }}
       onClick={onClick}
       aria-pressed={selected}
-      className={cn("flex w-full items-center rounded-[1.25rem] border bg-white text-left shadow-[0_12px_28px_rgba(80,13,104,0.08)] transition focus:outline-none focus:ring-2 focus:ring-[#6C1785]", compact ? "min-h-[clamp(4.05rem,8.2dvh,4.8rem)] gap-3 px-4" : "min-h-[clamp(5.5rem,12dvh,7rem)] gap-[clamp(1rem,4vw,2rem)] px-[clamp(1.1rem,5vw,2rem)]", selected && "bg-[#F8F3FA] shadow-[0_16px_32px_rgba(108,23,133,0.12)]")}
-      style={{ borderColor: selected ? brand.primary : "rgba(208,184,216,0.38)" }}
+      aria-disabled={comingSoon}
+      className={cn("flex w-full items-center rounded-[1.25rem] border bg-white text-left shadow-[0_12px_28px_rgba(80,13,104,0.08)] transition focus:outline-none focus:ring-2 focus:ring-[#6C1785]", compact ? "min-h-[clamp(4.05rem,8.2dvh,4.8rem)] gap-3 px-4" : "min-h-[clamp(5.5rem,12dvh,7rem)] gap-[clamp(1rem,4vw,2rem)] px-[clamp(1.1rem,5vw,2rem)]", selected && "bg-[#F8F3FA] shadow-[0_16px_32px_rgba(108,23,133,0.12)]", comingSoon && "bg-white/70 opacity-75 hover:opacity-90")}
+      style={{ borderColor: selected ? brand.primary : comingSoon ? "rgba(164,119,180,0.28)" : "rgba(208,184,216,0.38)" }}
     >
-      <span className={cn("relative grid shrink-0 place-items-center text-[#7B19C9]", compact ? "h-11 w-11" : "h-[clamp(3rem,7dvh,4rem)] w-[clamp(3rem,7dvh,4rem)]")}>
+      <span className={cn("relative grid shrink-0 place-items-center", comingSoon ? "text-[#A477B4]" : "text-[#7B19C9]", compact ? "h-11 w-11" : "h-[clamp(3rem,7dvh,4rem)] w-[clamp(3rem,7dvh,4rem)]")}>
         <Icon className={cn("stroke-[1.6]", compact ? "h-8 w-8" : "h-[clamp(2.5rem,6dvh,3.5rem)] w-[clamp(2.5rem,6dvh,3.5rem)]")} />
         <Sparkles className="absolute -right-2 -top-2 h-4 w-4 fill-[#CFA7F0] text-[#CFA7F0]" />
       </span>
       <span className={cn("min-w-0 flex-1 font-serif font-bold text-[#2D0C48]", compact ? "text-[clamp(1.2rem,2.6dvh,1.45rem)]" : "text-[clamp(1.65rem,4dvh,2rem)]")}>{title}</span>
+      {comingSoon && (
+        <span className="shrink-0 rounded-full border border-[#D0B8D8] bg-[#F6F0F8] px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-[#6C1785]">
+          Coming Soon
+        </span>
+      )}
       <AnimatePresence>
-        {selected && (
+        {selected && !comingSoon && (
           <motion.span initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} className="grid h-10 w-10 place-items-center rounded-full bg-[#7B19C9] text-white">
             <Check className="h-6 w-6" />
           </motion.span>
@@ -825,64 +814,6 @@ function TemplatePreviewModal({ template, onClose, onUse }: { template: EventTem
         </div>
       </motion.div>
     </AnimatePresence>
-  );
-}
-
-function StyleCard({ selected, title, description, dots, value, onClick }: { selected: boolean; title: string; description: string; dots: string[]; value: StyleValue; onClick: () => void }) {
-  return (
-    <motion.button
-      type="button"
-      variants={cardVariants}
-      whileTap={{ scale: 0.985 }}
-      animate={selected ? { scale: [1, 1.015, 1] } : { scale: 1 }}
-      transition={{ duration: 0.16 }}
-      onClick={onClick}
-      aria-pressed={selected}
-      className="relative flex min-h-[150px] w-full items-center gap-6 rounded-[1.35rem] border bg-white p-5 text-left shadow-[0_15px_34px_rgba(80,13,104,0.08)] transition focus:outline-none focus:ring-2 focus:ring-[#6C1785]"
-      style={{ borderColor: selected ? brand.primary : "rgba(208,184,216,0.38)", background: selected ? "#FDFBFE" : "white" }}
-    >
-      <StyleThumbnail value={value} />
-      <span className="min-w-0 flex-1">
-        <span className="block text-3xl font-bold text-[#140D24]">{title}</span>
-        <span className="mt-3 block max-w-[170px] text-xl font-medium leading-snug text-[#686078]">{description}</span>
-        <span className="mt-5 flex gap-3">
-          {dots.map((dot) => <span key={dot} className="h-7 w-7 rounded-full shadow-inner" style={{ background: dot }} />)}
-        </span>
-      </span>
-      <AnimatePresence>
-        {selected && (
-          <motion.span initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} className="absolute right-5 top-5 grid h-11 w-11 place-items-center rounded-full bg-[#7B19C9] text-white">
-            <Check className="h-6 w-6" />
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </motion.button>
-  );
-}
-
-function StyleThumbnail({ value }: { value: StyleValue }) {
-  const royal = value === "royal";
-  const floral = value === "floral";
-  return (
-    <span className="grid h-32 w-28 shrink-0 place-items-center overflow-hidden rounded-lg bg-[#FEFDFC] shadow-[0_10px_22px_rgba(80,13,104,0.13)]">
-      <span
-        className="relative h-full w-full p-3"
-        style={{
-          background: royal
-            ? "linear-gradient(145deg,#2D0C48,#500D68)"
-            : floral
-              ? "linear-gradient(145deg,#FEFDFC,#F6F0F8)"
-              : "linear-gradient(145deg,#FFFFFF,#FEFDFC)",
-        }}
-      >
-        <span className="absolute inset-3 rounded border" style={{ borderColor: royal ? brand.light : floral ? brand.lavender : brand.light }} />
-        <span className="absolute left-1/2 top-8 -translate-x-1/2 text-center font-serif text-lg font-bold" style={{ color: royal ? brand.light : floral ? brand.violet : "#171717" }}>
-          A<br />&amp;<br />S
-        </span>
-        <span className="absolute bottom-6 left-1/2 h-1 w-14 -translate-x-1/2 rounded-full" style={{ background: royal ? brand.light : floral ? brand.lavender : brand.light }} />
-        {floral && <span className="absolute -right-3 -top-3 h-12 w-12 rounded-full border-8 border-[#D0B8D8]/40" />}
-      </span>
-    </span>
   );
 }
 

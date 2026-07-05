@@ -14,13 +14,12 @@ import { EventCountdown } from "@/components/event/EventCountdown";
 import { EventMusicControl } from "@/components/event/EventMusicControl";
 import { EventOpening } from "@/components/event/EventOpening";
 import { MemoryModePreview } from "@/components/event/MemoryModePreview";
-import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/BirthdayTemplateRenderer";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import { familyContacts, galleryImages, locations, sampleEvent, schedule } from "@/lib/mock-data";
 import { FooterTrust, GuestEventHero, QRCodeCard, RSVPForm, Section, ShareCard, TimelineItem } from "@/components/shared";
 import { getDefaultDraft, loadDraft, type EventDraft } from "@/lib/event-draft";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
-import { getEventHeroLabel } from "@/lib/event-types";
+import { getEventHeroLabel, isLiveEventType } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 import { getThemeStyles } from "@/lib/themes";
 import { getEventUrl } from "@/lib/event-url";
@@ -52,11 +51,11 @@ export default function GuestEventPage() {
     });
   }, [params.slug, user]);
 
-  const eventTitle = localEvent?.title ?? sampleEvent.couple;
-  const eventType = localEvent?.eventType ?? "custom";
-  const eventDate = localEvent?.date ?? "2025-05-24";
-  const eventTime = localEvent?.time ?? "18:00";
-  const venue = localEvent ? `${localEvent.venueName}, ${localEvent.city}` : sampleEvent.location;
+  const eventTitle = localEvent?.title ?? "";
+  const eventType = localEvent?.eventType ?? "wedding";
+  const eventDate = localEvent?.date ?? "";
+  const eventTime = localEvent?.time ?? "";
+  const venue = localEvent ? `${localEvent.venueName}, ${localEvent.city}` : "";
   const eventSchedule = localEvent?.schedule.length
     ? localEvent.schedule.map((item) => ({
         title: item.title || "Event moment",
@@ -71,34 +70,8 @@ export default function GuestEventPage() {
   const savedTheme = getThemeStyles(localEvent?.theme);
   const visualStyle = localEvent ? savedTheme : { ...template.style, accent: template.style.secondary };
   const accentStyle = { "--template-primary": visualStyle.primary, "--template-secondary": visualStyle.accent } as CSSProperties;
-  const fallbackEventType = params.slug.includes("birthday") ? "birthday" : "custom";
-  const renderedEvent: EventDraft = localEvent ?? {
-    ...getDefaultDraft(fallbackEventType),
-    slug: params.slug,
-    ...(fallbackEventType === "birthday"
-      ? {
-          templateId: "pink-teddy-birthday",
-          title: "Ava's 5th Birthday",
-          primaryName: "Ava",
-          childName: "Ava",
-          birthdayPersonName: "Ava",
-          age: "5",
-          ageTurning: "5",
-          venueName: "The Party Place",
-          address: "Bangalore",
-          city: "Bangalore",
-        }
-        : {
-          templateId: "other-celebration-elegance",
-          title: "Family Celebration",
-          primaryName: "Rahman Family",
-          hostName: "Rahman Family",
-          venueName: "Grand Seasons",
-          address: "Kozhikode, Kerala",
-          city: "Kozhikode, Kerala",
-        }),
-  };
-  const isWeddingLike = ["wedding", "engagement", "reception"].includes(renderedEvent.eventType);
+  const renderedEvent: EventDraft = localEvent ?? { ...getDefaultDraft("wedding"), slug: params.slug };
+  const isWeddingLike = isLiveEventType(renderedEvent.eventType);
   const celebrationCopy = {
     anniversary: { heading: "A Beautiful Milestone", description: `Celebrate ${renderedEvent.primaryName || renderedEvent.hostName || "this special couple"} and a journey filled with love, memories and togetherness.` },
     "baby-shower": { heading: "A Little Blessing", description: `Join us as we celebrate ${renderedEvent.childName || "a little one"} and shower the family with love and blessings.` },
@@ -132,12 +105,15 @@ export default function GuestEventPage() {
     );
   }
 
-  if (!isMemoryMode && renderedEvent.eventType === "birthday") {
+  if (!isLiveEventType(renderedEvent.eventType)) {
     return (
-      <EventOpening event={renderedEvent}>
-        <BirthdayTemplateRenderer event={renderedEvent} />
-        <EventMusicControl music={renderedEvent.music} eventSlug={renderedEvent.slug} />
-      </EventOpening>
+      <main className="phone-shell grid min-h-screen place-items-center bg-background px-5 text-center">
+        <Card className="max-w-sm p-6">
+          <h1 className="font-serif text-3xl font-bold">Coming soon</h1>
+          <p className="mt-2 text-sm leading-6 text-muted">This event type is coming soon. Wedding invitations are live now.</p>
+          <Button asChild className="mt-5"><Link href="/create-event">Create a Wedding Invite</Link></Button>
+        </Card>
+      </main>
     );
   }
 

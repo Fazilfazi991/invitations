@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BirthdayTemplateRenderer } from "@/components/event/templates/birthday/BirthdayTemplateRenderer";
-import type { BirthdayEventData } from "@/components/event/templates/birthday/birthday-template-utils";
 import { EventMusicControl } from "@/components/event/EventMusicControl";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 import { normalizeStoredEvent, type EventDraft } from "@/lib/event-draft";
 import { loadPublicEvent } from "@/lib/event-repository";
 import { getDefaultMusicForType } from "@/lib/event-music";
+import { isLiveEventType } from "@/lib/event-types";
 
 export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallbackEvent?: WeddingEventData }) {
   const [event, setEvent] = useState<EventDraft | WeddingEventData | null>(fallbackEvent ?? null);
@@ -53,16 +52,12 @@ export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallb
     );
   }
 
-  if (event.eventType === "birthday") {
-    return <BirthdayTemplateRenderer event={event as BirthdayEventData} />;
-  }
-
-  if (!["wedding", "engagement", "reception"].includes(event.eventType)) {
+  if (!isLiveEventType(event.eventType)) {
     return (
       <main className="grid min-h-dvh place-items-center bg-[#fbf0f6] px-4 text-center">
         <div className="rounded-3xl border border-[#F0B6C8] bg-white/80 p-8 shadow-[0_18px_50px_rgba(89,35,101,0.12)]">
-          <h1 className="font-serif text-3xl font-bold text-[#D84B73]">{event.title}</h1>
-          <p className="mt-2 text-sm text-[#6F6670]">This invite uses a non-wedding template.</p>
+          <h1 className="font-serif text-3xl font-bold text-[#D84B73]">Coming soon</h1>
+          <p className="mt-2 text-sm text-[#6F6670]">This event type is coming soon. Wedding invitations are live now.</p>
         </div>
       </main>
     );

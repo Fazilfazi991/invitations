@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,11 +9,16 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { StepProgress } from "@/components/shared";
 import { useEventDraft } from "@/hooks/use-event-draft";
+import { isLiveEventType } from "@/lib/event-types";
 
 export default function StepTwoPage() {
   const router = useRouter();
   const { draft, setDraft } = useEventDraft();
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!isLiveEventType(draft.eventType)) router.replace("/create/step-1");
+  }, [draft.eventType, router]);
 
   function update(key: "venueName" | "address" | "city" | "mapLink", value: string) {
     setDraft((current) => ({ ...current, [key]: value }));

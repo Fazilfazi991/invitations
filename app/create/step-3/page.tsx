@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Link as LinkIcon, Plus, QrCode, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { StepProgress } from "@/components/shared";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
+import { isLiveEventType } from "@/lib/event-types";
 
 export default function StepThreePage() {
   const router = useRouter();
@@ -19,6 +20,10 @@ export default function StepThreePage() {
   const { draft, setDraft } = useEventDraft();
   const [error, setError] = useState("");
   const [authOpen, setAuthOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isLiveEventType(draft.eventType)) router.replace("/create/step-1");
+  }, [draft.eventType, router]);
 
   function continueNext() {
     if (draft.youtubeLink && !draft.youtubeLink.startsWith("http")) {

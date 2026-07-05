@@ -34,6 +34,12 @@ export const eventTypeOptions: { value: EventType; label: string }[] = [
   { value: "custom", label: "Custom Event" },
 ];
 
+export const liveEventTypes = ["wedding"] as const satisfies readonly EventType[];
+
+export function isLiveEventType(value?: string | null): value is (typeof liveEventTypes)[number] {
+  return liveEventTypes.some((eventType) => eventType === value);
+}
+
 export function normalizeEventType(value?: string | null): EventType {
   const found = eventTypeOptions.find((option) => option.value === value);
   return found?.value ?? "custom";

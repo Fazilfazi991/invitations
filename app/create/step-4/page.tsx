@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Music2, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { StepProgress } from "@/components/shared";
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { generateSlug } from "@/lib/event-draft";
-import { getEventTypeLabel } from "@/lib/event-types";
+import { getEventTypeLabel, isLiveEventType } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById } from "@/lib/templates";
 import { getThemeStyles, themeStyles } from "@/lib/themes";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -37,6 +37,10 @@ export default function StepFourPage() {
   const selectedMusic = getMusicTrack(draft.music.trackId);
   const [previewingTrack, setPreviewingTrack] = useState("");
 
+  useEffect(() => {
+    if (!isLiveEventType(draft.eventType)) router.replace("/create/step-1");
+  }, [draft.eventType, router]);
+
   async function publish() {
     // Temporary demo bypass - remove before production.
     if (!user && !BYPASS_AUTH_FOR_DEMO) {
@@ -47,16 +51,31 @@ export default function StepFourPage() {
       setError("Please complete title, date, time and venue before publishing.");
       return;
     }
+    if (!isLiveEventType(draft.eventType)) {
+      setError("This event type is coming soon. Wedding invitations are live now.");
+      router.replace("/create/step-1");
+      return;
+    }
     const candidate = {
       ...draft,
       ownerId: user?.id,
       eventType: draft.eventType,
+      title: draft.title.trim(),
+      primaryName: draft.primaryName.trim(),
+      secondaryName: (draft.secondaryName || "").trim(),
+      groomName: (draft.groomName || draft.primaryName).trim(),
+      brideName: (draft.brideName || draft.secondaryName || "").trim(),
+      venueName: draft.venueName.trim(),
+      address: draft.address.trim(),
+      city: draft.city.trim(),
+      mapLink: draft.mapLink.trim(),
+      youtubeLink: draft.youtubeLink.trim(),
       theme: draft.theme,
       templateId: selectedTemplate.id,
       templateName: selectedTemplate.name,
       templateImage: selectedTemplate.previewImage,
       status: "published" as const,
-      slug: generateSlug(draft.title),
+      slug: generateSlug(draft.title.trim()),
     };
     try {
       const published = await publishEvent(candidate);

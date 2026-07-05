@@ -67,7 +67,7 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
           <QrCode className="h-6 w-6 text-primary" />
         </div>
         <h2 className="mt-3 font-serif text-2xl font-bold">Event QR Code</h2>
-        <p className="mt-1 text-sm leading-6 text-muted">Guests can scan this to open your event page.</p>
+        <p className="mt-1 text-sm leading-6 text-muted">Guests can scan this to open the public wedding invitation.</p>
         <div className="mx-auto mt-5 aspect-square w-[min(280px,80vw)] max-w-full rounded-3xl border border-border bg-white p-5 shadow-card [&_svg]:block [&_svg]:h-auto [&_svg]:w-full">
           <QRCodeSVG id="event-qr-code" value={qrValue} size={240} fgColor={theme.primary} bgColor="#FFFFFF" />
         </div>
@@ -105,7 +105,7 @@ export function EventQRCode({ title = sampleEvent.title, date = sampleEvent.date
               <div className="mx-auto mt-5 w-[min(220px,72vw)] rounded-2xl bg-white p-4 [&_svg]:h-auto [&_svg]:w-full">
                 <QRCodeSVG value={qrValue} size={190} fgColor={theme.primary} />
               </div>
-              <p className="mt-4 text-sm font-semibold">Scan to view invitation, location and RSVP</p>
+              <p className="mt-4 text-sm font-semibold">Scan to view the wedding invitation, location and RSVP</p>
             </div>
             <Button onClick={downloadQr} className="mt-4 w-full"><Download className="h-4 w-4" />Download Poster</Button>
           </Card>

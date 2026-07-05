@@ -12,7 +12,7 @@ import { LiveTemplatePreview } from "@/components/create/LiveTemplatePreview";
 import { SelectedTemplatePreview } from "@/components/create/SelectedTemplatePreview";
 import { formatEventDate, formatEventTime } from "@/lib/date-utils";
 import { getDefaultDraft, generateSlug } from "@/lib/event-draft";
-import { eventTypeOptions, getEventTypeLabel, normalizeEventType, type EventType } from "@/lib/event-types";
+import { eventTypeOptions, getEventTypeLabel, isLiveEventType, normalizeEventType, type EventType } from "@/lib/event-types";
 import { getDefaultTemplateForType, getTemplateById, SELECTED_TEMPLATE_KEY, templateCategoryToEventType, templateMoodToTheme } from "@/lib/templates";
 import { useEventDraft } from "@/hooks/use-event-draft";
 
@@ -34,11 +34,21 @@ export default function StepOnePage() {
   const selectedTemplate = getTemplateById(draft.templateId) ?? getDefaultTemplateForType(draft.eventType);
 
   useEffect(() => {
+    if (!isLiveEventType(draft.eventType)) {
+      changeType("wedding");
+      setError("This event type is coming soon. Wedding invitations are live now.");
+    }
+  }, [draft.eventType]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paramTemplate = getTemplateById(params.get("template"));
     const storedTemplate = getTemplateById(window.localStorage.getItem(SELECTED_TEMPLATE_KEY));
-    const template = paramTemplate ?? storedTemplate;
-    const type = template ? templateCategoryToEventType(template.category) : normalizeEventType(params.get("type"));
+    const requestedTemplate = paramTemplate ?? storedTemplate;
+    const template = requestedTemplate && isLiveEventType(templateCategoryToEventType(requestedTemplate.category)) ? requestedTemplate : null;
+    const requestedType = template ? templateCategoryToEventType(template.category) : normalizeEventType(params.get("type"));
+    const type = isLiveEventType(requestedType) ? requestedType : "wedding";
+    if (requestedType !== "wedding") setError("This event type is coming soon. Wedding invitations are live now.");
     setDraft((current) => {
       const shouldResetType = current.eventType !== type;
       const base = shouldResetType ? { ...getDefaultDraft(type), date: current.date, time: current.time, eventType: type } : current;
@@ -59,6 +69,10 @@ export default function StepOnePage() {
   }
 
   function changeType(value: EventType) {
+    if (!isLiveEventType(value)) {
+      setError("This event type is coming soon. Wedding invitations are live now.");
+      return;
+    }
     const typed = getDefaultDraft(value);
     const template = getDefaultTemplateForType(value);
     setDraft((current) => ({
@@ -107,7 +121,7 @@ export default function StepOnePage() {
           <label className="block space-y-2 text-sm font-semibold">
             <span>Event type: {getEventTypeLabel(draft.eventType)}</span>
             <select value={draft.eventType} onChange={(event) => changeType(event.target.value as EventType)} className="h-12 w-full rounded-xl border border-border bg-white px-4 text-sm">
-              {eventTypeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              {eventTypeOptions.map((option) => <option key={option.value} value={option.value} disabled={!isLiveEventType(option.value)}>{option.label}{isLiveEventType(option.value) ? "" : " - Coming Soon"}</option>)}
             </select>
           </label>
           <label className="block space-y-2 text-sm font-semibold"><span>Event title</span><Input value={draft.title} onChange={(event) => update("title", event.target.value)} placeholder={draft.eventType === "birthday" ? "Ava's 5th Birthday" : "Event title"} /></label>
@@ -124,7 +138,10 @@ export default function StepOnePage() {
                 title: current.title && !current.title.includes("Birthday") ? current.title : `${name || "Ava"}'s ${current.ageTurning || current.age || "5"}th Birthday`,
                 slug: generateSlug(`${name || "Ava"}'s ${current.ageTurning || current.age || "5"}th Birthday`),
               }));
-            } else update("primaryName", event.target.value);
+            } else {
+              const name = event.target.value;
+              setDraft((current) => ({ ...current, primaryName: name, groomName: name }));
+            }
           }} /></label>
           {config.secondary && (
             <label className="block space-y-2 text-sm font-semibold"><span>{config.secondary}</span><Input value={draft.eventType === "birthday" ? draft.age || "" : draft.eventType === "housewarming" ? draft.homeName || "" : draft.eventType === "naming" ? draft.childName || "" : draft.secondaryName || draft.hostName || ""} onChange={(event) => {
@@ -141,7 +158,10 @@ export default function StepOnePage() {
               else if (draft.eventType === "housewarming") update("homeName", event.target.value);
               else if (draft.eventType === "naming") update("childName", event.target.value);
               else if (draft.eventType === "business") update("hostName", event.target.value);
-              else update("secondaryName", event.target.value);
+              else {
+                const name = event.target.value;
+                setDraft((current) => ({ ...current, secondaryName: name, brideName: name }));
+              }
             }} /></label>
           )}
           {config.host && <label className="block space-y-2 text-sm font-semibold"><span>{config.host}</span><Input value={draft.hostName || ""} onChange={(event) => update("hostName", event.target.value)} /></label>}
