@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { EventMusicControl } from "@/components/event/EventMusicControl";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
-import { normalizeStoredEvent, type EventDraft } from "@/lib/event-draft";
-import { loadPublicEvent } from "@/lib/event-repository";
+import { loadPublishedEvents, loadTemporaryInvite, normalizeStoredEvent, type EventDraft } from "@/lib/event-draft";
 import { getDefaultMusicForType } from "@/lib/event-music";
 import { isLiveEventType } from "@/lib/event-types";
 
@@ -14,8 +13,9 @@ export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallb
   const [loaded, setLoaded] = useState(Boolean(fallbackEvent));
 
   useEffect(() => {
+    if (fallbackEvent) return;
     let active = true;
-    loadPublicEvent(slug).then((storedEvent) => {
+    Promise.resolve(loadTemporaryInvite(slug) ?? loadPublishedEvents().find((candidate) => candidate.slug === slug) ?? null).then((storedEvent) => {
       if (!active) return;
       const nextEvent = storedEvent ? normalizeStoredEvent(storedEvent) : fallbackEvent ? normalizeStoredEvent(fallbackEvent) : null;
       if (process.env.NODE_ENV !== "production") {

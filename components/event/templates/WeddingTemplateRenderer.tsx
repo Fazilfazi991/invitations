@@ -1,18 +1,14 @@
 "use client";
 
-import { ContemporaryLuxeWedding } from "@/components/event/templates/contemporary-luxe-wedding";
-import { FloralWeddingElegance } from "@/components/event/templates/floral-wedding-elegance";
-import { MinimalEditorialWedding } from "@/components/event/templates/minimal-editorial-wedding";
-import { RoyalNikahElegance } from "@/components/event/templates/royal-nikah-elegance";
-import { SoftTraditionalWedding } from "@/components/event/templates/soft-traditional-wedding";
+import dynamic from "next/dynamic";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 
 export const weddingTemplateRegistry = {
-  "royal-nikah-elegance": RoyalNikahElegance,
-  "minimal-editorial-wedding": MinimalEditorialWedding,
-  "soft-traditional-wedding": SoftTraditionalWedding,
-  "contemporary-luxe-wedding": ContemporaryLuxeWedding,
-  "floral-wedding-elegance": FloralWeddingElegance,
+  "royal-nikah-elegance": dynamic(() => import("@/components/event/templates/royal-nikah-elegance").then((module) => module.RoyalNikahElegance)),
+  "minimal-editorial-wedding": dynamic(() => import("@/components/event/templates/minimal-editorial-wedding").then((module) => module.MinimalEditorialWedding)),
+  "soft-traditional-wedding": dynamic(() => import("@/components/event/templates/soft-traditional-wedding").then((module) => module.SoftTraditionalWedding)),
+  "contemporary-luxe-wedding": dynamic(() => import("@/components/event/templates/contemporary-luxe-wedding").then((module) => module.ContemporaryLuxeWedding)),
+  "floral-wedding-elegance": dynamic(() => import("@/components/event/templates/floral-wedding-elegance").then((module) => module.FloralWeddingElegance)),
 } as const;
 
 export const weddingTemplateAuditReport = {
@@ -32,6 +28,6 @@ export function WeddingTemplateRenderer({ event }: { event: WeddingEventData }) 
     }
   }
 
-  const ResolvedTemplate = Template ?? FloralWeddingElegance;
+  const ResolvedTemplate = Template ?? weddingTemplateRegistry["floral-wedding-elegance"];
   return <ResolvedTemplate event={event} />;
 }

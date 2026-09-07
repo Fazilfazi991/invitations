@@ -215,12 +215,10 @@ export function GuidedInvitationBuilder() {
     }
     if (step === 2 && !selectedTemplateId) return;
     setConfettiKey((current) => current + 1);
-    window.setTimeout(() => {
-      if (step === 1) setStep(2);
-      else if (step === 2) setStep(3);
-      else if (step === 3) setStep(4);
-      else if (step === 4) setStep(5);
-    }, 260);
+    if (step === 1) setStep(2);
+    else if (step === 2) setStep(3);
+    else if (step === 3) setStep(4);
+    else if (step === 4) setStep(5);
   }
 
   function skipDetails() {
@@ -271,7 +269,7 @@ export function GuidedInvitationBuilder() {
         slug: generateSlug(normalizedTitle),
       });
       setDraft(published);
-      window.setTimeout(() => router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard"), 420);
+      router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard");
     } catch {
       setCreating(false);
     }
