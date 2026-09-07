@@ -14,7 +14,7 @@ import { DRAFT_KEY, EVENT_TYPE_KEY, clearDraft, generateSlug, getDefaultDraft, t
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 import { getEventTypeLabel, isLiveEventType, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/date-utils";
-import { publishEvent } from "@/lib/event-repository";
+import { getCurrentAuthUser, publishEvent } from "@/lib/event-repository";
 import { getDefaultTemplateForType, getTemplateById, templateMoodToTheme, weddingTemplates, type EventTemplate } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +101,7 @@ export function GuidedInvitationBuilder() {
   const [authOpen, setAuthOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
+  const [publishError, setPublishError] = useState("");
 
   useEffect(() => {
     if (!loaded) return;
@@ -240,12 +241,25 @@ export function GuidedInvitationBuilder() {
 
   async function createInvite() {
     if (creating) return;
-    // Temporary demo bypass - remove before production.
-    if (!user && !BYPASS_AUTH_FOR_DEMO) {
+    setPublishError("");
+    setCreating(true);
+    // The auth context can render before a cross-tab email confirmation has
+    // propagated. Confirm the authoritative Supabase session at click time.
+    let authenticatedUser: Awaited<ReturnType<typeof getCurrentAuthUser>> = null;
+    try {
+      authenticatedUser = BYPASS_AUTH_FOR_DEMO ? null : await getCurrentAuthUser();
+    } catch (error) {
+      setPublishError(error instanceof Error ? error.message : "We couldn't verify your session. Your draft is safe—please try again.");
+      setCreating(false);
+      return;
+    }
+    if (!BYPASS_AUTH_FOR_DEMO && !authenticatedUser) {
+      setCreating(false);
       setAuthOpen(true);
       return;
     }
     if (!draft.primaryName.trim() || !(draft.secondaryName || "").trim() || !draft.date || !draft.venueName.trim() || !draft.templateId) {
+      setCreating(false);
       setStep(3);
       return;
     }
@@ -256,7 +270,6 @@ export function GuidedInvitationBuilder() {
       return;
     }
 
-    setCreating(true);
     setConfettiKey((current) => current + 1);
     try {
       const trimmedPrimary = draft.primaryName.trim();
@@ -273,7 +286,7 @@ export function GuidedInvitationBuilder() {
         address: draft.address.trim(),
         city: draft.city.trim(),
         mapLink: draft.mapLink.trim(),
-        ownerId: user?.id,
+        ownerId: authenticatedUser?.id ?? user?.id,
         status: "published",
         slug: generateSlug(normalizedTitle),
       });
@@ -281,7 +294,8 @@ export function GuidedInvitationBuilder() {
       clearDraft();
       window.localStorage.removeItem(BUILDER_STEP_KEY);
       router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard");
-    } catch {
+    } catch (error) {
+      setPublishError(error instanceof Error ? error.message : "We couldn't create your invite. Your draft is safe—please try again.");
       setCreating(false);
     }
   }
@@ -548,6 +562,7 @@ export function GuidedInvitationBuilder() {
 
       <div className="relative z-20 mt-auto shrink-0 rounded-t-[1.5rem] bg-white/92 px-5 pb-[clamp(0.7rem,1.8dvh,1.5rem)] pt-[clamp(0.65rem,1.6dvh,1.2rem)] shadow-[0_-18px_42px_rgba(80,13,104,0.08)] backdrop-blur sm:px-7">
         <ContinueButton disabled={step === 1 ? selectedEventType !== "wedding" : step === 2 ? !selectedTemplateId : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
+        {step === 5 && publishError && <p role="alert" className="mt-3 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{publishError}</p>}
         {step === 2 && (
           <button
             type="button"

@@ -89,7 +89,7 @@ export async function persistEventDraft(draft: EventDraft) {
   if (localTestMode) {
     return;
   }
-  draftWriteQueue = draftWriteQueue.then(async () => {
+  const write = draftWriteQueue.catch(() => undefined).then(async () => {
     const user = await getCurrentAuthUser();
     if (!user) return;
     const { error } = await createSupabaseBrowserClient()
@@ -97,7 +97,10 @@ export async function persistEventDraft(draft: EventDraft) {
       .upsert({ owner_id: user.id, data: draft, updated_at: new Date().toISOString() });
     if (error) throw error;
   });
-  return draftWriteQueue;
+  // Keep the queue usable after a transient failed write while still surfacing
+  // the current write failure to callers that explicitly await it.
+  draftWriteQueue = write.catch(() => undefined);
+  return write;
 }
 
 export async function loadOrganizerEvents() {
@@ -214,7 +217,11 @@ export async function publishEvent(event: EventDraft) {
   if (error) throw error;
   savePublishedEvent(published);
   const { error: draftDeleteError } = await supabase.from("event_drafts").delete().eq("owner_id", user.id);
-  if (draftDeleteError) throw draftDeleteError;
+  if (draftDeleteError) {
+    // The event is already published. Draft cleanup must never turn a successful
+    // insert into an apparent publish failure that strands the user on Step 5.
+    console.warn("Published event, but could not remove the saved draft.", draftDeleteError.message);
+  }
   return published;
 }
 

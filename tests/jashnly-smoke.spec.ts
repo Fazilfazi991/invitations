@@ -138,6 +138,48 @@ test.describe("Occazn Wedding MVP", () => {
     await expect(page.getByLabel("Venue name")).toHaveValue("Grand Ballroom, Address Sky View");
   });
 
+  test("anonymous draft survives signup and publishes from final step", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/create-event");
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.getByRole("button", { name: "Wedding", exact: true }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.locator("article").filter({ hasText: "Floral Luxury Wedding" }).getByRole("button", { name: "Select", exact: true }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.getByLabel("Partner 1 name").fill("Occazn Release");
+    await page.getByLabel("Partner 2 name").fill("QA Wedding");
+    await page.getByLabel("Event date").fill("2027-12-24");
+    await page.getByLabel("Event time").fill("18:30");
+    await page.getByLabel("Venue name").fill("Occazn Production QA Venue");
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.getByRole("button", { name: "Skip for now" }).click();
+    await page.goto("/register?next=%2Fcreate-event");
+    await page.getByLabel("Name").fill("Occazn Release QA");
+    await page.getByLabel("Email").fill("release-publish@occazn.test");
+    await page.getByLabel("Password", { exact: true }).fill("release-password");
+    await page.getByLabel("Confirm password").fill("release-password");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await page.waitForURL(/\/dashboard$/);
+    await page.goto("/create-event");
+    await expect(page.getByRole("heading", { name: "You're all set!" })).toBeVisible();
+    await expect(page.getByText("Occazn Release & QA Wedding", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Save as Draft" }).click();
+    await expect(page.getByRole("button", { name: "Draft saved" })).toBeVisible();
+    const urlBeforePublish = page.url();
+    await page.getByRole("button", { name: "Create My Invite" }).click();
+    await expect(page.getByRole("button", { name: "Creating..." })).toBeDisabled();
+    await page.waitForURL(/\/event\/[^/]+\/share$/);
+    expect(page.url()).not.toBe(urlBeforePublish);
+    const slug = page.url().match(/\/event\/([^/]+)\/share$/)?.[1];
+    expect(slug).toBeTruthy();
+    await page.goto(`/i/${slug}`);
+    await expect(page.getByText("Occazn Release", { exact: false }).first()).toBeVisible();
+    await expect(page.getByText("QA Wedding", { exact: false }).first()).toBeVisible();
+    await page.reload();
+    await expect(page.getByText("Occazn Production QA Venue", { exact: false }).first()).toBeVisible();
+  });
+
   test("public invitation hides empty schedule and location and music pauses", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");

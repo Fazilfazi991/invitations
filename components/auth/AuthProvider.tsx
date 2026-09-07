@@ -44,15 +44,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const supabase = createSupabaseBrowserClient();
-    supabase.auth.getUser().then(({ data }: { data: { user: User | null } }) => {
+    const syncUser = () => supabase.auth.getUser().then(({ data }: { data: { user: User | null } }) => {
       setUser(data.user ? mapUser(data.user) : null);
       setLoading(false);
     });
+    void syncUser();
     const { data: listener } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       setUser(session?.user ? mapUser(session.user) : null);
       setLoading(false);
     });
-    return () => listener.subscription.unsubscribe();
+    const syncVisibleUser = () => {
+      if (document.visibilityState === "visible") void syncUser();
+    };
+    window.addEventListener("focus", syncVisibleUser);
+    document.addEventListener("visibilitychange", syncVisibleUser);
+    return () => {
+      listener.subscription.unsubscribe();
+      window.removeEventListener("focus", syncVisibleUser);
+      document.removeEventListener("visibilitychange", syncVisibleUser);
+    };
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({
