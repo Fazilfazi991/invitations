@@ -76,9 +76,81 @@ test.describe("Occazn Wedding MVP", () => {
     await page.reload();
     await expect(page.getByText("Christopher Alexander", { exact: false }).first()).toBeVisible();
     await page.getByLabel("Your name").fill("Maya Guest");
-    await page.getByRole("button", { name: "Will Attend" }).click();
-    await expect(page.getByRole("status")).toContainText("RSVP has been saved");
+    await page.getByLabel("Number of guests").fill("3");
+    await page.getByLabel("Message (optional)").fill("So excited to celebrate with you!");
+    await page.getByRole("button", { name: "Joyfully Accept" }).click();
+    await expect(page.getByRole("status")).toContainText("Thank you for your response");
     expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key) || "[]").length, `occazn_rsvps_${slug}`)).toBe(1);
+    expect(await page.evaluate((key) => JSON.parse(localStorage.getItem(key) || "[]")[0], `occazn_rsvps_${slug}`)).toMatchObject({ guestName: "Maya Guest", attendance: "attending", guestCount: 3, message: "So excited to celebrate with you!" });
+  });
+
+  test("organizer dashboard and RSVP management use real stored responses", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.clear();
+      localStorage.setItem("jashnly_published_events", JSON.stringify([{
+        eventType: "wedding", title: "Dashboard QA Wedding", primaryName: "Amina", secondaryName: "Yusuf",
+        date: "2027-12-24", time: "18:30", venueName: "Garden Hall", address: "", city: "Dubai", mapLink: "", youtubeLink: "", gallery: [],
+        rsvpEnabled: true, familyContactsEnabled: false, qrEnabled: true, schedule: [], contacts: [], templateId: "floral-wedding-elegance",
+        templateName: "Floral Luxury Wedding", theme: "blush", openingAnimation: "none", music: { enabled: false, trackId: "", url: "" },
+        status: "published", slug: "dashboard-qa", publicUrl: `${location.origin}/i/dashboard-qa`, qrCodeData: ""
+      }]));
+      localStorage.setItem("occazn_rsvps_dashboard-qa", JSON.stringify([
+        { guestName: "Attending Guest", attendance: "attending", guestCount: 3, message: "Can't wait!" },
+        { guestName: "Declining Guest", attendance: "declined", guestCount: 1, message: "Sending love." }
+      ]));
+    });
+    await page.goto("/register");
+    await page.getByLabel("Name").fill("Dashboard QA Organizer");
+    await page.getByLabel("Email").fill("dashboard-qa@occazn.test");
+    await page.getByLabel("Password", { exact: true }).fill("dashboard-password");
+    await page.getByLabel("Confirm password").fill("dashboard-password");
+    await page.getByRole("button", { name: "Create account" }).click();
+    await page.waitForURL(/\/dashboard$/);
+    await page.goto("/dashboard");
+    await expect(page.getByRole("heading", { name: "Your Invitations" })).toBeVisible();
+    await expect(page.getByText("2 responses")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await page.getByRole("link", { name: "Manage RSVPs" }).click();
+    await expect(page.getByText("Total Responses").locator("..")).toContainText("2");
+    await expect(page.getByText("Expected Guests").locator("..")).toContainText("3");
+    await expect(page.getByText("Attending Guest")).toBeVisible();
+    await expect(page.getByText("Can't wait!")).toBeVisible();
+    await page.getByRole("button", { name: "Not Attending" }).click();
+    await expect(page.getByText("Declining Guest")).toBeVisible();
+    await expect(page.getByText("Attending Guest")).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  });
+
+  test("published invitation edits preserve the slug and public URL", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.evaluate(() => {
+      const id = "edit-qa";
+      localStorage.clear();
+      localStorage.setItem("jashnly_demo_user", JSON.stringify({ id, name: "Edit QA", email: "edit@occazn.test", createdAt: new Date().toISOString() }));
+      localStorage.setItem("jashnly_demo_session", id);
+      localStorage.setItem("jashnly_published_events", JSON.stringify([{
+        eventType: "wedding", title: "Stable URL Wedding", primaryName: "Sara", secondaryName: "Ibrahim", date: "2027-12-24", time: "18:30",
+        venueName: "Original Venue", address: "", city: "Dubai", mapLink: "", youtubeLink: "", gallery: [], rsvpEnabled: true,
+        familyContactsEnabled: false, qrEnabled: true, schedule: [], contacts: [], templateId: "minimal-editorial-wedding", templateName: "Minimal Elegant Wedding",
+        theme: "blush", openingAnimation: "none", music: { enabled: false, trackId: "", url: "" }, status: "published", slug: "stable-url-wedding",
+        publicUrl: "https://occazn.com/i/stable-url-wedding", qrCodeData: "stable-qr"
+      }]));
+    });
+    await page.goto("/create-event?edit=stable-url-wedding");
+    await expect(page.getByLabel("Venue name")).toHaveValue("Original Venue");
+    await page.getByLabel("Venue name").fill("Updated Garden Venue");
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.getByRole("button", { name: "Skip for now" }).click();
+    await page.getByRole("button", { name: "Save Invitation" }).click();
+    await page.waitForURL(/\/dashboard\/stable-url-wedding$/);
+    const edited = await page.evaluate(() => JSON.parse(localStorage.getItem("jashnly_published_events") || "[]")[0]);
+    expect(edited.slug).toBe("stable-url-wedding");
+    expect(edited.publicUrl).toBe("https://occazn.com/i/stable-url-wedding");
+    expect(edited.qrCodeData).toBe("stable-qr");
+    expect(edited.venueName).toBe("Updated Garden Venue");
   });
 
   test("countdown ticks without reload and expired events never go negative", async ({ page }) => {

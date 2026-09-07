@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { CalendarHeart, Home, Image, PlusCircle, Share2, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ const dashboardItems = [
 
 export function BottomNav({ type = "dashboard" }: { type?: "dashboard" | "guest" }) {
   const params = useParams<{ slug?: string }>();
+  const pathname = usePathname();
   const slug = params?.slug || "afsal-fathima";
   const guestItems = [
     { href: `/event/${slug}`, label: "Event", icon: Home },
@@ -27,7 +28,7 @@ export function BottomNav({ type = "dashboard" }: { type?: "dashboard" | "guest"
     <nav className="sticky bottom-0 z-40 border-t border-border bg-white/95 px-3 py-2 backdrop-blur">
       <div className={cn("mx-auto grid max-w-md gap-1", type === "guest" ? "grid-cols-5" : "grid-cols-4")}>
         {items.map((item) => (
-          <Link key={item.href} href={item.href} className={cn("flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] text-muted transition hover:bg-primary-soft hover:text-primary")}>
+          <Link key={item.href} href={item.href} aria-current={pathname === item.href || (item.href === "/dashboard" && pathname.startsWith("/dashboard")) ? "page" : undefined} className={cn("flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[11px] text-muted transition hover:bg-primary-soft hover:text-primary", (pathname === item.href || (item.href === "/dashboard" && pathname.startsWith("/dashboard"))) && "bg-primary-soft text-primary")}>
             <item.icon className="h-5 w-5" />
             {item.label}
           </Link>

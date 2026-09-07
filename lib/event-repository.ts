@@ -238,6 +238,8 @@ export async function updatePublishedEvent(event: EventDraft) {
     .update({
       event_type: event.eventType,
       title: event.title,
+      date: event.date || null,
+      time: event.time || null,
       theme: event.theme,
       template_id: event.templateId,
       template_name: event.templateName,

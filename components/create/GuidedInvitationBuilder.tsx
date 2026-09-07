@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Baby, BriefcaseBusiness, Cake, CalendarDays, Check, ChevronRight, Clock, Eye, Gift, Gem, GraduationCap, Heart, HeartHandshake, Home, Image as ImageIcon, Link as LinkIcon, Loader2, MapPin, Music2, PartyPopper, PlayCircle, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
@@ -14,7 +14,7 @@ import { DRAFT_KEY, EVENT_TYPE_KEY, clearDraft, generateSlug, getDefaultDraft, t
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 import { getEventTypeLabel, isLiveEventType, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/date-utils";
-import { getCurrentAuthUser, publishEvent } from "@/lib/event-repository";
+import { getCurrentAuthUser, loadOrganizerEvents, publishEvent, updatePublishedEvent } from "@/lib/event-repository";
 import { getDefaultTemplateForType, getTemplateById, templateMoodToTheme, weddingTemplates, type EventTemplate } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 
@@ -102,6 +102,25 @@ export function GuidedInvitationBuilder() {
   const [creating, setCreating] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [publishError, setPublishError] = useState("");
+  const [editSlug] = useState(() => typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("edit") ?? "");
+  const editInitialized = useRef(false);
+
+  useEffect(() => {
+    if (!loaded || !editSlug || editInitialized.current) return;
+    editInitialized.current = true;
+    void loadOrganizerEvents().then((events) => {
+      const existing = events.find((event: EventDraft) => event.slug === editSlug);
+      if (!existing) {
+        setPublishError("We couldn't open this invitation for editing.");
+        return;
+      }
+      setDraft(existing);
+      setOccasion("wedding");
+      setSelectedTemplateId(existing.templateId);
+      setStyle(inferStyleFromTemplate(existing.templateId));
+      setStep(3);
+    });
+  }, [editSlug, loaded]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -275,7 +294,7 @@ export function GuidedInvitationBuilder() {
       const trimmedPrimary = draft.primaryName.trim();
       const trimmedSecondary = (draft.secondaryName || "").trim();
       const normalizedTitle = titleForDraft(draft, trimmedPrimary, trimmedSecondary);
-      const published = await publishEvent({
+      const candidate = {
         ...draft,
         title: normalizedTitle,
         primaryName: trimmedPrimary,
@@ -287,13 +306,14 @@ export function GuidedInvitationBuilder() {
         city: draft.city.trim(),
         mapLink: draft.mapLink.trim(),
         ownerId: authenticatedUser?.id ?? user?.id,
-        status: "published",
-        slug: generateSlug(normalizedTitle),
-      });
+        status: "published" as const,
+        slug: editSlug ? draft.slug : generateSlug(normalizedTitle),
+      };
+      const published = editSlug ? await updatePublishedEvent(candidate) : await publishEvent(candidate);
       discardPendingDraft();
       clearDraft();
       window.localStorage.removeItem(BUILDER_STEP_KEY);
-      router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard");
+      router.push(editSlug ? `/dashboard/${published.slug}` : BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard");
     } catch (error) {
       setPublishError(error instanceof Error ? error.message : "We couldn't create your invite. Your draft is safe—please try again.");
       setCreating(false);
@@ -561,7 +581,7 @@ export function GuidedInvitationBuilder() {
       </div>
 
       <div className="relative z-20 mt-auto shrink-0 rounded-t-[1.5rem] bg-white/92 px-5 pb-[clamp(0.7rem,1.8dvh,1.5rem)] pt-[clamp(0.65rem,1.6dvh,1.2rem)] shadow-[0_-18px_42px_rgba(80,13,104,0.08)] backdrop-blur sm:px-7">
-        <ContinueButton disabled={step === 1 ? selectedEventType !== "wedding" : step === 2 ? !selectedTemplateId : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? "Create My Invite" : "Continue"} loading={creating} />
+        <ContinueButton disabled={step === 1 ? selectedEventType !== "wedding" : step === 2 ? !selectedTemplateId : step === 3 ? !detailsComplete : false} onClick={step === 5 ? createInvite : burstAndContinue} label={step === 5 ? editSlug ? "Save Invitation" : "Create My Invite" : "Continue"} loading={creating} />
         {step === 5 && publishError && <p role="alert" className="mt-3 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{publishError}</p>}
         {step === 2 && (
           <button

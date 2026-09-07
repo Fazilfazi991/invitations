@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 
-export function MobileHeader({ action = "create", className }: { action?: "create" | "settings" | "avatar" | "search"; className?: string }) {
+export function MobileHeader({ action = "create", className, showMenu = true }: { action?: "create" | "settings" | "avatar" | "search"; className?: string; showMenu?: boolean }) {
   const { user } = useAuth();
   const initial = user?.name?.charAt(0).toUpperCase() || "A";
   return (
     <header className={cn("sticky top-0 z-30 flex h-20 items-center justify-between bg-background/90 px-5 backdrop-blur", className)}>
-      <Button variant="ghost" size="icon" aria-label="Open menu"><Menu className="h-6 w-6" /></Button>
+      {showMenu ? <Button variant="ghost" size="icon" aria-label="Open menu"><Menu className="h-6 w-6" /></Button> : <div className="h-11 w-11" aria-hidden="true" />}
       <BrandLogo imageClassName="h-12" />
       {action === "create" ? (
         <Button asChild size="sm"><Link href="/create-event">Create</Link></Button>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Copy, Download, MessageCircle, Share2 } from "lucide-react";
+import { Copy, Download, MessageCircle, Share2, Users } from "lucide-react";
 import { MobileHeader } from "@/components/layout/mobile-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { EventCompletionChecklist } from "@/components/dashboard/EventCompletionChecklist";
@@ -79,8 +79,9 @@ export default function DashboardDetailPage() {
           <div className="mt-4 flex gap-4"><TemplatePreview template={template} compact className="w-28 shrink-0" /><div className="min-w-0 flex-1"><Badge>{template.category}</Badge><h3 className="mt-2 font-serif text-2xl font-bold">{template.name}</h3><Button asChild variant="outline" size="sm" className="mt-3"><Link href={`/categories?event=${params.id}&mode=change-template&type=${event.eventType}`}>Change template</Link></Button></div></div>
         </Card>
         <Card className="mt-5 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl font-bold">Guest insights</h2><Badge>Coming soon</Badge></div>
-          <p className="mt-2 text-sm text-muted">Verified views and RSVP reporting will appear here after production analytics are connected. No sample counts are shown.</p>
+          <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl font-bold">Guest responses</h2><Users className="h-5 w-5 text-primary" /></div>
+          <p className="mt-2 text-sm text-muted">See who is attending, who declined, guest totals, and messages from your guests.</p>
+          <Button asChild className="mt-4" size="sm"><Link href={`/dashboard/${event.slug}/rsvps`}>Manage RSVPs</Link></Button>
         </Card>
         <Card className="mt-5 p-5">
           <h2 className="font-serif text-2xl font-bold">Share tools</h2>

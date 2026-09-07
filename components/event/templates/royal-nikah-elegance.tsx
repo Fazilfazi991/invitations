@@ -23,7 +23,7 @@ import {
 } from "@/components/event/templates/template-utils";
 import { getEventDateTime } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
-import { submitRsvp } from "@/lib/rsvp";
+import { TemplateRSVP } from "@/components/event/templates/shared/TemplateParts";
 
 export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
   const { groom, bride, coupleName } = getCoupleNames(event);
@@ -132,7 +132,7 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
           {schedule.length > 0 && <SchedulePanel schedule={schedule} />}
           {(event.story || storyImage) && <StoryPanel event={event} image={storyImage} />}
           {(venue.venue || venue.address || venue.city || event.mapLink) && <VenuePanel event={event} venue={venue} />}
-          <RsvpPanel enabled={event.rsvpEnabled} slug={event.slug || "preview"} />
+          {event.rsvpEnabled ? <div id="rsvp" className="mt-5"><TemplateRSVP primary="#D84B73" slug={event.slug || "preview"} /></div> : null}
           <FooterNote />
         </div>
       </section>
@@ -251,53 +251,6 @@ function VenuePanel({ event, venue }: { event: WeddingEventData; venue: ReturnTy
           View Location
         </a>}
       </div>
-    </section>
-  );
-}
-
-function RsvpPanel({ enabled, slug }: { enabled: boolean; slug: string }) {
-  const [name, setName] = useState("");
-  const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
-  const [error, setError] = useState("");
-
-  async function save() {
-    setError("");
-    setStatus("saving");
-    try {
-      await submitRsvp(slug, { guestName: name, attendance: "attending", guestCount: 1, message: "" });
-      setStatus("saved");
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "We couldn't save your RSVP. Please try again.");
-      setStatus("idle");
-    }
-  }
-
-  return (
-    <section id="rsvp" className="mt-5 rounded-2xl border border-[#F0B6C8]/70 bg-white/78 p-4 shadow-[0_16px_44px_rgba(146,91,61,0.08)]">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D84B73]">RSVP</p>
-      <h2 className="mt-1 font-serif text-2xl font-bold">Share your presence</h2>
-      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-        <input
-          id={`royal-rsvp-${slug}`}
-          aria-label="Your name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          maxLength={100}
-          disabled={!enabled || status !== "idle"}
-          className="h-12 rounded-xl border border-[#F0B6C8] bg-white px-4 text-base outline-none focus:ring-2 focus:ring-[#D84B73]/25 disabled:cursor-not-allowed disabled:opacity-70"
-          placeholder={enabled ? "Enter your name" : "RSVP is currently closed"}
-        />
-        <button
-          disabled={!enabled || status !== "idle"}
-          onClick={save}
-          className="h-12 rounded-xl bg-[#D84B73] px-6 text-sm font-bold text-white transition hover:bg-[#C83C66] disabled:cursor-not-allowed disabled:opacity-70"
-          type="button"
-        >
-          {status === "saving" ? "Saving..." : status === "saved" ? "RSVP saved" : "Will Attend"}
-        </button>
-      </div>
-      {error && <p role="alert" className="mt-2 text-sm font-semibold text-rose-700">{error}</p>}
-      {status === "saved" && <p role="status" className="mt-2 text-sm font-semibold text-[#D84B73]">Thank you, {name.trim()}. Your RSVP has been saved.</p>}
     </section>
   );
 }

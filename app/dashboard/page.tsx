@@ -1,55 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
-import { MobileHeader } from "@/components/layout/mobile-header";
+import { Heart, Plus, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { InvitationCard } from "@/components/dashboard/InvitationCard";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { MobileHeader } from "@/components/layout/mobile-header";
 import { Button } from "@/components/ui/button";
-import { EventCompletionChecklist } from "@/components/dashboard/EventCompletionChecklist";
-import { EventCard, FooterTrust, Section } from "@/components/shared";
-import type { EventDraft } from "@/lib/event-draft";
-import { formatEventDate } from "@/lib/date-utils";
-import { getDefaultTemplateForType } from "@/lib/templates";
-import { loadOrganizerEvents } from "@/lib/event-repository";
+import { loadOrganizerDashboard, type OrganizerInvitation } from "@/lib/organizer-data";
 
 export default function DashboardPage() {
-  const [published, setPublished] = useState<EventDraft[]>([]);
-
-  useEffect(() => {
-    loadOrganizerEvents().then(setPublished);
+  const [invitations, setInvitations] = useState<OrganizerInvitation[]>([]);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  const load = useCallback(async () => {
+    setState("loading");
+    try {
+      setInvitations(await loadOrganizerDashboard());
+      setState("ready");
+    } catch {
+      setState("error");
+    }
   }, []);
 
-  const createdEvents = published.map((event) => ({
-    id: event.slug,
-    title: event.title,
-    date: formatEventDate(event.date),
-    status: "Published",
-    coverImage: event.coverImage || event.templateImage || getDefaultTemplateForType(event.eventType).previewImage,
-    theme: event.theme,
-  }));
+  useEffect(() => { void load(); }, [load]);
 
   return (
-    <main className="phone-shell min-h-screen pb-20">
-      <MobileHeader action="avatar" />
-      <Section>
-        <h1 className="font-serif text-5xl font-bold">My Events</h1>
-        <p className="mt-2 text-muted">Create, manage and share your events.</p>
-        <Button asChild className="mt-5"><Link href="/create-event"><Plus className="h-4 w-4" />Create New Event</Link></Button>
-        <div className="mt-6 inline-flex rounded-xl border border-border bg-white p-1 shadow-card"><span className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">Upcoming</span><span className="px-4 py-2 text-sm font-semibold text-muted">Past</span></div>
-        <div className="mt-5 space-y-4">
-          {createdEvents.length > 0 ? (
-            createdEvents.map((event) => <EventCard key={event.id} event={event} />)
-          ) : (
-            <p className="rounded-2xl border border-border bg-white p-5 text-sm text-muted shadow-card">
-              No events yet. Create your first celebration to see it here.
-            </p>
-          )}
+    <main className="phone-shell flex min-h-screen flex-col">
+      <MobileHeader action="avatar" showMenu={false} />
+      <section className="flex-1 px-5 pb-6 pt-4 sm:px-8 sm:pt-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-serif text-3xl font-bold tracking-[-0.02em] text-[#2D1735] sm:text-4xl">Your Invitations</h1>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-muted sm:text-base">Create, share, and keep track of every response in one calm place.</p>
+          </div>
+          <Button asChild className="w-full sm:w-auto"><Link href="/create-event"><Plus className="h-4 w-4" />Create Wedding Invitation</Link></Button>
         </div>
-        {published[0] && <div className="mt-5"><EventCompletionChecklist event={published[0]} compact /></div>}
-      </Section>
-      <FooterTrust />
+        {state === "loading" ? <DashboardSkeleton /> : null}
+        {state === "error" ? (
+          <div role="alert" className="mt-6 rounded-2xl bg-white p-6 text-center shadow-card ring-1 ring-[#E6D8EB]">
+            <h2 className="font-serif text-xl font-bold">We couldn&apos;t load your invitations</h2>
+            <p className="mt-2 text-sm text-muted">Your invitations are safe. Check your connection and try again.</p>
+            <Button type="button" onClick={load} variant="outline" size="sm" className="mt-4"><RefreshCw className="h-4 w-4" />Try again</Button>
+          </div>
+        ) : null}
+        {state === "ready" && invitations.length === 0 ? <EmptyDashboard /> : null}
+        {state === "ready" && invitations.length > 0 ? <div className="mt-6 space-y-4" aria-live="polite">{invitations.map((invitation) => <InvitationCard key={`${invitation.status}-${invitation.id}`} invitation={invitation} />)}</div> : null}
+      </section>
       <BottomNav />
     </main>
   );
+}
+
+function EmptyDashboard() {
+  return <div className="mt-8 rounded-2xl bg-white px-6 py-10 text-center shadow-card ring-1 ring-[#E6D8EB]"><span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-primary-soft text-primary"><Heart className="h-6 w-6" /></span><h2 className="mt-4 font-serif text-2xl font-bold text-[#2D1735]">Create your first Wedding invitation</h2><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">Design, publish, and share your invitation in a few minutes.</p><Button asChild className="mt-5"><Link href="/create-event">Create Wedding Invitation</Link></Button></div>;
+}
+
+function DashboardSkeleton() {
+  return <div className="mt-6 space-y-4" aria-label="Loading invitations" aria-busy="true">{[0, 1].map((item) => <div key={item} className="h-52 animate-pulse rounded-2xl bg-[#F1E7F4] sm:h-40" />)}</div>;
 }

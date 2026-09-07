@@ -15,10 +15,11 @@ export async function submitRsvp(slug: string, response: RsvpResponse) {
     ...response,
     guestName: response.guestName.trim(),
     message: response.message.trim(),
-    guestCount: Math.max(1, Math.min(20, response.guestCount || 1)),
+    guestCount: Math.max(1, Math.min(10, response.guestCount || 1)),
   };
 
   if (!normalized.guestName) throw new Error("Please enter your name.");
+  if (normalized.message.length > 500) throw new Error("Please keep your message under 500 characters.");
 
   if (BYPASS_AUTH_FOR_DEMO) {
     const stored = JSON.parse(window.localStorage.getItem(localKey(slug)) || "[]") as RsvpResponse[];

@@ -19,6 +19,7 @@ Thumbs.db
 
 test-results/
 .tmp-qr-qa/
+.impeccable/review/
 
 # Raw design/source asset packs. Commit only optimized assets used by the app.
 event_cards_webp.zip

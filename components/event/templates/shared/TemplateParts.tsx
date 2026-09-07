@@ -134,6 +134,8 @@ export function TemplateGallery({ event, title, primary }: { event: WeddingEvent
 export function TemplateRSVP({ primary, slug }: { primary: string; slug: string }) {
   const [name, setName] = useState("");
   const [response, setResponse] = useState<"yes" | "no" | null>(null);
+  const [guestCount, setGuestCount] = useState(1);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -148,8 +150,8 @@ export function TemplateRSVP({ primary, slug }: { primary: string; slug: string 
       await submitRsvp(slug, {
         guestName: name,
         attendance: nextResponse === "yes" ? "attending" : "declined",
-        guestCount: 1,
-        message: "",
+        guestCount: nextResponse === "yes" ? guestCount : 1,
+        message,
       });
       setResponse(nextResponse);
     } catch (submitError) {
@@ -163,14 +165,18 @@ export function TemplateRSVP({ primary, slug }: { primary: string; slug: string 
     <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card">
       <div>
         <h2 className="font-serif text-2xl font-bold">RSVP</h2>
-        <p className="text-sm text-muted">Kindly respond and make the day perfect.</p>
+        <p className="text-sm text-muted">Let the couple know if you can celebrate with them.</p>
         <label className="mt-3 block text-sm font-semibold" htmlFor={`rsvp-name-${slug}`}>Your name</label>
         <input id={`rsvp-name-${slug}`} value={name} maxLength={100} onChange={(event) => setName(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-border px-4 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Enter your name" />
+        <div className="mt-3 grid gap-3 sm:grid-cols-[9rem_1fr]">
+          <label className="block text-sm font-semibold" htmlFor={`rsvp-guests-${slug}`}>Number of guests<input id={`rsvp-guests-${slug}`} type="number" min={1} max={10} inputMode="numeric" value={guestCount} onChange={(event) => setGuestCount(Math.max(1, Math.min(10, Number(event.target.value) || 1)))} className="mt-2 h-12 w-full rounded-xl border border-border px-4 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" /></label>
+          <label className="block text-sm font-semibold" htmlFor={`rsvp-message-${slug}`}>Message <span className="font-normal text-muted">(optional)</span><textarea id={`rsvp-message-${slug}`} value={message} maxLength={500} onChange={(event) => setMessage(event.target.value)} className="mt-2 min-h-20 w-full resize-y rounded-xl border border-border px-4 py-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Leave a message for the couple" /></label>
+        </div>
         {error && <p role="alert" className="mt-2 text-sm font-semibold text-rose-700">{error}</p>}
-        {response && <p role="status" className="mt-2 text-sm font-semibold" style={{ color: primary }}>Thank you, {name.trim()}. Your RSVP has been saved.</p>}
+        {response && <div role="status" className="mt-3 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800"><p className="font-semibold">Thank you for your response.</p><p className="mt-1">{response === "yes" ? "We look forward to celebrating together." : "Your response has been shared with the couple."}</p></div>}
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button type="button" disabled={submitting || Boolean(response)} onClick={() => submit("yes")} className="min-h-12 px-2 text-sm" style={{ backgroundColor: primary }}>Will Attend</Button>
-          <Button type="button" disabled={submitting || Boolean(response)} onClick={() => submit("no")} className="min-h-12 px-2 text-sm" variant="outline">Can&apos;t Attend</Button>
+          <Button type="button" disabled={submitting || Boolean(response)} onClick={() => submit("yes")} className="min-h-12 whitespace-normal px-2 text-sm" style={{ backgroundColor: primary }}>{submitting ? "Sending…" : "Joyfully Accept"}</Button>
+          <Button type="button" disabled={submitting || Boolean(response)} onClick={() => submit("no")} className="min-h-12 whitespace-normal px-2 text-sm" variant="outline">Regretfully Decline</Button>
         </div>
       </div>
     </section>
