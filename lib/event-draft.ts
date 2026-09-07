@@ -67,6 +67,10 @@ export const EVENT_TYPE_KEY = "jashnly_event_type";
 export const PUBLISHED_EVENTS_KEY = "jashnly_published_events";
 export const TEMP_INVITE_KEY_PREFIX = "occazn_invite_";
 
+export function hasStoredDraft() {
+  return typeof window !== "undefined" && Boolean(window.localStorage.getItem(DRAFT_KEY));
+}
+
 const defaultsByType: Record<EventType, Partial<EventDraft>> = {
   wedding: { title: "Your Wedding", primaryName: "", secondaryName: "" },
   engagement: { title: "Afsal & Fathima Engagement", primaryName: "Afsal", secondaryName: "Fathima" },
@@ -123,9 +127,7 @@ export function getDefaultDraft(eventType: EventType = "custom"): EventDraft {
     rsvpEnabled: true,
     familyContactsEnabled: false,
     qrEnabled: true,
-    schedule: [
-      { id: "schedule-1", title: "Welcome", startTime: "18:00", endTime: "18:30", venue: "Main Hall", description: "Guests arrive and settle in." },
-    ],
+    schedule: [],
     contacts: [],
     templateId: template.id,
     templateName: template.name,

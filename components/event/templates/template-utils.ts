@@ -11,11 +11,11 @@ export type WeddingEventData = EventDraft & {
 };
 
 export function formatEventDate(date?: string) {
-  return date ? formatDate(date) : "24 May 2025";
+  return date ? formatDate(date) : "";
 }
 
 export function formatEventTime(time?: string) {
-  return time ? formatTime(time) : "6:30 PM";
+  return time ? formatTime(time) : "";
 }
 
 export function getCoupleNames(event: Partial<WeddingEventData>) {
@@ -26,7 +26,7 @@ export function getCoupleNames(event: Partial<WeddingEventData>) {
 }
 
 export function getVenueText(event: Partial<WeddingEventData>) {
-  const venue = event.venueName?.trim() || "Venue to be announced";
+  const venue = event.venueName?.trim() || "";
   const city = event.city?.trim() || "";
   const address = event.address?.trim() || city;
   return { venue, city, address, full: [venue, city].filter(Boolean).join(", ") };
@@ -49,12 +49,7 @@ export function getTemplateSchedule(event: Partial<WeddingEventData>) {
       note: item.description || item.venue || "With loved ones",
     }));
   }
-  return [
-    { title: "Nikah Ceremony", time: "6:30 PM", note: "Ceremony" },
-    { title: "Photos", time: "7:15 PM", note: "Capture moments" },
-    { title: "Dinner", time: "8:00 PM", note: "Let's dine" },
-    { title: "Reception", time: "9:00 PM", note: "Dance & celebrate" },
-  ];
+  return [];
 }
 
 export function getTemplateContacts(event: Partial<WeddingEventData>) {

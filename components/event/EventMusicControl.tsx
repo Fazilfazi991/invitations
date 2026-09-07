@@ -24,6 +24,14 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
     }
   }, [enabled, preferenceKey]);
 
+  useEffect(() => () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+  }, []);
+
   async function playMusic() {
     const audio = audioRef.current;
     if (!audio) return;
@@ -40,7 +48,12 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
   }
 
   function pauseMusic() {
-    audioRef.current?.pause();
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.muted = true;
+    }
+    setMuted(true);
     setIsPlaying(false);
     window.sessionStorage.setItem(preferenceKey, "paused");
   }
@@ -84,7 +97,7 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
       <Button
         type="button"
         onClick={isPlaying ? pauseMusic : playMusic}
-        className="fixed bottom-5 right-4 z-40 rounded-full bg-primary px-4 shadow-soft"
+        className="fixed bottom-4 right-3 z-40 h-11 rounded-full bg-primary px-3 text-xs shadow-soft"
         aria-label={isPlaying ? "Pause music" : muted ? "Music muted" : "Play music"}
       >
         {isPlaying ? <Pause className="h-4 w-4" /> : muted ? <VolumeX className="h-4 w-4" /> : <Play className="h-4 w-4" />}

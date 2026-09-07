@@ -129,9 +129,9 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
           </section>
 
           <CountdownPanel values={countdown} />
-          <SchedulePanel schedule={schedule} />
+          {schedule.length > 0 && <SchedulePanel schedule={schedule} />}
           {(event.story || storyImage) && <StoryPanel event={event} image={storyImage} />}
-          <VenuePanel event={event} venue={venue} />
+          {(venue.venue || venue.address || venue.city || event.mapLink) && <VenuePanel event={event} venue={venue} />}
           <RsvpPanel enabled={event.rsvpEnabled} slug={event.slug || "preview"} />
           <FooterNote />
         </div>
@@ -185,10 +185,7 @@ function CountdownPanel({ values }: { values: string[] | null }) {
 
 function SchedulePanel({ schedule }: { schedule: ReturnType<typeof getTemplateSchedule> }) {
   const icons = [MoonStar, Utensils, Camera, Sparkles];
-  const items = schedule.length ? schedule : [
-    { title: "Nikah", time: "12:00 PM", note: "Ceremony" },
-    { title: "Lunch", time: "12:00 PM", note: "Dining" },
-  ];
+  const items = schedule;
 
   return (
     <section className="mt-6 text-center">
@@ -244,15 +241,15 @@ function VenuePanel({ event, venue }: { event: WeddingEventData; venue: ReturnTy
           <h2 className="mt-1 font-serif text-2xl font-bold">{venue.venue}</h2>
           <p className="text-sm text-[#6F6670]">{venue.address}</p>
         </div>
-        <a
-          href={event.mapLink || "#"}
+        {event.mapLink && <a
+          href={event.mapLink}
           target="_blank"
           rel="noreferrer"
           className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#D84B73] px-5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#C83C66]"
         >
           <MapPin className="h-4 w-4" />
           View Location
-        </a>
+        </a>}
       </div>
     </section>
   );

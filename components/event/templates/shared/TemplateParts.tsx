@@ -70,11 +70,13 @@ export function TemplateCountdown({ event, title, primary }: { event: WeddingEve
 }
 
 export function TemplateTimeline({ event, title, primary, boxed = false }: { event: WeddingEventData; title: string; primary: string; boxed?: boolean }) {
+  const schedule = getTemplateSchedule(event);
+  if (!schedule.length) return null;
   return (
     <section className="text-center">
       <h2 className="font-serif text-2xl font-bold">{title}</h2>
       <div className={cn("mt-4 grid gap-3", boxed ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4")}>
-        {getTemplateSchedule(event).map((item, index) => {
+        {schedule.map((item, index) => {
           const Icon = icons[index % icons.length];
           return (
             <div key={`${item.title}-${index}`} className={cn("rounded-2xl border border-border bg-white/75 p-3 shadow-card transition hover:-translate-y-1 hover:shadow-soft", !boxed && "border-0 bg-transparent shadow-none")}>
@@ -93,13 +95,14 @@ export function TemplateTimeline({ event, title, primary, boxed = false }: { eve
 export function TemplateLocation({ event, primary, imageStyle = "map" }: { event: WeddingEventData; primary: string; imageStyle?: "map" | "photo" }) {
   const venue = getVenueText(event);
   const hasMap = Boolean(event.mapLink);
+  if (!venue.venue && !venue.address && !venue.city && !hasMap) return null;
   return (
     <section className="rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card">
       <h2 className="font-serif text-2xl font-bold">Location</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <div className={cn("grid min-h-32 place-items-center rounded-2xl border border-border/70 p-4 text-center", imageStyle === "map" ? "map-bg" : "bg-gradient-to-br from-rose-100 to-amber-50")}>
+        <div className={cn("grid min-h-24 place-items-center rounded-2xl border border-border/70 p-3 text-center", imageStyle === "map" ? "map-bg" : "bg-gradient-to-br from-rose-100 to-amber-50")}>
           <div>
-            <MapPin className="mx-auto h-10 w-10" style={{ color: primary }} />
+            <MapPin className="mx-auto h-7 w-7" style={{ color: primary }} />
             <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em]" style={{ color: primary }}>{venue.city}</p>
           </div>
         </div>

@@ -15,13 +15,12 @@ import {
   TemplateTimeline,
 } from "@/components/event/templates/shared/TemplateParts";
 import { getCoupleNames, isUsableImage, type WeddingEventData } from "@/components/event/templates/template-utils";
-import { sampleEvent } from "@/lib/mock-data";
 import { getThemeStyles } from "@/lib/themes";
 
 export function MinimalEditorialWedding({ event }: { event: WeddingEventData }) {
   const primary = getThemeStyles(event.theme).primary;
   const { groom, bride, coupleName } = getCoupleNames(event);
-  const heroImage = isUsableImage(event.coverImage) ? event.coverImage : sampleEvent.coupleImage;
+  const heroImage = isUsableImage(event.coverImage) ? event.coverImage : "";
 
   return (
     <TemplateShell background="#FFFDF9">
@@ -29,12 +28,12 @@ export function MinimalEditorialWedding({ event }: { event: WeddingEventData }) 
       <section className="grid gap-4 px-5 pb-5 sm:grid-cols-2">
         <div className="pt-8">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted">Together with their families</p>
-          <h1 className="mt-5 font-serif text-[clamp(3rem,13vw,4.5rem)] font-bold leading-none text-[#1F2937] [overflow-wrap:anywhere]">{bride ? <>{groom} <span style={{ color: primary }}>&</span><br />{bride}</> : coupleName}</h1>
+          <h1 className="mt-5 font-serif text-[clamp(2.4rem,10vw,3.75rem)] font-bold leading-[0.98] text-[#1F2937] [overflow-wrap:anywhere]">{bride ? <>{groom} <span style={{ color: primary }}>&</span><br />{bride}</> : coupleName}</h1>
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-muted">Invite you to celebrate their wedding</p>
           <div className="mt-5"><DetailPills event={event} primary={primary} /></div>
           <Button className="mt-5" style={{ backgroundColor: primary }}>Save the Date <Heart className="h-4 w-4" /></Button>
         </div>
-        <img src={heroImage} alt="" className="h-80 w-full rounded-b-[2rem] object-cover" />
+        {heroImage ? <img src={heroImage} alt="" className="h-72 w-full rounded-b-[2rem] object-cover" /> : <div className="h-56 rounded-[2rem] bg-gradient-to-br from-rose-100 via-white to-amber-50 sm:h-72" aria-hidden="true" />}
       </section>
       <div className="space-y-5 px-5 pb-6">
         <TemplateCountdown event={event} title="Counting down to our big day" primary={primary} />

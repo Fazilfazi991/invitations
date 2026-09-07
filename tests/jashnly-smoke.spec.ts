@@ -116,4 +116,86 @@ test.describe("Occazn Wedding MVP", () => {
     await page.goto("/");
     await expect(page.getByText("Countdown to celebration")).toHaveCount(0);
   });
+
+  test("anonymous Wedding draft survives the authentication handoff", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/create-event");
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.getByRole("button", { name: "Wedding", exact: true }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.locator("article").filter({ hasText: "Classic Royal Wedding" }).getByRole("button", { name: "Select", exact: true }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.getByLabel("Partner 1 name").fill("Mohammed Abdul Rahman");
+    await page.getByLabel("Partner 2 name").fill("Fathima Zahra");
+    await page.getByLabel("Venue name").fill("Grand Ballroom, Address Sky View");
+    await page.waitForTimeout(700);
+    await page.goto("/login?next=%2Fcreate-event");
+    await page.getByRole("button", { name: "Continue with Google" }).click();
+    await page.waitForURL(/\/create-event$/);
+    await expect(page.getByLabel("Partner 1 name")).toHaveValue("Mohammed Abdul Rahman");
+    await expect(page.getByLabel("Partner 2 name")).toHaveValue("Fathima Zahra");
+    await expect(page.getByLabel("Venue name")).toHaveValue("Grand Ballroom, Address Sky View");
+  });
+
+  test("public invitation hides empty schedule and location and music pauses", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.setItem("jashnly_published_events", JSON.stringify([{
+        eventType: "wedding", title: "No Fallback Wedding", primaryName: "Maya", secondaryName: "Omar",
+        date: "2027-12-24", time: "18:30", venueName: "", address: "", city: "", mapLink: "", youtubeLink: "", gallery: [],
+        rsvpEnabled: true, familyContactsEnabled: false, qrEnabled: true, schedule: [], contacts: [], templateId: "floral-wedding-elegance",
+        templateName: "Floral Luxury Wedding", theme: "blush", openingAnimation: "none",
+        music: { enabled: true, trackId: "leberch-wedding-romantic-262606", url: "/audio/leberch-wedding-romantic-262606.mp3", autoplay: false },
+        status: "published", slug: "no-fallback", publicUrl: `${location.origin}/i/no-fallback`, qrCodeData: ""
+      }]));
+      sessionStorage.setItem("jashnly_intro_seen_no-fallback", "true");
+    });
+    await page.goto("/i/no-fallback");
+    await expect(page.getByText("Guests arrive and settle in.")).toHaveCount(0);
+    await expect(page.getByText("Venue to be announced")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Location" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Play Music" }).first().click();
+    await expect.poll(() => page.locator("audio").evaluate((audio: HTMLAudioElement) => audio.paused)).toBe(false);
+    await page.getByRole("button", { name: "Pause music" }).click();
+    await expect.poll(() => page.locator("audio").evaluate((audio: HTMLAudioElement) => audio.paused)).toBe(true);
+    await page.waitForTimeout(1_000);
+    expect(await page.locator("audio").evaluate((audio: HTMLAudioElement) => audio.paused)).toBe(true);
+  });
+
+  test("all five Wedding templates keep long content balanced", async ({ page }) => {
+    const templates = [
+      "floral-wedding-elegance",
+      "royal-nikah-elegance",
+      "minimal-editorial-wedding",
+      "soft-traditional-wedding",
+      "contemporary-luxe-wedding",
+    ];
+    for (const templateId of templates) {
+      for (const viewport of [{ width: 390, height: 844 }, { width: 1366, height: 768 }]) {
+        await page.setViewportSize(viewport);
+        await page.goto("/");
+        await page.evaluate(({ templateId }) => {
+          localStorage.setItem("jashnly_published_events", JSON.stringify([{
+            eventType: "wedding", title: "Long Content Wedding", primaryName: "Mohammed Abdul Rahman", secondaryName: "Fathima Zahra",
+            date: "2027-12-24", time: "18:30", venueName: "Grand Ballroom, Address Sky View, Sheikh Mohammed bin Rashid Boulevard, Downtown Dubai",
+            address: "Downtown Dubai", city: "Dubai", mapLink: "https://maps.google.com/?q=Address+Sky+View", youtubeLink: "", gallery: [],
+            rsvpEnabled: true, familyContactsEnabled: false, qrEnabled: true,
+            schedule: [{ id: "reception", title: "Wedding Reception & Family Celebration", startTime: "18:30", description: "Dinner and family celebration" }],
+            contacts: [], templateId, templateName: templateId, theme: "blush", openingAnimation: "none",
+            music: { enabled: false, trackId: "none", url: "", autoplay: false }, status: "published", slug: "template-audit",
+            publicUrl: `${location.origin}/i/template-audit`, qrCodeData: ""
+          }]));
+          sessionStorage.setItem("jashnly_intro_seen_template-audit", "true");
+        }, { templateId });
+        await page.goto("/i/template-audit");
+        await expect(page.getByText("Mohammed Abdul Rahman", { exact: false }).first()).toBeVisible();
+        await expect(page.getByText("Wedding Reception & Family Celebration", { exact: false }).first()).toBeVisible();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+        const headingSize = await page.locator("h1").first().evaluate((heading) => Number.parseFloat(getComputedStyle(heading).fontSize));
+        expect(headingSize).toBeLessThanOrEqual(60);
+      }
+    }
+  });
 });

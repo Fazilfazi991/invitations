@@ -10,7 +10,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useEventDraft } from "@/hooks/use-event-draft";
 import { TemplateFullPagePreview } from "@/components/templates/TemplateFullPagePreview";
 import { TemplatePreview } from "@/components/templates/TemplatePreview";
-import { DRAFT_KEY, EVENT_TYPE_KEY, generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
+import { DRAFT_KEY, EVENT_TYPE_KEY, clearDraft, generateSlug, getDefaultDraft, type EventDraft } from "@/lib/event-draft";
 import { BYPASS_AUTH_FOR_DEMO } from "@/lib/demo-bypass";
 import { getEventTypeLabel, isLiveEventType, type EventType } from "@/lib/event-types";
 import { formatEventDate } from "@/lib/date-utils";
@@ -26,6 +26,7 @@ const brand = {
   light: "#D0B8D8",
   soft: "#F6F0F8",
 };
+const BUILDER_STEP_KEY = "occazn_wedding_builder_step";
 
 type OccasionValue = "wedding" | "birthday" | "other";
 type OtherEventType = Exclude<EventType, "wedding" | "birthday" | "business" | "religious" | "reception">;
@@ -83,7 +84,11 @@ export function GuidedInvitationBuilder() {
   const router = useRouter();
   const { user } = useAuth();
   const { draft, setDraft, loaded } = useEventDraft();
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(() => {
+    if (typeof window === "undefined") return 1;
+    const stored = Number(window.localStorage.getItem(BUILDER_STEP_KEY));
+    return stored >= 1 && stored <= 5 ? stored as 1 | 2 | 3 | 4 | 5 : 1;
+  });
   const [occasion, setOccasion] = useState<OccasionValue | null>(null);
   const [eventTypeError, setEventTypeError] = useState("");
   const [style, setStyle] = useState<StyleValue>("royal");
@@ -125,6 +130,10 @@ export function GuidedInvitationBuilder() {
     setStyle(inferStyleFromTemplate(draft.templateId));
     setSelectedTemplateId(draft.templateId || null);
   }, [draft.eventType, draft.templateId, loaded]);
+
+  useEffect(() => {
+    window.localStorage.setItem(BUILDER_STEP_KEY, String(step));
+  }, [step]);
 
   const heading = step === 1 ? "What are you celebrating?" : step === 2 ? "Choose Your Wedding Template" : step === 3 ? "Add wedding details" : step === 4 ? "Bring your invite to life" : "You're all set!";
   const subheading = step === 1 ? "Wedding is live now. Other events are coming soon." : step === 2 ? "Pick one of the live wedding designs. You can customize everything next." : step === 3 ? "Just the wedding basics. You can edit everything later." : step === 4 ? "Add the things you want to include." : "Let's create your invite and make it magical.";
@@ -269,6 +278,8 @@ export function GuidedInvitationBuilder() {
         slug: generateSlug(normalizedTitle),
       });
       setDraft(published);
+      clearDraft();
+      window.localStorage.removeItem(BUILDER_STEP_KEY);
       router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard");
     } catch {
       setCreating(false);

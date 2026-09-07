@@ -30,7 +30,7 @@ export function SoftTraditionalWedding({ event }: { event: WeddingEventData }) {
       <div className="space-y-5 px-5 pb-6">
         <section className="rounded-t-full border border-border bg-white/80 p-6 text-center shadow-card">
           <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: secondary }}>With blessings from our families</p>
-          <h1 className="mt-4 font-serif text-[clamp(3rem,13vw,4.5rem)] font-bold leading-none [overflow-wrap:anywhere]" style={{ color: primary }}>{bride ? <>{groom}<span className="block text-3xl">&</span>{bride}</> : coupleName}</h1>
+          <h1 className="mt-4 font-serif text-[clamp(2.4rem,10vw,3.75rem)] font-bold leading-[0.98] [overflow-wrap:anywhere]" style={{ color: primary }}>{bride ? <>{groom}<span className="block text-2xl">&</span>{bride}</> : coupleName}</h1>
           <p className="mt-4 text-sm text-muted">Invite you to celebrate their wedding day with love.</p>
           <div className="mt-5"><DetailPills event={event} primary={primary} /></div>
           <Button className="mt-5" style={{ backgroundColor: primary }}>RSVP with Love <Heart className="h-4 w-4" /></Button>

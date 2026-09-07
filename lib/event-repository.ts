@@ -1,5 +1,6 @@
 import {
   loadDraft,
+  hasStoredDraft,
   loadPublishedEvents,
   loadTemporaryInvite,
   normalizeStoredEvent,
@@ -48,7 +49,11 @@ export async function loadEventDraft() {
   const cached = loadDraft();
   if (localTestMode) return cached;
   const user = await getCurrentAuthUser();
-  if (!user) return null;
+  if (!user) return hasStoredDraft() ? cached : null;
+  if (hasStoredDraft()) {
+    await persistEventDraft(cached);
+    return cached;
+  }
   await draftWriteQueue;
   const { data, error } = await createSupabaseBrowserClient()
     .from("event_drafts")
@@ -80,13 +85,13 @@ export async function persistEventDraft(draft: EventDraft) {
       eventType: "wedding",
     };
   }
+  saveDraft(draft);
   if (localTestMode) {
-    saveDraft(draft);
     return;
   }
   draftWriteQueue = draftWriteQueue.then(async () => {
     const user = await getCurrentAuthUser();
-    if (!user) throw new Error("You must be signed in to save an event draft.");
+    if (!user) return;
     const { error } = await createSupabaseBrowserClient()
       .from("event_drafts")
       .upsert({ owner_id: user.id, data: draft, updated_at: new Date().toISOString() });

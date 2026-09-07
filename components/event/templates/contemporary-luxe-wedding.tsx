@@ -15,23 +15,22 @@ import {
   TemplateTimeline,
 } from "@/components/event/templates/shared/TemplateParts";
 import { getCoupleNames, isUsableImage, type WeddingEventData } from "@/components/event/templates/template-utils";
-import { sampleEvent } from "@/lib/mock-data";
 import { getThemeStyles } from "@/lib/themes";
 
 export function ContemporaryLuxeWedding({ event }: { event: WeddingEventData }) {
   const primary = getThemeStyles(event.theme).primary;
   const { coupleName } = getCoupleNames(event);
-  const heroImage = isUsableImage(event.coverImage) ? event.coverImage : sampleEvent.coupleImage;
+  const heroImage = isUsableImage(event.coverImage) ? event.coverImage : "";
 
   return (
     <TemplateShell background="#FFF8F8" className="rounded-b-[2rem]">
       <BrandBar primary={primary} cta="RSVP Now" />
       <section className="relative">
-        <img src={heroImage} alt="" className="h-96 w-full object-cover" />
+        {heroImage ? <img src={heroImage} alt="" className="h-80 w-full object-cover sm:h-96" /> : <div className="h-72 bg-gradient-to-br from-[#4A193F] via-[#8A456F] to-[#E8B7C8] sm:h-80" aria-hidden="true" />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
         <div className="absolute inset-x-0 bottom-10 px-6 text-center text-white">
           <p className="text-xs font-bold uppercase tracking-[0.3em]">Together with our families</p>
-          <h1 className="mt-3 font-serif text-[clamp(3rem,13vw,4.5rem)] font-bold leading-none [overflow-wrap:anywhere]">{coupleName}</h1>
+          <h1 className="mt-3 font-serif text-[clamp(2.4rem,10vw,3.75rem)] font-bold leading-[0.98] [overflow-wrap:anywhere]">{coupleName}</h1>
           <p className="mt-2 text-sm">A celebration of love</p>
         </div>
       </section>
