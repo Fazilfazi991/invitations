@@ -9,7 +9,7 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [decision, setDecision] = useState<"pending" | "made">("pending");
   const [missing, setMissing] = useState(false);
   const enabled = Boolean(music?.enabled && music.url && !missing);
   const preferenceKey = `occazn_music_${eventSlug}`;
@@ -17,10 +17,9 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
   useEffect(() => {
     if (!enabled) return;
     const preference = window.sessionStorage.getItem(preferenceKey);
-    if (preference === "dismissed") setDismissed(true);
-    if (preference === "muted") {
+    if (preference) setDecision("made");
+    if (preference === "muted" || preference === "paused") {
       setMuted(true);
-      setDismissed(true);
     }
   }, [enabled, preferenceKey]);
 
@@ -40,7 +39,7 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
       setMuted(false);
       await audio.play();
       setIsPlaying(true);
-      setDismissed(true);
+      setDecision("made");
       window.sessionStorage.setItem(preferenceKey, "playing");
     } catch {
       setIsPlaying(false);
@@ -61,7 +60,7 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
   function declineMusic() {
     pauseMusic();
     setMuted(true);
-    setDismissed(true);
+    setDecision("made");
     window.sessionStorage.setItem(preferenceKey, "muted");
   }
 
@@ -78,31 +77,30 @@ export function EventMusicControl({ music, eventSlug }: { music?: EventMusic; ev
         onPlay={() => setIsPlaying(true)}
         onError={() => setMissing(true)}
       />
-      {!dismissed && (
-        <div className="fixed bottom-24 right-4 z-40 w-[min(92vw,320px)] rounded-2xl border border-brand-light bg-white/95 p-4 shadow-soft backdrop-blur">
+      {decision === "pending" ? (
+        <div className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 mx-auto w-[min(calc(100vw-2rem),340px)] rounded-2xl bg-[#2c2130] p-4 text-white shadow-[0_18px_55px_rgba(24,13,28,0.28)]">
           <div className="flex items-start gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-soft text-primary">
-              <Music2 className="h-5 w-5" />
+              <Music2 className="h-5 w-5 text-primary" />
             </span>
             <div className="min-w-0">
               <p className="font-serif text-xl font-bold">Play celebration music?</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button onClick={playMusic} size="sm"><Play className="h-4 w-4" />Play Music</Button>
-                <Button onClick={declineMusic} size="sm" variant="outline">No thanks</Button>
+                <Button onClick={declineMusic} size="sm" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10">Not now</Button>
               </div>
             </div>
           </div>
         </div>
-      )}
-      <Button
+      ) : <Button
         type="button"
         onClick={isPlaying ? pauseMusic : playMusic}
-        className="fixed bottom-4 right-3 z-40 h-11 rounded-full bg-primary px-3 text-xs shadow-soft"
+        className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 h-11 rounded-full bg-[#2c2130] px-3 text-xs text-white shadow-[0_12px_36px_rgba(24,13,28,0.22)]"
         aria-label={isPlaying ? "Pause music" : muted ? "Music muted" : "Play music"}
       >
         {isPlaying ? <Pause className="h-4 w-4" /> : muted ? <VolumeX className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         {isPlaying ? "Music On" : "Music Off"}
-      </Button>
+      </Button>}
     </>
   );
 }

@@ -169,7 +169,24 @@ export function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
       ? templateCategoryToEventType(storedTemplate.category)
       : "custom";
   const defaults = getDefaultDraft(eventType);
-  const normalized = { ...defaults, ...value, eventType } as EventDraft;
+  const normalized = {
+    ...defaults,
+    ...value,
+    eventType,
+    primaryName: value.primaryName ?? value.groomName ?? "",
+    secondaryName: value.secondaryName ?? value.brideName ?? "",
+    date: value.date ?? "",
+    time: value.time ?? "",
+    venueName: value.venueName ?? "",
+    address: value.address ?? "",
+    city: value.city ?? "",
+    mapLink: value.mapLink ?? "",
+    youtubeLink: value.youtubeLink ?? "",
+    coverImage: value.coverImage ?? "",
+    gallery: Array.isArray(value.gallery) ? value.gallery : [],
+    schedule: Array.isArray(value.schedule) ? value.schedule : [],
+    contacts: Array.isArray(value.contacts) ? value.contacts : [],
+  } as EventDraft;
   return withTemplateMetadata({ ...normalized, music: normalizeMusic(value.music, eventType) }, value.templateId);
 }
 

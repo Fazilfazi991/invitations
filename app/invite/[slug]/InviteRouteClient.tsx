@@ -5,7 +5,6 @@ import { EventMusicControl } from "@/components/event/EventMusicControl";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
 import type { WeddingEventData } from "@/components/event/templates/template-utils";
 import { loadPublishedEvents, loadTemporaryInvite, normalizeStoredEvent, type EventDraft } from "@/lib/event-draft";
-import { getDefaultMusicForType } from "@/lib/event-music";
 import { isLiveEventType } from "@/lib/event-types";
 
 export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallbackEvent?: WeddingEventData }) {
@@ -63,10 +62,7 @@ export function InviteRouteClient({ slug, fallbackEvent }: { slug: string; fallb
     );
   }
 
-  const weddingEvent = {
-    ...(event as WeddingEventData),
-    music: getDefaultMusicForType(event.eventType),
-  };
+  const weddingEvent = event as WeddingEventData;
 
   return (
     <>

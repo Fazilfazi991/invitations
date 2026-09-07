@@ -1,55 +1,19 @@
 "use client";
 
-import { Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  BrandBar,
-  DetailPills,
-  TemplateBlessings,
-  TemplateCountdown,
-  TemplateFooter,
-  TemplateGallery,
-  TemplateLocation,
-  TemplateRSVP,
-  TemplateShell,
-  TemplateTimeline,
-} from "@/components/event/templates/shared/TemplateParts";
-import { getCoupleNames, isUsableImage, type WeddingEventData } from "@/components/event/templates/template-utils";
-import { getThemeStyles } from "@/lib/themes";
+import { ArrowDown, Play } from "lucide-react";
+import { BrandBar, TemplateCountdown, TemplateFooter, TemplateGallery, TemplateLocation, TemplateRSVP, TemplateShare, TemplateShell, TemplateTimeline } from "@/components/event/templates/shared/TemplateParts";
+import { formatEventDate, formatEventTime, getCoupleNames, isUsableImage, type WeddingEventData } from "@/components/event/templates/template-utils";
 
 export function ContemporaryLuxeWedding({ event }: { event: WeddingEventData }) {
-  const primary = getThemeStyles(event.theme).primary;
-  const { coupleName } = getCoupleNames(event);
-  const heroImage = isUsableImage(event.coverImage) ? event.coverImage : "";
-
-  return (
-    <TemplateShell background="#FFF8F8" className="rounded-b-[2rem]">
-      <BrandBar primary={primary} cta="RSVP Now" />
-      <section className="relative">
-        {heroImage ? <img src={heroImage} alt="" className="h-80 w-full object-cover sm:h-96" /> : <div className="h-72 bg-gradient-to-br from-[#4A193F] via-[#8A456F] to-[#E8B7C8] sm:h-80" aria-hidden="true" />}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-        <div className="absolute inset-x-0 bottom-10 px-6 text-center text-white">
-          <p className="text-xs font-bold uppercase tracking-[0.3em]">Together with our families</p>
-          <h1 className="mt-3 font-serif text-[clamp(2.4rem,10vw,3.75rem)] font-bold leading-[0.98] [overflow-wrap:anywhere]">{coupleName}</h1>
-          <p className="mt-2 text-sm">A celebration of love</p>
-        </div>
-      </section>
-      <div className="-mt-10 space-y-5 px-5 pb-6">
-        <section className="relative rounded-[1.5rem] border border-border bg-white/90 p-4 text-center shadow-soft">
-          <DetailPills event={event} primary={primary} />
-          <Button className="mt-4" style={{ backgroundColor: primary }}>You're Invited</Button>
-        </section>
-        <TemplateCountdown event={event} title="Counting Down To Our Big Day" primary={primary} />
-        <TemplateTimeline event={event} title="Our Big Day" primary={primary} />
-        <TemplateLocation event={event} primary={primary} />
-        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} slug={event.slug || "preview"} />}
-        <TemplateGallery event={event} title="Our Gallery" primary={primary} />
-        {event.youtubeLink && <section className="grid gap-4 rounded-[1.5rem] border border-border bg-white/80 p-4 shadow-card sm:grid-cols-2"><div><h2 className="font-serif text-2xl font-bold">Can't join us in person?</h2><p className="mt-2 text-sm text-muted">Be a part of our live stream.</p><Button asChild className="mt-3" style={{ backgroundColor: primary }}><a href={event.youtubeLink}><Play className="h-4 w-4" />Watch Live</a></Button></div><div className="rounded-2xl bg-gradient-to-br from-rose-100 to-amber-50" /></section>}
-        <TemplateBlessings primary={primary} title="Share Your Memories" />
-      </div>
-      <div style={{ backgroundColor: primary }} className="px-5 py-8 text-center text-white">
-        <TemplateFooter text="Made with love on" primary="#FFFFFF" />
-      </div>
-    </TemplateShell>
-  );
+  const { groom, bride, coupleName } = getCoupleNames(event);
+  const photo = isUsableImage(event.coverImage) ? event.coverImage : "";
+  return <TemplateShell background="#efeee9" className="text-[#17141a]">
+    <div className="bg-[#17141a] text-white"><BrandBar primary="#ffffff" cta="RSVP" /></div>
+    <section className="grid min-h-[calc(100svh-68px)] bg-[#17141a] text-white lg:grid-cols-2">
+      <div className="relative flex flex-col justify-between overflow-hidden px-5 py-10 sm:px-8 lg:px-14 lg:py-14"><div className="absolute -right-20 top-16 h-64 w-64 rounded-full bg-[#6c1785]/35 blur-3xl" /><p className="relative text-sm text-white/60">Wedding · {formatEventDate(event.date)}</p><h1 className="relative my-10 text-balance font-serif text-[clamp(3.2rem,13vw,3.75rem)] leading-[.84] tracking-[-.04em]">{bride ? <>{groom}<span className="block text-[#d7ff53]">+ {bride}</span></> : coupleName}</h1><div className="relative flex items-end justify-between gap-5 border-t border-white/20 pt-5"><div><p className="text-2xl">{formatEventTime(event.time)}</p><p className="mt-1 max-w-sm text-sm text-white/55">{[event.venueName, event.city].filter(Boolean).join(" · ")}</p></div><a href="#modern-details" className="grid h-11 w-11 place-items-center bg-[#d7ff53] text-black" aria-label="View event details"><ArrowDown className="h-4 w-4" /></a></div></div>
+      {photo ? <img src={photo} alt={`Wedding portrait of ${coupleName}`} className="h-[52svh] w-full object-cover lg:h-full" /> : <div className="relative min-h-72 overflow-hidden bg-[#6c1785]"><div className="absolute -left-24 top-20 h-80 w-80 rounded-full border-[40px] border-[#d7ff53]/80" /><div className="absolute bottom-10 right-8 text-right text-sm uppercase tracking-[.25em] text-white/75">A modern<br />celebration</div></div>}
+    </section>
+    <section id="modern-details" className="mx-auto max-w-6xl px-5 py-10 sm:px-8"><TemplateCountdown event={event} title="Countdown" primary="#6c1785" />{event.story && <div className="my-10 grid gap-5 border-y border-black/15 py-10 md:grid-cols-[.45fr_1fr]"><h2 className="font-serif text-4xl">The story</h2><p className="max-w-2xl leading-8 text-black/65">{event.story}</p></div>}<div className="space-y-10"><div className="grid items-start gap-8 lg:grid-cols-[1.2fr_.8fr]"><TemplateTimeline event={event} title="The day, in motion" primary="#6c1785" layout="modern" /><TemplateLocation event={event} primary="#6c1785" /></div><TemplateGallery event={event} title="Frames" primary="#6c1785" />{event.youtubeLink && <section className="flex flex-wrap items-center justify-between gap-5 bg-[#6c1785] p-6 text-white sm:p-8"><h2 className="font-serif text-3xl">Join the live celebration</h2><a href={event.youtubeLink} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 bg-[#d7ff53] px-5 text-sm font-semibold text-black"><Play className="h-4 w-4" />Watch live</a></section>}{event.rsvpEnabled !== false && <TemplateRSVP primary="#6c1785" slug={event.slug || "preview"} variant="modern" />}<TemplateShare event={event} primary="#6c1785" title="Share the moment" /></div></section>
+    <div className="bg-[#17141a] px-5 text-white"><TemplateFooter text="Made for this moment on" primary="#d7ff53" /></div>
+  </TemplateShell>;
 }

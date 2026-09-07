@@ -258,6 +258,52 @@ This is the organizer workspace's signature component. A full-width cover image 
 
 Four compact metric cards lead with a purple icon, a 12px label, and a 30px Playfair tabular number. Guest responses stay readable cards on mobile, then align into the observed five-column structure at 768px; statuses remain badges, messages wrap, and long lists paginate in groups of 25.
 
+### Public Wedding Templates
+
+The public invitation is an Experience surface: it should feel like entering the occasion, not opening an organizer form with decoration around it. All five templates render through the same live registry in preview and at the canonical public URL, but each owns a materially different palette, composition, image silhouette, information rhythm, and RSVP surround. Template-specific colors and geometry are local worlds, not replacements for the organizer tokens in this file.
+
+#### Shared Content and Conditional Rules
+
+- Lead every invitation with the couple's real names, Wedding context, supplied date and time, useful venue context when present, and a visible route to RSVP. On a 390×844 viewport, that first-view information must remain legible without horizontal scrolling; desktop may become a split hero, framed print composition, or editorial grid.
+- Render optional story, schedule, gallery, location, contacts, livestream, RSVP, and music only from supplied event data and enabled feature flags. Never synthesize event facts, gallery images, schedule items, contacts, or venue details to fill a composition.
+- Treat a source as a usable image only when it is a local path or an HTTP(S) URL. Gallery sections disappear when no usable images exist, schedule sections disappear when no real schedule rows exist, and location disappears when venue, address, city, and map link are all absent.
+- Limit the shared rendered schedule to five supplied items, family contacts to three, and the compact gallery preview to four images. Keep overflow in the dedicated gallery route instead of elongating the invitation preview.
+- Preserve the event's stable slug and canonical share URL across template changes. The registry falls back to Floral Wedding Elegance only when the template identifier is missing or invalid.
+
+**The Real Occasion Rule.** Empty optional sections collapse completely; decorative structure may hold atmosphere, but it may never impersonate missing event content.
+
+#### Five Visual Worlds
+
+- **Floral — Botanical Editorial:** Soft ivory and pale sage support deep botanical green, dusty rose, asymmetric foliage, and an editorial serif. A supplied cover becomes a tall arched portrait with a fine offset outline; without a photo, a sage arched field, botanical wreath, and heart preserve the silhouette without inventing a person. The lower page uses centered icon-led schedule cards beside a quieter location column.
+- **Royal — Formal Printed Card:** Blush ground, warm ivory paper, berry red, antique gold linework, mirrored arches, lanterns, and restrained floral clusters create a symmetrical ceremonial card. Photography is secondary: the hero remains typographic and architectural, while a supplied cover or first gallery image may accompany the story; with no image, the printed-card structure stands on its own. The lower schedule is a compact two-column-to-four-column set of ceremonial icon cards, followed by separately framed story and venue panels.
+- **Minimal — Editorial Ledger:** Warm gray paper, near-black typography, hairline rules, severe image geometry, and large low-leading serif names create an editorial document rather than a card. A supplied cover occupies a flush rectangular column; without one, a ruled abstract panel and oversized ampersand maintain the grid. The lower schedule is a border-led ledger: each row fixes time in a narrow left column and event detail on the right.
+- **Traditional — Indian Ceremonial:** Warm ivory, maroon, antique gold, mandala geometry, a framed portrait, and family-blessing language create a culturally rich but restrained composition. A supplied portrait sits in a square-cornered gold frame; without one, the mandalas, ornament, and centered naming hierarchy carry the ceremony. The lower page uses warm boxed icon cards for ceremonies in a wider schedule column, paired with a narrower location column; real family contacts may follow when enabled.
+- **Modern — Architectural Editorial:** A near-black field, white typography, violet atmosphere, acid-lime accents, split-screen massing, and hard-edged information bands make the invitation feel architectural. A supplied photo owns one full hero half; without it, a violet field, lime ring, and compact editorial caption preserve the split. The lower schedule becomes numbered horizontal bands with hairline separators, and a supplied livestream link may become one high-contrast broadcast band.
+
+**The Five Worlds Rule.** Keep the five templates materially distinct; do not flatten them into the same centered white card with palette swaps.
+
+#### RSVP, Sharing, and Data Compatibility
+
+Every template uses the same private RSVP behavior inside its own material treatment: translucent floral card, warm royal print panel, rule-only minimal ledger, warm traditional panel, or dark modern panel. The shared form requires a guest name, accepts an optional message up to 500 characters, keeps text inputs at 16px and 48px high, bounds attending party size from 1 to 10, disables both actions while sending or after success, and exposes failures with `role="alert"` and confirmation with `role="status"`.
+
+A declined response intentionally stores `guest_count = 1` as a database-compatibility sentinel because production constrains the column to 1–10. That stored value never means one expected guest: organizer totals, response rows, and CSV export must interpret every declined response as zero expected guests. Count only attending rows toward expected-guest totals.
+
+Sharing remains compact and last in the invitation: WhatsApp and Copy Link use the canonical public URL, with short copied confirmation and a direct recovery message when clipboard access is blocked. Do not grow this into a dashboard-like share matrix on the guest page.
+
+**The Private Response Rule.** The invitation collects the minimum useful response in place; guest records and aggregate management remain owner-private.
+
+#### Music, Accessibility, and Performance
+
+Optional music presents one consent decision surface—“Play celebration music?” with Play Music and Not now—before collapsing into one compact fixed Music On/Music Off control. Audio never autoplays, uses `preload="none"`, remembers the decision per event for the browser session, cleans up playback on unmount, and disappears when the media is missing or errors. Maintain an explicit accessible label for the compact control and keep it clear of the device safe area.
+
+Across all worlds, preserve visible keyboard focus, semantic error and success feedback, 16px form inputs, 44px minimum links and compact controls, 48px RSVP actions, meaningful couple-name alt text on portraits, and hidden semantics for purely decorative geometry. Retain authored contrast pairs—especially white and acid lime on Modern near-black, white on Traditional maroon, and white on Royal berry actions—rather than applying one global tint over every template.
+
+The registry dynamically imports the selected template so the public route does not ship all five visual worlds up front. Keep public first-load JavaScript near the verified 122 kB baseline: prefer CSS, existing shared components, and code-rendered motifs; avoid adding a heavy runtime, eager cross-template imports, or decorative client logic that expands the guest bundle.
+
+**The One Consent, One Control Rule.** Ask once, then reduce music to a single compact stateful control; never stack a prompt, player, mute button, and autoplay behavior.
+
+**The 122 kB Guest-Floor Rule.** Visual richness comes from composition and CSS, while the selected template remains dynamically loaded and public first-load JavaScript stays near the verified baseline.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -267,6 +313,10 @@ Four compact metric cards lead with a purple icon, a 12px label, and a 30px Play
 - **Do** use Playfair selectively for occasion-bearing hierarchy and Inter for operations and guest data.
 - **Do** give interactive controls a minimum 44px mobile target and a visible focus treatment.
 - **Do** use honest zero, loading, empty, error, and not-found states in the same warm, reassuring visual language.
+- **Do** preserve each Wedding template's distinct material world while reusing shared conditional data, RSVP, sharing, and accessibility behavior.
+- **Do** interpret the declined-response database sentinel as zero expected guests in organizer totals, rows, and CSV exports.
+- **Do** keep optional guest-page music to one consent prompt followed by one compact control.
+- **Do** keep the selected Wedding template dynamically loaded and public first-load JavaScript near the verified 122 kB baseline.
 
 ### Don't:
 
@@ -275,3 +325,7 @@ Four compact metric cards lead with a purple icon, a 12px label, and a 30px Play
 - **Don't** expose private RSVP detail outside the owner workspace or let status styling imply a value the data does not contain.
 - **Don't** use purple as an all-over fill; its restraint is what preserves hierarchy.
 - **Don't** introduce sharp containers, heavy black shadows, or cold gray page grounds into the organizer workspace.
+- **Don't** render empty story, schedule, gallery, location, contact, livestream, RSVP, or music sections when their real data or enabling flag is absent.
+- **Don't** substitute fabricated portraits or stock event facts when a couple supplied no photo or optional content; use the template's code-rendered no-photo composition.
+- **Don't** collapse the five Wedding templates into palette variants of one generic centered card.
+- **Don't** count a declined row's stored `guest_count = 1` sentinel as an expected guest or export it as one.

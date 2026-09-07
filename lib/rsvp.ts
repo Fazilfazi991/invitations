@@ -15,7 +15,10 @@ export async function submitRsvp(slug: string, response: RsvpResponse) {
     ...response,
     guestName: response.guestName.trim(),
     message: response.message.trim(),
-    guestCount: Math.max(1, Math.min(10, response.guestCount || 1)),
+    // The production schema requires 1..10. A declined row stores 1 as a
+    // compatibility sentinel; organizer totals, display, and CSV always
+    // interpret declined responses as zero expected guests.
+    guestCount: response.attendance === "declined" ? 1 : Math.max(1, Math.min(10, response.guestCount || 1)),
   };
 
   if (!normalized.guestName) throw new Error("Please enter your name.");

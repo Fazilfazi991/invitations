@@ -3,7 +3,6 @@ import { normalizeStoredEvent } from "@/lib/event-draft";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { EventMusicControl } from "@/components/event/EventMusicControl";
 import { WeddingTemplateRenderer } from "@/components/event/templates/WeddingTemplateRenderer";
-import { getDefaultMusicForType } from "@/lib/event-music";
 import { isLiveEventType } from "@/lib/event-types";
 
 type ShortInvitePageProps = {
@@ -52,6 +51,5 @@ export default async function ShortInvitePage({ params }: ShortInvitePageProps) 
     return <main className="grid min-h-dvh place-items-center bg-[#fbf0f6] px-4 text-center"><h1 className="font-serif text-3xl font-bold text-[#D84B73]">Coming soon</h1></main>;
   }
 
-  const weddingEvent = { ...event, music: getDefaultMusicForType(event.eventType) };
-  return <><WeddingTemplateRenderer event={weddingEvent} /><EventMusicControl music={weddingEvent.music} eventSlug={event.slug || slug} /></>;
+  return <><WeddingTemplateRenderer event={event} /><EventMusicControl music={event.music} eventSlug={event.slug || slug} /></>;
 }

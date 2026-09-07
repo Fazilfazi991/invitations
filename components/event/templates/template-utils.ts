@@ -20,7 +20,7 @@ export function formatEventTime(time?: string) {
 
 export function getCoupleNames(event: Partial<WeddingEventData>) {
   const hasUserPrimary = Boolean(event.primaryName?.trim());
-  const groom = event.primaryName?.trim() || event.groomName?.trim() || "Wedding celebration";
+  const groom = event.primaryName?.trim() || event.groomName?.trim() || "Our Wedding";
   const bride = event.secondaryName?.trim() || (!hasUserPrimary ? event.brideName?.trim() : "") || "";
   return { groom, bride, coupleName: bride ? `${groom} & ${bride}` : groom };
 }
@@ -44,10 +44,10 @@ export function getTemplateGallery(event: Partial<WeddingEventData>) {
 export function getTemplateSchedule(event: Partial<WeddingEventData>) {
   if (event.schedule?.length) {
     return event.schedule.slice(0, 5).map((item) => ({
-      title: item.title || "Event moment",
+      title: item.title?.trim() || "",
       time: formatEventTime(item.startTime),
-      note: item.description || item.venue || "With loved ones",
-    }));
+      note: item.description?.trim() || item.venue?.trim() || "",
+    })).filter((item) => item.title || item.time || item.note);
   }
   return [];
 }

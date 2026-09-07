@@ -7,7 +7,6 @@ import {
   Clock,
   Heart,
   MapPin,
-  Menu,
   MoonStar,
   Sparkles,
   Utensils,
@@ -23,7 +22,7 @@ import {
 } from "@/components/event/templates/template-utils";
 import { getEventDateTime } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
-import { TemplateRSVP } from "@/components/event/templates/shared/TemplateParts";
+import { TemplateGallery, TemplateRSVP, TemplateShare } from "@/components/event/templates/shared/TemplateParts";
 
 export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
   const { groom, bride, coupleName } = getCoupleNames(event);
@@ -39,29 +38,22 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
       <section className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-[1.75rem] border border-[#B66AC8]/70 bg-[#FFF8EF] shadow-[0_28px_90px_rgba(89,35,101,0.16)] sm:rounded-[2.5rem]">
         <RoyalBackdrop />
 
-        <div className="relative z-10 mx-auto flex w-full max-w-[560px] flex-col px-4 py-5 sm:px-6 lg:max-w-[600px]">
+        <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col px-4 py-5 sm:px-8 lg:py-8">
           <header className="flex items-center justify-between gap-4">
             <a href="/" className="font-serif text-3xl font-bold leading-none text-[#D84B73]" aria-label="Occazn home">
               occazn<span className="text-lg text-[#8B3FA4]">.</span>
             </a>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <a
                 href="#rsvp"
-                className="inline-flex h-9 items-center rounded-md bg-[#D84B73] px-4 text-xs font-bold text-white shadow-[0_8px_22px_rgba(216,75,115,0.28)] transition hover:-translate-y-0.5 hover:bg-[#C83C66]"
+                className="inline-flex h-11 items-center rounded-md bg-[#B52D57] px-4 text-sm font-bold text-white shadow-[0_8px_22px_rgba(181,45,87,0.24)] transition hover:-translate-y-0.5 hover:bg-[#9D2249]"
               >
                 RSVP Now
               </a>
-              <button
-                type="button"
-                className="grid h-10 w-10 place-items-center rounded-full border border-[#F0B6C8] bg-white/80 text-[#D84B73]"
-                aria-label="Open invite menu"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
             </div>
           </header>
 
-          <section className="relative mt-4 rounded-[1.5rem] bg-white/84 px-4 pb-5 pt-6 text-center shadow-[0_22px_70px_rgba(146,91,61,0.14)] backdrop-blur sm:px-7 sm:pt-7">
+          <section className="relative mx-auto mt-4 w-full max-w-3xl rounded-[1.5rem] bg-white/84 px-4 pb-7 pt-6 text-center shadow-[0_22px_70px_rgba(146,91,61,0.14)] backdrop-blur sm:px-10 sm:pt-7">
             <div className="pointer-events-none absolute inset-x-8 top-4 h-36 rounded-t-full border-2 border-[#E9C982]/70 sm:inset-x-14 sm:h-44" />
             <div className="pointer-events-none absolute inset-x-12 top-7 h-28 rounded-t-full border border-[#F2DDB0]/80 sm:inset-x-20 sm:h-36" />
             <Lantern className="left-4 top-7 sm:left-8" small />
@@ -73,14 +65,12 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
               <p className="text-[0.66rem] font-bold uppercase tracking-[0.24em] text-[#D84B73]">
                 Together with their families
               </p>
-              <p className="mt-3 font-serif text-xl leading-relaxed text-[#D7A95A]" dir="rtl">
-                {event.invitationOpening || "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u064e\u0651\u0670\u0647\u0650 \u0671\u0644\u0631\u064e\u0651\u062d\u0652\u0645\u064e\u0640\u0670\u0646\u0650 \u0671\u0644\u0631\u064e\u0651\u062d\u0650\u064a\u0645\u0650"}
-              </p>
+              {event.invitationOpening && <p className="mt-3 font-serif text-xl leading-relaxed text-[#D7A95A]" dir="auto">{event.invitationOpening}</p>}
               <h1 className="mt-3 font-serif text-[clamp(2.45rem,8.5vw,3.65rem)] leading-[0.95] text-[#D84B73] [overflow-wrap:anywhere]">
                 {bride ? (
                   <>
                     {groom}
-                    <span className="my-2 block text-[0.72rem] font-bold uppercase tracking-[0.28em] text-[#8C7B86]">and</span>
+                    <span className="my-2 block text-xs font-bold uppercase tracking-[0.28em] text-[#665B62]">and</span>
                     {bride}
                   </>
                 ) : coupleName}
@@ -99,11 +89,11 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
                 <div className="px-3">
                   <p className="text-[0.66rem] font-bold uppercase tracking-[0.2em] text-[#D84B73]">{date.weekday}</p>
                   <p className="mt-1 font-serif text-3xl font-bold text-[#D84B73]">{date.day}</p>
-                  <p className="text-[0.66rem] font-bold uppercase tracking-[0.18em] text-[#8C7B86]">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#665B62]">
                     {date.year}
                   </p>
                 </div>
-                <DateCell label={event.hijriDate || "1448 Safar 6"} value={formatEventTime(event.time)} />
+                <DateCell label={event.hijriDate || "Time"} value={formatEventTime(event.time)} />
               </div>
 
               <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-[#4D4650]">
@@ -112,14 +102,14 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
               <div className="mt-4 flex justify-center gap-2">
                 <a
                   href="#rsvp"
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-[#D84B73] px-5 text-xs font-bold text-white shadow-[0_10px_24px_rgba(216,75,115,0.25)] transition hover:-translate-y-0.5 hover:bg-[#C83C66]"
+                  className="inline-flex h-11 items-center justify-center rounded-md bg-[#B52D57] px-5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(181,45,87,0.22)] transition hover:-translate-y-0.5 hover:bg-[#9D2249]"
                 >
                   RSVP Now
                 </a>
                 <a
                   href={calendarHref}
                   download={`${event.slug || "royal-nikah"}-invite.ics`}
-                  className="grid h-10 w-10 place-items-center rounded-md border border-[#F0B6C8] bg-white text-[#D84B73] transition hover:-translate-y-0.5"
+                  className="grid h-11 w-11 place-items-center rounded-md border border-[#D49AAF] bg-white text-[#B52D57] transition hover:-translate-y-0.5"
                   aria-label="Save the date"
                 >
                   <CalendarDays className="h-4 w-4" />
@@ -132,7 +122,9 @@ export function RoyalNikahElegance({ event }: { event: WeddingEventData }) {
           {schedule.length > 0 && <SchedulePanel schedule={schedule} />}
           {(event.story || storyImage) && <StoryPanel event={event} image={storyImage} />}
           {(venue.venue || venue.address || venue.city || event.mapLink) && <VenuePanel event={event} venue={venue} />}
-          {event.rsvpEnabled ? <div id="rsvp" className="mt-5"><TemplateRSVP primary="#D84B73" slug={event.slug || "preview"} /></div> : null}
+          <TemplateGallery event={event} title="Portraits & memories" primary="#8a5534" />
+          {event.rsvpEnabled ? <div className="mt-5"><TemplateRSVP primary="#8a5534" slug={event.slug || "preview"} variant="royal" /></div> : null}
+          <TemplateShare event={event} primary="#8a5534" title="Share this invitation" />
           <FooterNote />
         </div>
       </section>
@@ -175,7 +167,7 @@ function CountdownPanel({ values }: { values: string[] | null }) {
           <div key={label} className="px-2">
             <Clock className="mx-auto mb-1 h-4 w-4 text-[#D84B73]" />
             <b className="block font-serif text-2xl text-[#D84B73]">{displayValues[index]}</b>
-            <span className="text-[0.62rem] font-bold uppercase tracking-[0.12em] text-[#8C7B86]">{label}</span>
+            <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#665B62]">{label}</span>
           </div>
         ))}
       </div>
@@ -199,8 +191,8 @@ function SchedulePanel({ schedule }: { schedule: ReturnType<typeof getTemplateSc
                 <Icon className="h-5 w-5" />
               </span>
               <h2 className="mt-2 text-sm font-bold">{item.title}</h2>
-              <p className="text-xs text-[#8C7B86]">{item.time}</p>
-              <p className="mt-1 text-[0.68rem] text-[#8C7B86]">{item.note}</p>
+              <p className="text-xs text-[#665B62]">{item.time}</p>
+              <p className="mt-1 text-xs text-[#665B62]">{item.note}</p>
             </div>
           );
         })}
@@ -211,22 +203,11 @@ function SchedulePanel({ schedule }: { schedule: ReturnType<typeof getTemplateSc
 
 function StoryPanel({ event, image }: { event: WeddingEventData; image: string }) {
   return (
-    <section className="mt-6 grid gap-4 rounded-2xl border border-[#F0B6C8]/70 bg-white/78 p-4 shadow-[0_16px_44px_rgba(146,91,61,0.08)] sm:grid-cols-[1fr_1.15fr]">
-      <div className="h-40 overflow-hidden rounded-xl bg-[#FCE8D6]">
-        {image ? (
-          <img src={image} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_50%_35%,rgba(216,75,115,0.18),transparent_28%),linear-gradient(135deg,#fff7ed,#fce7f3)]">
-            <Heart className="h-10 w-10 fill-[#D84B73] text-[#D84B73]" />
-          </div>
-        )}
-      </div>
+    <section className={cn("mt-8 grid gap-5 border-y border-[#c59b54]/35 py-8", image && "sm:grid-cols-[1fr_1.15fr]")}>
+      {image && <div className="h-56 overflow-hidden rounded-xl"><img src={image} alt="" className="h-full w-full object-cover" /></div>}
       <div>
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#D84B73]">Our Story</p>
-        <h2 className="mt-2 font-serif text-2xl font-bold text-[#322A35]">A blessed beginning</h2>
-        <p className="mt-2 text-sm leading-6 text-[#6F6670]">
-          {event.story || "Two hearts, one journey. With the prayers and blessings of family, this day marks a graceful new beginning filled with love, faith, and togetherness."}
-        </p>
+        <h2 className="font-serif text-3xl font-bold text-[#322A35]">Our story</h2>
+        <p className="mt-3 text-sm leading-7 text-[#6F6670]">{event.story}</p>
       </div>
     </section>
   );
@@ -245,7 +226,7 @@ function VenuePanel({ event, venue }: { event: WeddingEventData; venue: ReturnTy
           href={event.mapLink}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#D84B73] px-5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#C83C66]"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#B52D57] px-5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#9D2249]"
         >
           <MapPin className="h-4 w-4" />
           View Location
@@ -257,7 +238,7 @@ function VenuePanel({ event, venue }: { event: WeddingEventData; venue: ReturnTy
 
 function FooterNote() {
   return (
-    <footer className="py-6 text-center text-sm text-[#8C7B86]">
+    <footer className="py-6 text-center text-sm text-[#665B62]">
       <Heart className="mx-auto mb-2 h-4 w-4 fill-[#D84B73] text-[#D84B73]" />
       We look forward to celebrating with you.
     </footer>
@@ -328,9 +309,9 @@ function useRoyalCountdown(date: string, time: string) {
 }
 
 function getDateParts(date?: string) {
-  if (!date) return { weekday: "Saturday", day: "22", month: "May", year: "2026" };
+  if (!date) return { weekday: "", day: "", month: "", year: "" };
   const value = new Date(`${date}T12:00:00`);
-  if (Number.isNaN(value.getTime())) return { weekday: "Saturday", day: "22", month: "May", year: "2026" };
+  if (Number.isNaN(value.getTime())) return { weekday: "", day: "", month: "", year: "" };
   return {
     weekday: value.toLocaleDateString("en-US", { weekday: "long" }),
     day: value.toLocaleDateString("en-US", { day: "2-digit" }),
@@ -346,7 +327,9 @@ function getStoryImage(event: WeddingEventData) {
 function buildCalendarDataUri(event: WeddingEventData, venue: string) {
   const date = event.date.replaceAll("-", "");
   const start = `${date}T${event.time.replace(":", "")}00`;
-  const end = `${date}T150000`;
+  const startDate = getEventDateTime(event.date, event.time);
+  const endDate = startDate ? new Date(startDate.getTime() + 2 * 60 * 60 * 1000) : null;
+  const end = endDate ? `${date}T${String(endDate.getHours()).padStart(2, "0")}${String(endDate.getMinutes()).padStart(2, "0")}00` : start;
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",

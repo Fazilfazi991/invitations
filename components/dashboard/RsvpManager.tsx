@@ -40,7 +40,7 @@ export function RsvpManager({ slug }: { slug: string }) {
   const publicUrl = getEventUrl(event.slug);
 
   function exportCsv() {
-    const values = [["Guest name", "Attendance", "Guest count", "Message", "Submitted"], ...rows.map((row) => [row.guestName, row.attendance, String(row.guestCount), row.message, row.createdAt])];
+    const values = [["Guest name", "Attendance", "Expected guests", "Message", "Submitted"], ...rows.map((row) => [row.guestName, row.attendance, String(row.attendance === "attending" ? row.guestCount : 0), row.message, row.createdAt])];
     const csv = values.map((line) => line.map((value) => `"${value.replaceAll('"', '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a"); link.href = url; link.download = `${event.slug}-rsvps.csv`; link.click(); URL.revokeObjectURL(url);
