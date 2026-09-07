@@ -16,6 +16,7 @@ import {
 import { getEventDateTime } from "@/lib/date-utils";
 import { getEventUrl } from "@/lib/event-url";
 import { cn } from "@/lib/utils";
+import { submitRsvp } from "@/lib/rsvp";
 
 const icons = [Heart, Camera, Utensils, Music, Users];
 
@@ -127,18 +128,32 @@ export function TemplateGallery({ event, title, primary }: { event: WeddingEvent
   );
 }
 
-export function TemplateRSVP({ primary }: { primary: string }) {
+export function TemplateRSVP({ primary, slug }: { primary: string; slug: string }) {
   const [name, setName] = useState("");
   const [response, setResponse] = useState<"yes" | "no" | null>(null);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit(nextResponse: "yes" | "no") {
+  async function submit(nextResponse: "yes" | "no") {
     if (!name.trim()) {
       setError("Please enter your name first.");
       return;
     }
     setError("");
-    setResponse(nextResponse);
+    setSubmitting(true);
+    try {
+      await submitRsvp(slug, {
+        guestName: name,
+        attendance: nextResponse === "yes" ? "attending" : "declined",
+        guestCount: 1,
+        message: "",
+      });
+      setResponse(nextResponse);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "We couldn't save your RSVP. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -146,12 +161,13 @@ export function TemplateRSVP({ primary }: { primary: string }) {
       <div>
         <h2 className="font-serif text-2xl font-bold">RSVP</h2>
         <p className="text-sm text-muted">Kindly respond and make the day perfect.</p>
-        <input value={name} onChange={(event) => setName(event.target.value)} className="mt-3 h-11 w-full rounded-full border border-border px-4 text-sm outline-none focus:border-primary" placeholder="Enter your name" />
-        {error && <p className="mt-2 text-xs font-semibold text-rose-600">{error}</p>}
-        {response && <p className="mt-2 text-xs font-semibold" style={{ color: primary }}>Thank you, {name.trim()}. Your RSVP is noted.</p>}
+        <label className="mt-3 block text-sm font-semibold" htmlFor={`rsvp-name-${slug}`}>Your name</label>
+        <input id={`rsvp-name-${slug}`} value={name} maxLength={100} onChange={(event) => setName(event.target.value)} className="mt-2 h-12 w-full rounded-xl border border-border px-4 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Enter your name" />
+        {error && <p role="alert" className="mt-2 text-sm font-semibold text-rose-700">{error}</p>}
+        {response && <p role="status" className="mt-2 text-sm font-semibold" style={{ color: primary }}>Thank you, {name.trim()}. Your RSVP has been saved.</p>}
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button type="button" onClick={() => submit("yes")} className="px-2 text-xs" style={{ backgroundColor: primary }}>Will Attend</Button>
-          <Button type="button" onClick={() => submit("no")} className="px-2 text-xs" variant="outline">Can&apos;t Attend</Button>
+          <Button type="button" disabled={submitting || Boolean(response)} onClick={() => submit("yes")} className="min-h-12 px-2 text-sm" style={{ backgroundColor: primary }}>Will Attend</Button>
+          <Button type="button" disabled={submitting || Boolean(response)} onClick={() => submit("no")} className="min-h-12 px-2 text-sm" variant="outline">Can&apos;t Attend</Button>
         </div>
       </div>
     </section>

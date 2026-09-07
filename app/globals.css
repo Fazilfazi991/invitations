@@ -14,7 +14,7 @@
   --font-playfair: "Playfair Display", Georgia, serif;
   background: var(--brand-off-white);
   color: #1f2937;
-  font-size: 75%;
+  font-size: 100%;
 }
 
 * {
@@ -58,6 +58,16 @@ input,
 select,
 textarea {
   -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(108, 23, 133, 0.2);
+  color: #2d0c48;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 3px;
 }
 
 .phone-shell {

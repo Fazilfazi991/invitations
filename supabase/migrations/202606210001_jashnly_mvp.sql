@@ -70,15 +70,6 @@ create policy "events_delete_own" on public.events for delete using (auth.uid() 
 
 drop policy if exists "guest_memories_public_read" on public.guest_memories;
 create policy "guest_memories_public_read" on public.guest_memories for select using (approved = true);
-drop policy if exists "guest_memories_public_insert" on public.guest_memories;
-create policy "guest_memories_public_insert" on public.guest_memories for insert with check (
-  approved = true
-  and exists (
-    select 1 from public.events
-    where events.id = guest_memories.event_id
-      and events.status = 'published'
-  )
-);
 drop policy if exists "guest_memories_owner_manage" on public.guest_memories;
 create policy "guest_memories_owner_manage" on public.guest_memories for all using (
   exists (
@@ -103,13 +94,6 @@ on conflict (id) do update set
 
 drop policy if exists "guest_memory_images_public_read" on storage.objects;
 create policy "guest_memory_images_public_read" on storage.objects for select using (bucket_id = 'guest-memories');
-drop policy if exists "guest_memory_images_public_upload" on storage.objects;
-create policy "guest_memory_images_public_upload" on storage.objects for insert with check (
-  bucket_id = 'guest-memories'
-  and (storage.foldername(name))[1] in (
-    select slug from public.events where status = 'published'
-  )
-);
 drop policy if exists "guest_memory_images_owner_delete" on storage.objects;
 create policy "guest_memory_images_owner_delete" on storage.objects for delete using (
   bucket_id = 'guest-memories'

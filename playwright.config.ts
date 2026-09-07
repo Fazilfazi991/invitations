@@ -19,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "cross-env NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE=true npm run start -- -p 3000",
+    command: "node node_modules/cross-env/dist/bin/cross-env.js NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE=true node node_modules/next/dist/bin/next dev -p 3000",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: true,
     timeout: 120_000,

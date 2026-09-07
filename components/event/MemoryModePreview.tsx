@@ -6,7 +6,6 @@ import { CalendarDays, Download, Heart, Image, MapPin, Play, Share2, Sparkles } 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BlessingsWall } from "@/components/event/BlessingsWall";
-import { GuestPhotoUpload } from "@/components/event/GuestPhotoUpload";
 import { MemoryGallery } from "@/components/event/MemoryGallery";
 import { galleryImages, sampleEvent } from "@/lib/mock-data";
 import type { EventDraft } from "@/lib/event-draft";
@@ -72,7 +71,6 @@ export function MemoryModePreview({ event }: { event?: EventDraft }) {
         </div>
       </Card>
 
-      <GuestPhotoUpload slug={slug} theme={event?.theme} onAdded={(memory) => setGuestMemories((current) => [memory, ...current])} />
       <BlessingsWall compact eventTitle={title} slug={slug} />
 
       <Card className="p-5" style={{ borderColor: theme.border }}>

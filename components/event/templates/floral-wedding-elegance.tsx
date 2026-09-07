@@ -42,7 +42,7 @@ export function FloralWeddingElegance({ event }: { event: WeddingEventData }) {
         <TemplateTimeline event={event} title="Wedding Timeline" primary={primary} />
         <TemplateLocation event={event} primary={primary} />
         <TemplateGallery event={event} title="Glimpses of Love" primary={primary} />
-        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} />}
+        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} slug={event.slug || "preview"} />}
         <TemplateBlessings primary={primary} />
         {event.familyContactsEnabled !== false && <TemplateContacts event={event} primary={primary} />}
         <TemplateShare event={event} primary={primary} title="Share the Happiness" />

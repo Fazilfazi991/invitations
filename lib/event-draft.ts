@@ -68,7 +68,7 @@ export const PUBLISHED_EVENTS_KEY = "jashnly_published_events";
 export const TEMP_INVITE_KEY_PREFIX = "occazn_invite_";
 
 const defaultsByType: Record<EventType, Partial<EventDraft>> = {
-  wedding: { title: "Afsal & Fathima Wedding", primaryName: "Afsal", secondaryName: "Fathima" },
+  wedding: { title: "Your Wedding", primaryName: "", secondaryName: "" },
   engagement: { title: "Afsal & Fathima Engagement", primaryName: "Afsal", secondaryName: "Fathima" },
   birthday: { title: "Ava's 5th Birthday", primaryName: "Ava", childName: "Ava", hostName: "Rahman Family" },
   anniversary: { title: "Afsal & Fathima Anniversary", primaryName: "Afsal", secondaryName: "Fathima" },
@@ -89,14 +89,13 @@ export function generateSlug(title: string) {
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "jashnly-event";
+    .replace(/^-+|-+$/g, "") || "occazn-event";
 }
 
 export function getDefaultDraft(eventType: EventType = "custom"): EventDraft {
   const typedDefaults = defaultsByType[eventType];
   const title = typedDefaults.title ?? "occazn Event";
   const template = getDefaultTemplateForType(eventType);
-  const defaultContactName = typedDefaults.hostName || typedDefaults.primaryName || "Event Host";
   return {
     eventType,
     title,
@@ -113,23 +112,21 @@ export function getDefaultDraft(eventType: EventType = "custom"): EventDraft {
     homeName: "",
     date: "2026-12-24",
     time: "18:00",
-    venueName: "Calicut Convention Centre",
-    address: "Mini Bypass Rd, Kozhikode, Kerala",
-    city: "Calicut",
+    venueName: "",
+    address: "",
+    city: "",
     mapLink: "",
     youtubeLink: "",
     invitationCard: "",
     coverImage: "",
     gallery: [],
     rsvpEnabled: true,
-    familyContactsEnabled: true,
+    familyContactsEnabled: false,
     qrEnabled: true,
     schedule: [
       { id: "schedule-1", title: "Welcome", startTime: "18:00", endTime: "18:30", venue: "Main Hall", description: "Guests arrive and settle in." },
     ],
-    contacts: [
-      { id: "contact-1", name: defaultContactName, role: "Family", phone: "+91 999 555 1234" },
-    ],
+    contacts: [],
     templateId: template.id,
     templateName: template.name,
     templateImage: template.previewImage,

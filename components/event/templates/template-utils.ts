@@ -20,16 +20,16 @@ export function formatEventTime(time?: string) {
 
 export function getCoupleNames(event: Partial<WeddingEventData>) {
   const hasUserPrimary = Boolean(event.primaryName?.trim());
-  const groom = event.primaryName?.trim() || event.groomName?.trim() || "Afsal";
+  const groom = event.primaryName?.trim() || event.groomName?.trim() || "Wedding celebration";
   const bride = event.secondaryName?.trim() || (!hasUserPrimary ? event.brideName?.trim() : "") || "";
   return { groom, bride, coupleName: bride ? `${groom} & ${bride}` : groom };
 }
 
 export function getVenueText(event: Partial<WeddingEventData>) {
-  const venue = event.venueName || "Grand Seasons";
-  const city = event.city || "Kozhikode, Kerala";
-  const address = event.address || city;
-  return { venue, city, address, full: `${venue}, ${city}` };
+  const venue = event.venueName?.trim() || "Venue to be announced";
+  const city = event.city?.trim() || "";
+  const address = event.address?.trim() || city;
+  return { venue, city, address, full: [venue, city].filter(Boolean).join(", ") };
 }
 
 export function isUsableImage(src?: string) {
@@ -59,11 +59,7 @@ export function getTemplateSchedule(event: Partial<WeddingEventData>) {
 
 export function getTemplateContacts(event: Partial<WeddingEventData>) {
   if (event.contacts?.length) return event.contacts.slice(0, 3);
-  return [
-    { id: "bride-family", role: "Bride's Family", name: "Fathima's Family", phone: "+91 98765 43210" },
-    { id: "groom-family", role: "Groom's Family", name: "Afsal's Family", phone: "+91 98765 43211" },
-    { id: "manager", role: "Event Manager", name: "occazn Team", phone: "+91 73560 12345" },
-  ];
+  return [];
 }
 
 export function getCountdownCopy(date?: string) {
@@ -81,6 +77,6 @@ export function getCountdownCopy(date?: string) {
 
 export function buildShareText(event: Partial<WeddingEventData>) {
   const { coupleName } = getCoupleNames(event);
-  const url = event.publicUrl || getEventUrl(event.slug || "afsal-fathima");
+  const url = event.publicUrl || getEventUrl(event.slug || "invitation");
   return encodeURIComponent(`Join us to celebrate ${coupleName} on occazn.\n${url}`);
 }

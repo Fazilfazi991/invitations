@@ -46,7 +46,7 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
-        <div className="mt-5"><EventCompletionChecklist event={published[0]} compact /></div>
+        {published[0] && <div className="mt-5"><EventCompletionChecklist event={published[0]} compact /></div>}
       </Section>
       <FooterTrust />
       <BottomNav />

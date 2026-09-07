@@ -13,6 +13,11 @@ export function useEventDraft(initialType?: EventType) {
     let active = true;
     loadEventDraft().then((existing) => {
       if (!active) return;
+      if (!existing) {
+        setDraftState(getDefaultDraft(initialType));
+        setLoaded(true);
+        return;
+      }
       if (initialType && existing.eventType !== initialType) {
         const next = withTemplateMetadata({ ...getDefaultDraft(initialType), ...existing, eventType: initialType }, null);
         setDraftState(next);

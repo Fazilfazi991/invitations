@@ -24,7 +24,7 @@ const trustPoints = [
 const navItems = ["Wedding", "Birthday", "Baptism", "Holy Communion", "Naming Ceremony", "Baby Shower", "Housewarming"];
 
 export function RotatingEventHero() {
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [muted, setMuted] = useState(false);
   const [paused, setPaused] = useState(false);
   const reducedMotion = useReducedMotion();
@@ -36,7 +36,7 @@ export function RotatingEventHero() {
   }, []);
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || selectedIndex === 0) return;
     const timer = window.setTimeout(() => {
       setSelectedIndex((current) => (current + 1) % heroCategories.length);
     }, 3000);
@@ -66,11 +66,12 @@ export function RotatingEventHero() {
           <nav className="min-w-0" aria-label="Event types">
             <div className="mx-auto grid min-w-0 max-w-[820px] grid-cols-7 items-stretch rounded-[1.35rem] border border-brand-light/70 bg-white/75 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
               {navItems.map((item) => {
-                const active = item === "Housewarming";
+                const active = item === "Wedding";
                 return (
                   <Link
                     key={item}
                     href={`/categories?type=${encodeURIComponent(item.toLowerCase().replaceAll(" ", "-"))}`}
+                    aria-label={item === "Wedding" ? item : `${item}, Coming Soon`}
                     className={`relative flex min-w-0 items-center justify-center rounded-[1rem] px-2 py-3 text-center text-[12px] font-semibold leading-tight transition hover:bg-primary-soft hover:text-primary xl:px-3 xl:text-sm ${
                       active ? "bg-primary-soft text-primary shadow-[inset_0_1px_8px_rgba(108,23,133,0.08)]" : "text-[#4B5563]"
                     }`}
@@ -149,7 +150,7 @@ export function RotatingEventHero() {
         </header>
         <nav className="mx-4 mt-3 flex gap-2 overflow-x-auto rounded-2xl border border-brand-light/70 bg-white/75 p-2 text-sm font-semibold text-[#4B5563]" aria-label="Browse event categories">
           {navItems.map((item) => (
-            <Link key={item} href={`/categories?type=${encodeURIComponent(item.toLowerCase().replaceAll(" ", "-"))}`} className={`shrink-0 rounded-xl px-3 py-2 ${item === "Housewarming" ? "bg-primary-soft text-primary" : ""}`}>
+            <Link key={item} aria-label={item === "Wedding" ? item : `${item}, Coming Soon`} href={`/categories?type=${encodeURIComponent(item.toLowerCase().replaceAll(" ", "-"))}`} className={`shrink-0 rounded-xl px-3 py-2 ${item === "Wedding" ? "bg-primary-soft text-primary" : ""}`}>
               {item}
             </Link>
           ))}
@@ -157,10 +158,10 @@ export function RotatingEventHero() {
 
         <div className="mx-auto max-w-[460px] px-5 pb-8 pt-5">
           <h1 className="font-serif text-[clamp(31px,8.7vw,42px)] font-bold leading-[1.02]">
-            <span className="block whitespace-nowrap">One link for every</span>
-            <span className="block whitespace-nowrap"><span className="text-primary">special</span> occasion</span>
+            <span className="block">One link for every</span>
+            <span className="block"><span className="text-primary">special</span> occasion</span>
           </h1>
-          <p className="mt-3 whitespace-nowrap text-[clamp(13px,3.6vw,15px)] leading-6 text-muted">
+          <p className="mt-3 text-[clamp(16px,3.8vw,17px)] leading-6 text-muted">
             Beautiful invitations, RSVPs and memories—all in one place.
           </p>
           <div className="mt-5 grid grid-cols-2 items-stretch gap-2.5">

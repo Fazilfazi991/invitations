@@ -1,5 +1,4 @@
 import { Card } from "@/components/ui/card";
-import { galleryImages, memoryHighlights } from "@/lib/mock-data";
 import type { EventDraft } from "@/lib/event-draft";
 import type { GuestMemory } from "@/lib/guest-memories";
 import { getThemeStyles } from "@/lib/themes";
@@ -7,12 +6,13 @@ import { getThemeStyles } from "@/lib/themes";
 export function MemoryGallery({ event, guestMemories = [] }: { event?: EventDraft; guestMemories?: GuestMemory[] }) {
   const theme = getThemeStyles(event?.theme);
   const eventImages = (event?.gallery || []).filter((src) => src.startsWith("/") || src.startsWith("http"));
-  const highlights = eventImages.length
-    ? eventImages.map((image, index) => ({ id: `event-${index}`, image, title: index === 0 ? "A favorite moment" : `Memory ${index + 1}`, description: "A beautiful moment from the celebration." }))
-    : memoryHighlights;
+  const highlights = eventImages.map((image, index) => ({ id: `event-${index}`, image, title: index === 0 ? "A favorite moment" : `Memory ${index + 1}`, description: "A beautiful moment from the celebration." }));
   return (
     <Card className="p-5" style={{ borderColor: theme.border }}>
       <h2 className="font-serif text-2xl font-bold">Moments we'll never forget</h2>
+      {highlights.length === 0 && guestMemories.length === 0 && (
+        <p className="mt-4 rounded-2xl border border-dashed border-border p-5 text-sm text-muted">No memories have been shared yet.</p>
+      )}
       <div className="mt-4 grid gap-3">
         {highlights.map((item) => (
           <div key={item.id} className="flex gap-3 rounded-2xl border border-border bg-white p-3">

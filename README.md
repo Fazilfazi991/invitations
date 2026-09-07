@@ -1,13 +1,13 @@
 # occazn
 
-occazn is a mobile-first event invitation MVP built around one shareable link for weddings, birthdays, housewarmings, naming ceremonies, religious events, receptions, business openings, and custom celebrations.
+occazn is a mobile-first event invitation MVP built around one shareable link. Wedding invitations are live in the current release; other celebration types are intentional Coming Soon experiences.
 
 Tagline: One beautiful link for every celebration.
 
 The current release includes:
 
-- Event-type-aware create and publish flow
-- Multiple wedding and birthday templates
+- Wedding-focused create and publish flow
+- Five code-based, responsive wedding templates
 - Persistent Blush, Sage, Classic, and Royal themes
 - Event opening animations
 - Date, time, venue, schedule, countdown, RSVP, contacts, gallery, blessings, QR, and WhatsApp sharing

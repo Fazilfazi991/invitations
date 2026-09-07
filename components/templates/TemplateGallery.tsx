@@ -22,8 +22,12 @@ export function TemplateGallery() {
   const router = useRouter();
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const queryType = searchParams.get("type") as TemplateFilterValue | null;
+  const requestedType = searchParams.get("type");
+  const queryType = requestedType as TemplateFilterValue | null;
   const initialType = templateFilterOptions.some((option) => option.value === queryType) ? queryType ?? "all" : "all";
+  const comingSoonLabel = requestedType && !["all", "wedding"].includes(requestedType)
+    ? requestedType.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
+    : null;
   const [filter, setFilter] = useState<TemplateFilterValue>(initialType);
   const [selectedId, setSelectedId] = useState<string | null>(typeof window === "undefined" ? null : window.localStorage.getItem(SELECTED_TEMPLATE_KEY));
   const [preview, setPreview] = useState<EventTemplate | null>(null);
@@ -47,7 +51,7 @@ export function TemplateGallery() {
       if (!user) {
         const current = await loadEventDraft();
         const draft = {
-          ...current,
+          ...(current ?? getDefaultDraft(eventType)),
           templateId: template.id,
           templateName: template.name,
           templateImage: template.previewImage,
@@ -78,7 +82,7 @@ export function TemplateGallery() {
     }
 
     const current = await loadEventDraft();
-    const base = current.eventType === eventType && current.status === "draft" ? current : getDefaultDraft(eventType);
+    const base = current?.eventType === eventType && current.status === "draft" ? current : getDefaultDraft(eventType);
     const draft = {
       ...base,
       templateId: template.id,
@@ -93,6 +97,13 @@ export function TemplateGallery() {
 
   return (
     <div className="space-y-9">
+      {comingSoonLabel && (
+        <section className="mx-auto max-w-3xl rounded-2xl bg-primary-soft px-5 py-6 text-center" role="status">
+          <p className="text-sm font-bold uppercase tracking-[0.14em] text-primary">Coming Soon</p>
+          <h2 className="mt-2 font-serif text-3xl font-bold text-[#2B171C]">{comingSoonLabel} invitations are on the way</h2>
+          <p className="mx-auto mt-2 max-w-xl text-base leading-7 text-muted">Wedding invitations are live today. Explore the collection below or return when this celebration launches.</p>
+        </section>
+      )}
       <TemplateFilters selected={filter} onSelect={setFilter} />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {visibleTemplates.map((template) => (

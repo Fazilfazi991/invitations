@@ -21,5 +21,13 @@ export function ensureUniqueSlug(baseSlug: string, publishedEvents: Partial<Even
 
 export function getEventUrl(slug: string) {
   const path = `/i/${slug}`;
-  return typeof window === "undefined" ? path : `${window.location.origin}${path}`;
+  if (process.env.NEXT_PUBLIC_JASHNLY_LOCAL_TEST_MODE === "true" && typeof window !== "undefined") {
+    return `${window.location.origin}${path}`;
+  }
+  return `${getCanonicalSiteOrigin()}${path}`;
+}
+
+export function getCanonicalSiteOrigin() {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  return configured || "https://occazn.com";
 }

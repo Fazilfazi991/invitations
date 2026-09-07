@@ -46,7 +46,7 @@ export function MinimalEditorialWedding({ event }: { event: WeddingEventData }) 
         )}
         <TemplateTimeline event={event} title="Event Timeline" primary={primary} />
         <TemplateLocation event={event} primary={primary} imageStyle="photo" />
-        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} />}
+        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} slug={event.slug || "preview"} />}
         <TemplateGallery event={event} title="Gallery" primary={primary} />
         <TemplateShare event={event} primary={primary} title="Share Our Joy" />
         <TemplateFooter text="Made with love on" primary={primary} />

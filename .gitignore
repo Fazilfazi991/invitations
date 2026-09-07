@@ -18,6 +18,7 @@ Thumbs.db
 *.tsbuildinfo
 
 test-results/
+.tmp-qr-qa/
 
 # Raw design/source asset packs. Commit only optimized assets used by the app.
 event_cards_webp.zip

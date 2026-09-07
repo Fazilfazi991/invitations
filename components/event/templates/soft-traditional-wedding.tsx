@@ -11,6 +11,7 @@ import {
   TemplateFooter,
   TemplateGallery,
   TemplateLocation,
+  TemplateRSVP,
   TemplateShare,
   TemplateShell,
   TemplateTimeline,
@@ -43,6 +44,7 @@ export function SoftTraditionalWedding({ event }: { event: WeddingEventData }) {
         )}
         <TemplateTimeline event={event} title="Wedding Schedule" primary={primary} boxed />
         <TemplateLocation event={event} primary={primary} />
+        {event.rsvpEnabled !== false && <TemplateRSVP primary={primary} slug={event.slug || "preview"} />}
         {event.familyContactsEnabled !== false && <TemplateContacts event={event} primary={primary} />}
         <TemplateBlessings primary={primary} title="Blessings Wall" />
         <TemplateGallery event={event} title="Glimpses of Love" primary={primary} />

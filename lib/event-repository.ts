@@ -37,13 +37,7 @@ function loadCachedPublicEvent(inviteId: string) {
   return loadTemporaryInvite(inviteId) ?? loadPublishedEvents().find((event) => matchesPublicInvite(event, inviteId)) ?? null;
 }
 
-function fallback<T>(message: string, value: T, error?: unknown) {
-  console.warn(`[occazn storage fallback] ${message}`, error);
-  return value;
-}
-
 export async function getCurrentAuthUser() {
-  // Temporary demo bypass - remove before production.
   if (BYPASS_AUTH_FOR_DEMO) return null;
   if (localTestMode) return null;
   const { data } = await createSupabaseBrowserClient().auth.getUser();
@@ -53,27 +47,16 @@ export async function getCurrentAuthUser() {
 export async function loadEventDraft() {
   const cached = loadDraft();
   if (localTestMode) return cached;
-  try {
-    const user = await getCurrentAuthUser();
-    if (!user) return cached;
-    // A route transition can mount the next create step while the previous
-    // step's queued upsert is still in flight. Wait for the newest queued
-    // write before reading, otherwise stale remote data can replace the
-    // selected event type/template in local state.
-    await draftWriteQueue;
-    const { data, error } = await createSupabaseBrowserClient()
-      .from("event_drafts")
-      .select("data")
-      .eq("owner_id", user.id)
-      .maybeSingle();
-    if (error) throw error;
-    if (!data?.data) return cached;
-    const draft = normalizeStoredEvent(data.data as Partial<EventDraft>);
-    saveDraft(draft);
-    return draft;
-  } catch (error) {
-    return fallback("Could not load the Supabase draft.", cached, error);
-  }
+  const user = await getCurrentAuthUser();
+  if (!user) return null;
+  await draftWriteQueue;
+  const { data, error } = await createSupabaseBrowserClient()
+    .from("event_drafts")
+    .select("data")
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.data ? normalizeStoredEvent(data.data as Partial<EventDraft>) : null;
 }
 
 export async function persistEventDraft(draft: EventDraft) {
@@ -97,19 +80,17 @@ export async function persistEventDraft(draft: EventDraft) {
       eventType: "wedding",
     };
   }
-  saveDraft(draft);
-  if (localTestMode) return;
+  if (localTestMode) {
+    saveDraft(draft);
+    return;
+  }
   draftWriteQueue = draftWriteQueue.then(async () => {
-    try {
-      const user = await getCurrentAuthUser();
-      if (!user) return;
-      const { error } = await createSupabaseBrowserClient()
-        .from("event_drafts")
-        .upsert({ owner_id: user.id, data: draft, updated_at: new Date().toISOString() });
-      if (error) throw error;
-    } catch (error) {
-      fallback("Draft remains cached locally because Supabase could not be reached.", undefined, error);
-    }
+    const user = await getCurrentAuthUser();
+    if (!user) throw new Error("You must be signed in to save an event draft.");
+    const { error } = await createSupabaseBrowserClient()
+      .from("event_drafts")
+      .upsert({ owner_id: user.id, data: draft, updated_at: new Date().toISOString() });
+    if (error) throw error;
   });
   return draftWriteQueue;
 }
@@ -117,21 +98,15 @@ export async function persistEventDraft(draft: EventDraft) {
 export async function loadOrganizerEvents() {
   const cached = loadPublishedEvents();
   if (localTestMode) return cached;
-  try {
-    const user = await getCurrentAuthUser();
-    if (!user) return [];
-    const { data, error } = await createSupabaseBrowserClient()
-      .from("events")
-      .select("data")
-      .eq("owner_id", user.id)
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    const events = (data || []).map((row: { data: unknown }) => normalizeStoredEvent(row.data as Partial<EventDraft>));
-    events.forEach(savePublishedEvent);
-    return events;
-  } catch (error) {
-    return fallback("Could not load organizer events from Supabase.", cached, error);
-  }
+  const user = await getCurrentAuthUser();
+  if (!user) return [];
+  const { data, error } = await createSupabaseBrowserClient()
+    .from("events")
+    .select("data")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data || []).map((row: { data: unknown }) => normalizeStoredEvent(row.data as Partial<EventDraft>));
 }
 
 export async function loadPublicEvent(slug: string) {
@@ -144,18 +119,16 @@ export async function loadPublicEvent(slug: string) {
       generatedInviteUrl: cached?.publicUrl,
     });
   }
-  if (cached) return cached;
-  try {
-    const { data, error } = await createSupabaseBrowserClient()
-      .from("events")
-      .select("data")
-      .eq("slug", slug)
-      .eq("status", "published")
-      .maybeSingle();
-    if (error) throw error;
-    if (!data?.data) return cached;
-    const event = normalizeStoredEvent(data.data as Partial<EventDraft>);
-    savePublishedEvent(event);
+  if (localTestMode) return cached;
+  const { data, error } = await createSupabaseBrowserClient()
+    .from("events")
+    .select("data")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data?.data) return null;
+  const event = normalizeStoredEvent(data.data as Partial<EventDraft>);
     if (process.env.NODE_ENV !== "production") {
       console.debug("Public invite lookup:", {
         routeParamId: slug,
@@ -164,10 +137,7 @@ export async function loadPublicEvent(slug: string) {
         generatedInviteUrl: event.publicUrl,
       });
     }
-    return event;
-  } catch (error) {
-    return fallback(`Could not load public event ${slug} from Supabase.`, cached, error);
-  }
+  return event;
 }
 
 export async function publishEvent(event: EventDraft) {
@@ -183,7 +153,6 @@ export async function publishEvent(event: EventDraft) {
   }
 
   if (localTestMode) {
-    // Temporary demo bypass - remove before production.
     const inviteId = getStableInviteId(event);
     const slug = inviteId;
     const publicUrl = getEventUrl(slug);
@@ -204,6 +173,7 @@ export async function publishEvent(event: EventDraft) {
 
   const user = await getCurrentAuthUser();
   if (!user) throw new Error("You must be signed in to publish an event.");
+  await draftWriteQueue;
   const supabase = createSupabaseBrowserClient();
   const { data: existing, error: existingError } = await supabase.from("events").select("slug").ilike("slug", `${event.slug || event.title}%`);
   if (existingError) throw existingError;
@@ -238,7 +208,8 @@ export async function publishEvent(event: EventDraft) {
   });
   if (error) throw error;
   savePublishedEvent(published);
-  await supabase.from("event_drafts").delete().eq("owner_id", user.id);
+  const { error: draftDeleteError } = await supabase.from("event_drafts").delete().eq("owner_id", user.id);
+  if (draftDeleteError) throw draftDeleteError;
   return published;
 }
 

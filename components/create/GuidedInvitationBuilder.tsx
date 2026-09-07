@@ -135,7 +135,7 @@ export function GuidedInvitationBuilder() {
   }, [occasion]);
   const coupleNames = [draft.primaryName, draft.secondaryName].filter(Boolean).join(" & ") || draft.hostName || "";
   const completedDetailCount = [
-    coupleNames.trim(),
+    draft.primaryName.trim() && (draft.secondaryName || "").trim(),
     draft.date,
     draft.venueName.trim(),
   ].filter(Boolean).length;
@@ -238,7 +238,7 @@ export function GuidedInvitationBuilder() {
       setAuthOpen(true);
       return;
     }
-    if (!draft.title || !draft.date || !draft.venueName || !draft.templateId) {
+    if (!draft.primaryName.trim() || !(draft.secondaryName || "").trim() || !draft.date || !draft.venueName.trim() || !draft.templateId) {
       setStep(3);
       return;
     }

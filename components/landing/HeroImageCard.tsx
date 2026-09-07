@@ -15,9 +15,14 @@ export function HeroImageCard({ category, className, fluid = false }: { category
         height={360}
         sizes={fluid ? "(max-width: 480px) calc(100vw - 40px), 420px" : "280px"}
         unoptimized
-        priority={category.id === "birthday"}
+        priority={category.id === "wedding"}
         className="h-full w-full object-contain"
       />
+      {category.id !== "wedding" && (
+        <span className="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-primary shadow-sm">
+          Coming Soon
+        </span>
+      )}
     </div>
   );
 }
