@@ -83,7 +83,7 @@ function inferStyleFromTemplate(templateId?: string): StyleValue {
 export function GuidedInvitationBuilder() {
   const router = useRouter();
   const { user } = useAuth();
-  const { draft, setDraft, loaded } = useEventDraft();
+  const { draft, setDraft, loaded, discardPendingDraft } = useEventDraft();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(() => {
     if (typeof window === "undefined") return 1;
     const stored = Number(window.localStorage.getItem(BUILDER_STEP_KEY));
@@ -290,7 +290,7 @@ export function GuidedInvitationBuilder() {
         status: "published",
         slug: generateSlug(normalizedTitle),
       });
-      setDraft(published);
+      discardPendingDraft();
       clearDraft();
       window.localStorage.removeItem(BUILDER_STEP_KEY);
       router.push(BYPASS_AUTH_FOR_DEMO ? `/event/${published.slug}/share` : "/dashboard");

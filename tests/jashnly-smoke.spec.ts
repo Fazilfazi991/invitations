@@ -173,6 +173,7 @@ test.describe("Occazn Wedding MVP", () => {
     expect(page.url()).not.toBe(urlBeforePublish);
     const slug = page.url().match(/\/event\/([^/]+)\/share$/)?.[1];
     expect(slug).toBeTruthy();
+    expect(await page.evaluate(() => localStorage.getItem("jashnly_event_draft"))).toBeNull();
     await page.goto(`/i/${slug}`);
     await expect(page.getByText("Occazn Release", { exact: false }).first()).toBeVisible();
     await expect(page.getByText("QA Wedding", { exact: false }).first()).toBeVisible();

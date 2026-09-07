@@ -51,5 +51,11 @@ export function useEventDraft(initialType?: EventType) {
     });
   }
 
-  return { draft, setDraft, loaded };
+  function discardPendingDraft() {
+    if (persistTimer.current) clearTimeout(persistTimer.current);
+    persistTimer.current = null;
+    pendingDraft.current = null;
+  }
+
+  return { draft, setDraft, loaded, discardPendingDraft };
 }
