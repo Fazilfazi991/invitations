@@ -11,17 +11,35 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, user, loading } = useAuth();
+  const { signIn, signInWithGoogle, user, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    setBusy(true);
+    setError("");
     const result = await signIn(email, password);
-    if (result.error) return setError(result.error);
+    if (result.error) {
+      setError(result.error);
+      setBusy(false);
+      return;
+    }
     const next = new URLSearchParams(window.location.search).get("next");
     router.replace(next || "/dashboard");
+  }
+
+  async function google() {
+    setBusy(true);
+    setError("");
+    const next = new URLSearchParams(window.location.search).get("next");
+    const result = await signInWithGoogle(next || "/dashboard");
+    if (result.error) {
+      setError(result.error);
+      setBusy(false);
+    }
   }
 
   useEffect(() => {
@@ -36,11 +54,19 @@ export default function LoginPage() {
         <BrandLogo imageClassName="h-14" />
         <h1 className="mt-6 font-serif text-4xl font-bold">Organizer login</h1>
         <p className="mt-2 text-sm text-muted">Sign in to create and manage your events.</p>
-        <form onSubmit={submit} className="mt-6 space-y-4">
+        <Button className="mt-6 w-full" type="button" disabled={busy} onClick={google}>
+          Continue with Google
+        </Button>
+        <div className="my-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+          <span className="h-px flex-1 bg-brand-light" />
+          <span>or use email</span>
+          <span className="h-px flex-1 bg-brand-light" />
+        </div>
+        <form onSubmit={submit} className="space-y-4">
           <label className="block space-y-2 text-sm font-semibold"><span>Email</span><Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
           <label className="block space-y-2 text-sm font-semibold"><span>Password</span><Input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
           {error && <p className="rounded-xl bg-primary-soft p-3 text-sm font-semibold text-primary">{error}</p>}
-          <Button className="w-full" type="submit">Login</Button>
+          <Button className="w-full" type="submit" disabled={busy}>Login</Button>
         </form>
         <p className="mt-5 text-center text-sm text-muted">No account? <Link href="/register" className="font-semibold text-primary">Create one</Link></p>
         <p className="mt-4 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800">Accounts are secured by Supabase Auth.</p>
