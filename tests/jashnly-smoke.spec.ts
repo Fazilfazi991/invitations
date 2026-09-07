@@ -259,8 +259,8 @@ test.describe("Occazn Wedding MVP", () => {
     await page.evaluate(() => {
       localStorage.setItem("jashnly_published_events", JSON.stringify([{
         eventType: "wedding", title: "No Fallback Wedding", primaryName: "Maya", secondaryName: "Omar",
-        date: "2027-12-24", time: "18:30", venueName: "", address: "", city: "", mapLink: "", youtubeLink: "", gallery: [],
-        rsvpEnabled: true, familyContactsEnabled: false, qrEnabled: true, schedule: [], contacts: [], templateId: "floral-wedding-elegance",
+        date: "2027-12-24", time: "18:30", venueName: "Demo", address: "Demo", city: "Demo", mapLink: "", youtubeLink: "", gallery: [],
+        rsvpEnabled: true, familyContactsEnabled: false, qrEnabled: true, schedule: [{ id: "legacy-welcome", title: "Welcome", startTime: "18:30", description: "Guests arrive and settle in." }], contacts: [], templateId: "floral-wedding-elegance",
         templateName: "Floral Luxury Wedding", theme: "blush", openingAnimation: "none",
         music: { enabled: true, trackId: "leberch-wedding-romantic-262606", url: "/audio/leberch-wedding-romantic-262606.mp3", autoplay: false },
         status: "published", slug: "no-fallback", publicUrl: `${location.origin}/i/no-fallback`, qrCodeData: ""

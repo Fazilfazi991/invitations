@@ -169,6 +169,12 @@ export function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
       ? templateCategoryToEventType(storedTemplate.category)
       : "custom";
   const defaults = getDefaultDraft(eventType);
+  const legacyPlaceholder = (text?: string) => text?.trim().toLowerCase() === "demo" ? "" : text ?? "";
+  const schedule = Array.isArray(value.schedule) ? value.schedule.filter((item) => {
+    const title = item.title?.trim().toLowerCase();
+    const description = item.description?.trim().toLowerCase();
+    return !(title === "welcome" && description === "guests arrive and settle in.");
+  }) : [];
   const normalized = {
     ...defaults,
     ...value,
@@ -177,14 +183,14 @@ export function normalizeStoredEvent(value: Partial<EventDraft>): EventDraft {
     secondaryName: value.secondaryName ?? value.brideName ?? "",
     date: value.date ?? "",
     time: value.time ?? "",
-    venueName: value.venueName ?? "",
-    address: value.address ?? "",
-    city: value.city ?? "",
+    venueName: legacyPlaceholder(value.venueName),
+    address: legacyPlaceholder(value.address),
+    city: legacyPlaceholder(value.city),
     mapLink: value.mapLink ?? "",
     youtubeLink: value.youtubeLink ?? "",
     coverImage: value.coverImage ?? "",
     gallery: Array.isArray(value.gallery) ? value.gallery : [],
-    schedule: Array.isArray(value.schedule) ? value.schedule : [],
+    schedule,
     contacts: Array.isArray(value.contacts) ? value.contacts : [],
   } as EventDraft;
   return withTemplateMetadata({ ...normalized, music: normalizeMusic(value.music, eventType) }, value.templateId);
